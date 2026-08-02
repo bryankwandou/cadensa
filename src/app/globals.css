@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
+@theme {
+  /* Ink — malam dalam */
+  --color-ink-950: #06100f;
+  --color-ink-900: #0a1817;
+  --color-ink-800: #0f2321;
+  --color-ink-700: #17332f;
+  --color-ink-600: #21453f;
+
+  /* Teal — ritme */
+  --color-teal-500: #2ed3c0;
+  --color-teal-600: #16b3a3;
+  --color-teal-700: #0e7c86;
+
+  /* Amber — perhatian, bukan bahaya */
+  --color-amber-400: #f2b860;
+  --color-amber-500: #e09b3d;
+
+  /* Pasir — teks */
+  --color-sand-100: #f4efe6;
+  --color-sand-300: #d6cdbe;
+  --color-sand-500: #9aa8a2;
+
+  /* Merah dicadangkan untuk satu makna saja: anjuran medis */
+  --color-signal-500: #e2685f;
+
+  --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-var), ui-monospace, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--color-ink-950);
+  color: var(--color-sand-100);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-teal-700);
+  color: var(--color-sand-100);
+}
+
+/* Latar bernapas — gerakan yang tidak menarik perhatian ke dirinya sendiri */
+.aurora {
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, rgba(46, 211, 192, 0.13), transparent 60%),
+    radial-gradient(48rem 34rem at 95% 8%, rgba(242, 184, 96, 0.09), transparent 62%),
+    radial-gradient(56rem 40rem at 50% 110%, rgba(14, 124, 134, 0.16), transparent 60%);
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(23, 51, 47, 0.55), rgba(10, 24, 23, 0.55));
+  border: 1px solid rgba(214, 205, 190, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.hairline {
+  border-color: rgba(214, 205, 190, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
