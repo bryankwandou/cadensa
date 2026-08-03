@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Nav } from "@/components/Nav";
 import { Magnetic, Pressable, Reveal } from "@/components/Motion";
 import { DeviceIcon } from "@/components/DeviceIcon";
+import { OptionTile } from "@/components/OptionTile";
 import { useVault } from "@/lib/vault";
 import {
   AFTERFEELS,
@@ -24,36 +25,6 @@ import {
   type Mode,
   type Trigger,
 } from "@/lib/types";
-
-function Chip({
-  on,
-  onClick,
-  children,
-  tone = "teal",
-}: {
-  on: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  tone?: "teal" | "signal";
-}) {
-  const active =
-    tone === "signal"
-      ? "border-signal-500/50 bg-signal-500/10 text-sand-100"
-      : "border-teal-600 bg-teal-600/10 text-sand-100";
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 420, damping: 26 }}
-      className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-        on ? active : "hairline text-sand-300 hover:text-sand-100"
-      }`}
-    >
-      {children}
-    </motion.button>
-  );
-}
 
 function emptyDraft(mode: Mode): Draft {
   return {
@@ -158,18 +129,19 @@ export default function LogPage() {
         <Reveal delay={0.08}>
           <div className="mt-8">
             <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Cara</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {METHODS.map((m) => (
-                <Chip
+                <OptionTile
                   key={m}
-                  on={draft.method === m}
+                  set="method"
+                  name={m}
+                  label={m}
+                  active={draft.method === m}
                   onClick={() => {
                     set("method", m as Method);
                     if (m !== "alat bantu") set("device", null);
                   }}
-                >
-                  {m}
-                </Chip>
+                />
               ))}
             </div>
           </div>
@@ -194,7 +166,7 @@ export default function LogPage() {
                     return (
                       <div key={g.key}>
                         <p className="mb-2 text-xs text-sand-500">{g.label}</p>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                           {items.map((d) => {
                             const on = draft.device === d.key;
                             return (
@@ -202,20 +174,19 @@ export default function LogPage() {
                                 key={d.key}
                                 type="button"
                                 onClick={() => set("device", d.key)}
-                                whileHover={{ y: -2 }}
-                                whileTap={{ scale: 0.97 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 26 }}
-                                className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                                whileHover={{ y: -4, rotateX: 8, rotateY: -6 }}
+                                whileTap={{ scale: 0.96 }}
+                                transition={{ type: "spring", stiffness: 380, damping: 24 }}
+                                style={{ transformStyle: "preserve-3d", perspective: 700 }}
+                                className={`flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors ${
                                   on ? "border-teal-600 bg-teal-600/10" : "hairline hover:border-sand-500/25"
                                 }`}
                               >
                                 <span className={on ? "text-teal-500" : "text-sand-500"}>
-                                  <DeviceIcon device={d.key} animate={on} />
+                                  <DeviceIcon device={d.key} size={38} animate={on} />
                                 </span>
-                                <span className="min-w-0">
-                                  <span className="block truncate text-sm text-sand-100">{d.label}</span>
-                                  <span className="block truncate text-xs text-sand-500">{d.hint}</span>
-                                </span>
+                                <span className="block text-sm leading-tight text-sand-100">{d.label}</span>
+                                <span className="block text-[11px] leading-snug text-sand-500">{d.hint}</span>
                               </motion.button>
                             );
                           })}
@@ -247,18 +218,24 @@ export default function LogPage() {
         <Reveal delay={0.1}>
           <div className="mt-8">
             <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Rasanya sesudah</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
               {AFTERFEELS.map((a) => (
-                <Chip
+                <OptionTile
                   key={a.key}
-                  on={draft.afterfeel === a.key}
+                  set="feel"
+                  name={a.key}
+                  label={a.key}
+                  size="sm"
                   tone={a.medical ? "signal" : "teal"}
+                  active={draft.afterfeel === a.key}
                   onClick={() => set("afterfeel", a.key as Afterfeel)}
-                >
-                  {a.key}
-                </Chip>
+                />
               ))}
             </div>
+            <p className="mt-3 text-xs text-sand-500">
+              Empat yang terakhir bertanda merah karena berhubungan dengan tubuh, bukan suasana
+              hati — dan dijawab lewat jalur yang berbeda.
+            </p>
           </div>
         </Reveal>
 
@@ -284,11 +261,17 @@ export default function LogPage() {
               <div className="mt-6 space-y-7">
                 <div>
                   <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Pelumas</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {LUBES.map((l) => (
-                      <Chip key={l} on={draft.lube === l} onClick={() => set("lube", l as Lube)}>
-                        {l}
-                      </Chip>
+                      <OptionTile
+                        key={l}
+                        set="lube"
+                        name={l}
+                        label={l}
+                        size="sm"
+                        active={draft.lube === l}
+                        onClick={() => set("lube", l as Lube)}
+                      />
                     ))}
                   </div>
                   {draft.lube === "berbasis silikon" && chosen && (
@@ -301,11 +284,16 @@ export default function LogPage() {
 
                 <div>
                   <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Edging</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {EDGING.map((e) => (
-                      <Chip key={e} on={draft.edging === e} onClick={() => set("edging", e as Edging)}>
-                        {e}
-                      </Chip>
+                      <OptionTile
+                        key={e}
+                        set="edge"
+                        name={e}
+                        label={e}
+                        active={draft.edging === e}
+                        onClick={() => set("edging", e as Edging)}
+                      />
                     ))}
                   </div>
                   {draft.edging !== "tidak" && (
@@ -323,15 +311,17 @@ export default function LogPage() {
 
                 <div>
                   <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Yang memicu</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {TRIGGERS.map((t) => (
-                      <Chip
+                      <OptionTile
                         key={t}
-                        on={draft.trigger === t}
+                        set="trigger"
+                        name={t}
+                        label={t}
+                        size="sm"
+                        active={draft.trigger === t}
                         onClick={() => set("trigger", draft.trigger === t ? null : (t as Trigger))}
-                      >
-                        {t}
-                      </Chip>
+                      />
                     ))}
                   </div>
                 </div>

@@ -15,7 +15,8 @@ import {
   Tilt3D,
 } from "@/components/Motion";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
-import { DEVICES } from "@/lib/types";
+import { Glyph } from "@/components/Glyph";
+import { AFTERFEELS, DEVICES, METHODS, TRIGGERS } from "@/lib/types";
 import { Nav } from "@/components/Nav";
 
 const SIGNALS = [
@@ -241,6 +242,60 @@ export default function Home() {
             tanpa menambah unduhan, ikut warna tema — dan yang paling menentukan, tidak ada berkas
             gambar yang tersimpan di perangkat atau singgah di riwayat unduhan. Bentuknya cukup
             untuk dikenali pemakainya, tidak cukup untuk dipahami orang yang melirik dari samping.
+          </p>
+        </Reveal>
+      </section>
+
+      {/* Kosakata rupa */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <Reveal>
+          <h2 className="max-w-3xl text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
+            Setiap pilihan punya rupanya sendiri
+          </h2>
+          <p className="mt-4 max-w-2xl leading-relaxed text-sand-300">
+            Alur catat punya anggaran waktu dua belas detik, dan di layar sekecil ponsel bentuk
+            terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya
+            berupa teks. Arahkan kursor untuk melihatnya bergerak.
+          </p>
+        </Reveal>
+
+        <div className="mt-10 space-y-8">
+          {[
+            { t: "Rasanya sesudah", set: "feel" as const, items: AFTERFEELS.map((a) => ({ n: a.key, medis: a.medical })) },
+            { t: "Cara", set: "method" as const, items: METHODS.map((m) => ({ n: m, medis: false })) },
+            { t: "Yang memicu", set: "trigger" as const, items: TRIGGERS.map((t) => ({ n: t, medis: false })) },
+          ].map((row, ri) => (
+            <Reveal key={row.t} delay={ri * 0.06}>
+              <p className="mb-3 text-xs uppercase tracking-[0.18em] text-sand-500">{row.t}</p>
+              <Stagger className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
+                {row.items.map((it) => (
+                  <StaggerItem key={it.n}>
+                    <motion.div
+                      whileHover={{ y: -5, rotateX: 12, rotateY: -8 }}
+                      transition={{ type: "spring", stiffness: 340, damping: 20 }}
+                      style={{ transformStyle: "preserve-3d", perspective: 600 }}
+                      className={`flex h-full flex-col items-center gap-2 rounded-2xl border p-3 text-center ${
+                        it.medis ? "border-signal-500/30" : "hairline"
+                      }`}
+                    >
+                      <span className={it.medis ? "text-signal-500" : "text-teal-500"}>
+                        <Glyph set={row.set} name={it.n} size={30} active />
+                      </span>
+                      <span className="text-[11px] leading-tight text-sand-300">{it.n}</span>
+                    </motion.div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal delay={0.1}>
+          <p className="mt-8 max-w-2xl text-sm leading-relaxed text-sand-500">
+            Empat rupa terakhir di baris pertama bertanda merah karena berhubungan dengan tubuh,
+            bukan suasana hati. Warna itu dicadangkan untuk satu makna saja di seluruh aplikasi, dan
+            memilih salah satunya membawa catatanmu ke jalur yang berbeda — jalur yang tidak pernah
+            dijawab dengan saran mengubah teknik.
           </p>
         </Reveal>
       </section>
