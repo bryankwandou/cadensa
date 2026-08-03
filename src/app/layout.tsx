@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { VaultProvider } from "@/lib/vault";
 
 const sans = Geist({ variable: "--font-sans-var", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-mono-var", subsets: ["latin"] });
@@ -26,7 +27,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" className={`${sans.variable} ${mono.variable} h-full`}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        <VaultProvider>{children}</VaultProvider>
+      </body>
     </html>
   );
 }

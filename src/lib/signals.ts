@@ -13,7 +13,9 @@ import {
   triggerCount,
   within,
 } from "./metrics";
-import { afterfeelMeta, type Entry } from "./types";
+import { afterfeelMeta, deviceMeta, type Entry } from "./types";
+import { PHASE_NOTE, cycleCoupling, daysUntilNextPeriod, peakPhase, phaseDensity, phaseOf } from "./cycle";
+import type { Profile } from "./vault";
 
 export type ReadingKind = "ritme" | "sinyal" | "praktik" | "medis";
 
@@ -241,9 +243,176 @@ export function readEntries(entries: Entry[], now = new Date()): Reading[] {
     });
   }
 
+  return sortReadings(out);
+}
+
+function sortReadings(out: Reading[]) {
   return out.sort((a, b) => {
     const rank = { medis: 0, sinyal: 1, ritme: 2, praktik: 3 } as const;
     if (rank[a.kind] !== rank[b.kind]) return rank[a.kind] - rank[b.kind];
     return b.strength - a.strength;
   });
+}
+
+/**
+ * Bacaan yang berasal dari alat bantu.
+ *
+ * Dipisahkan dari bacaan pola karena sebabnya berbeda jenis: kalau keluhan hanya
+ * muncul pada satu alat dan tidak pada yang lain, itu soal perangkat, bukan soal
+ * kebiasaan — dan menjawabnya dengan saran perilaku akan salah alamat.
+ */
+export function readDevices(entries: Entry[], now = new Date()): Reading[] {
+  const out: Reading[] = [];
+  const d60 = lastDays(entries, 60, now).filter((e) => e.device);
+  if (d60.length < 4) return out;
+
+  const byDevice = new Map<string, Entry[]>();
+  for (const e of d60) {
+    const list = byDevice.get(e.device!) ?? [];
+    list.push(e);
+    byDevice.set(e.device!, list);
+  }
+
+  for (const [key, list] of byDevice) {
+    if (list.length < 3) continue;
+    const meta = deviceMeta(key);
+    if (!meta) continue;
+
+    const hurt = list.filter((e) => afterfeelMeta(e.afterfeel).medical).length;
+    const others = d60.filter((e) => e.device !== key);
+    const otherHurt = others.length
+      ? others.filter((e) => afterfeelMeta(e.afterfeel).medical).length / others.length
+      : 0;
+    const rate = hurt / list.length;
+
+    if (rate >= 0.4 && rate > otherHurt + 0.2) {
+      out.push({
+        id: `alat-${key}`,
+        kind: "praktik",
+        strength: 0.75,
+        title: `${meta.label} lebih sering berujung keluhan`,
+        body: `Dari ${list.length} sesi dengan ${meta.label.toLowerCase()} dalam dua bulan terakhir, ${hurt} berakhir dengan ngilu, perih, nyeri, atau kebas. Alat lain yang kamu pakai tidak menunjukkan pola yang sama.`,
+        action: meta.care,
+      });
+    }
+
+    // Alat berintensitas tinggi yang dipakai hampir setiap kali — risiko penumpulan.
+    if (meta.intensity >= 0.7 && list.length / d60.length >= 0.7) {
+      out.push({
+        id: `alat-dominan-${key}`,
+        kind: "praktik",
+        strength: 0.45,
+        title: `Hampir semuanya lewat ${meta.label.toLowerCase()}`,
+        body: `${Math.round((list.length / d60.length) * 100)}% sesi beralatmu memakai satu alat yang rangsangannya termasuk kuat. Tubuh menyesuaikan diri dengan rangsangan yang selalu sama, dan yang lebih lembut lama-lama terasa kurang.`,
+        action: "Selingi dengan cara yang lebih pelan beberapa kali, supaya rentang kepekaannya tidak menyempit ke satu titik.",
+      });
+    }
+
+    const noLube = list.filter((e) => e.lube === "tidak pakai").length;
+    if (meta.group !== "getar" && meta.group !== "isap" && noLube / list.length >= 0.6 && rate >= 0.3) {
+      out.push({
+        id: `alat-pelumas-${key}`,
+        kind: "praktik",
+        strength: 0.6,
+        title: `${meta.label} tanpa pelumas`,
+        body: `Sebagian besar sesimu dengan alat ini tercatat tanpa pelumas, dan keluhan fisik muncul di ${Math.round(rate * 100)}% di antaranya.`,
+        action: "Pakai pelumas berbasis air. Bahan silikon dan minyak bisa merusak permukaan alat berbahan silikon atau TPE.",
+      });
+    }
+  }
+
+  return sortReadings(out).slice(0, 3);
+}
+
+/**
+ * Bacaan mode wanita. Tidak memakai angka 21 dan tidak memakai pita target —
+ * yang dibaca adalah hubungan antara dorongan dan fase siklus.
+ */
+export function readCycle(entries: Entry[], profile: Profile, now = new Date()): Reading[] {
+  const out: Reading[] = [];
+  const cycle = profile.cycle;
+
+  if (!cycle.lastPeriodStart) {
+    out.push({
+      id: "siklus-belum-diisi",
+      kind: "ritme",
+      strength: 0.9,
+      title: "Siklusnya belum diketahui",
+      body: "Tanpa tanggal haid terakhir, catatanmu hanya bisa dibaca sebagai deret tanggal biasa. Dengan tanggal itu, pola yang berulang tiap bulan mulai kelihatan.",
+      action: "Isi tanggal hari pertama haid terakhir di halaman pengaturan. Satu isian, sekali saja.",
+    });
+    return out;
+  }
+
+  const d90 = lastDays(entries, 90, now);
+  const coupling = cycleCoupling(d90, cycle);
+  const peak = peakPhase(d90, cycle);
+  const until = daysUntilNextPeriod(cycle, now);
+
+  if (coupling != null && peak) {
+    if (coupling >= 45) {
+      out.push({
+        id: "siklus-terikat",
+        kind: "ritme",
+        strength: 0.85,
+        title: `Doronganmu memuncak di fase ${peak}`,
+        body: `Keterikatan siklusmu ${coupling} dari 100, dan puncaknya jatuh di fase ${peak}. ${PHASE_NOTE[peak]}`,
+        action: "Kalau ada minggu yang bisa kamu atur sendiri, letakkan yang menuntut tenaga di luar fase ini.",
+      });
+    } else if (coupling <= 20 && d90.length >= 12) {
+      out.push({
+        id: "siklus-lepas",
+        kind: "ritme",
+        strength: 0.6,
+        title: "Polamu hampir tidak mengikuti siklus",
+        body: `Keterikatan siklusmu hanya ${coupling} dari 100 — sebarannya cukup rata di semua fase. Ini bukan kelainan; pada sebagian orang dorongan memang lebih ditentukan keadaan sehari-hari daripada hormon.`,
+        action: "Coba lihat pemicu yang kamu catat. Untuk pola seperti ini, itu biasanya lebih menjelaskan daripada tanggal.",
+      });
+    }
+  }
+
+  const rows = phaseDensity(d90, cycle);
+  const luteal = rows.find((r) => r.phase === "luteal");
+  const lutealEntries = d90.filter((e) => phaseOf(e.at, cycle) === "luteal");
+  if (luteal && lutealEntries.length >= 4) {
+    const pos = positiveShare(lutealEntries);
+    const rest = positiveShare(d90.filter((e) => !lutealEntries.includes(e)));
+    if (pos != null && rest != null && rest - pos >= 0.25) {
+      out.push({
+        id: "siklus-luteal-datar",
+        kind: "sinyal",
+        strength: 0.7,
+        title: "Fase luteal terasa berbeda",
+        body: `Di minggu-minggu menjelang haid, hanya ${pct(pos)} catatanmu terasa lega atau nikmat, dibanding ${pct(rest)} di fase lain. Pergeseran suasana hati di fase ini lumrah, dan catatanmu menunjukkannya dengan jelas.`,
+        action: "Perlakukan minggu itu sebagai minggu yang butuh lebih banyak istirahat, bukan sebagai minggu yang gagal.",
+      });
+    }
+  }
+
+  if (until != null && until <= 3) {
+    out.push({
+      id: "siklus-dekat-haid",
+      kind: "ritme",
+      strength: 0.3,
+      title: until <= 1 ? "Haid diperkirakan mulai besok" : `Perkiraan haid ${until} hari lagi`,
+      body: "Perkiraan ini dihitung dari panjang siklus yang kamu isi, bukan dari pengamatan tubuh. Meleset beberapa hari itu biasa.",
+      action: "Perbarui tanggal haid terakhir begitu mulai, supaya perkiraan berikutnya ikut membaik.",
+    });
+  }
+
+  return sortReadings(out);
+}
+
+/** Satu pintu masuk untuk halaman bacaan. */
+export function readAll(entries: Entry[], profile: Profile, now = new Date()): Reading[] {
+  const base = profile.mode === "wanita" ? readCycleMode(entries, profile, now) : readEntries(entries, now);
+  return sortReadings([...base, ...readDevices(entries, now)]);
+}
+
+/** Mode wanita memakai bacaan bersama, dikurangi yang bersandar pada pita 21. */
+function readCycleMode(entries: Entry[], profile: Profile, now: Date): Reading[] {
+  const shared = readEntries(entries, now).filter(
+    (r) => !["ritme-sepi", "ritme-padat"].includes(r.id),
+  );
+  return [...readCycle(entries, profile, now), ...shared];
 }

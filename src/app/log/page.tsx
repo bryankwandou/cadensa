@@ -1,308 +1,389 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Nav } from "@/components/Nav";
-import { Pressable } from "@/components/Motion";
-import { useEntries } from "@/lib/store";
+import { Magnetic, Pressable, Reveal } from "@/components/Motion";
+import { DeviceIcon } from "@/components/DeviceIcon";
+import { useVault } from "@/lib/vault";
 import {
   AFTERFEELS,
+  DEVICE_GROUPS,
   EDGING,
+  LUBES,
   METHODS,
   TRIGGERS,
+  deviceMeta,
+  devicesFor,
   type Afterfeel,
+  type Draft,
   type Edging,
+  type Lube,
   type Method,
+  type Mode,
   type Trigger,
 } from "@/lib/types";
 
 function Chip({
-  active,
-  children,
+  on,
   onClick,
+  children,
+  tone = "teal",
 }: {
-  active: boolean;
-  children: React.ReactNode;
+  on: boolean;
   onClick: () => void;
+  children: React.ReactNode;
+  tone?: "teal" | "signal";
 }) {
+  const active =
+    tone === "signal"
+      ? "border-signal-500/50 bg-signal-500/10 text-sand-100"
+      : "border-teal-600 bg-teal-600/10 text-sand-100";
   return (
-    <Pressable
+    <motion.button
       type="button"
       onClick={onClick}
-      aria-pressed={active}
-      className={`rounded-full border px-4 py-2.5 text-sm transition-colors ${
-        active
-          ? "border-teal-500 bg-teal-500/12 text-teal-500"
-          : "hairline text-sand-300 hover:bg-ink-800"
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 420, damping: 26 }}
+      className={`rounded-full border px-4 py-2 text-sm transition-colors ${
+        on ? active : "hairline text-sand-300 hover:text-sand-100"
       }`}
     >
       {children}
-    </Pressable>
+    </motion.button>
   );
 }
 
-function clock(sec: number) {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
+function emptyDraft(mode: Mode): Draft {
+  return {
+    at: new Date().toISOString(),
+    durationSec: null,
+    method: "tangan",
+    device: null,
+    lube: null,
+    edging: "tidak",
+    edgeCycles: null,
+    trigger: null,
+    afterfeel: "lega",
+    note: "",
+    mode,
+  };
 }
 
 export default function LogPage() {
-  const { add, entries } = useEntries();
-
-  const [method, setMethod] = useState<Method | null>(null);
-  const [afterfeel, setAfterfeel] = useState<Afterfeel | null>(null);
-  const [edging, setEdging] = useState<Edging>("tidak");
-  const [edgeCycles, setEdgeCycles] = useState<number | null>(null);
-  const [trigger, setTrigger] = useState<Trigger | null>(null);
-  const [note, setNote] = useState("");
-  const [manualMin, setManualMin] = useState("");
+  const { add, entries, profile, ready } = useVault();
+  const [draft, setDraft] = useState<Draft>(() => emptyDraft("pria"));
   const [detail, setDetail] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  // Timer opsional.
+  const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const devices = useMemo(() => devicesFor(profile.mode), [profile.mode]);
+  const chosen = deviceMeta(draft.device);
 
   useEffect(() => {
-    if (running) {
-      tick.current = setInterval(() => setElapsed((s) => s + 1), 1000);
-    } else if (tick.current) {
-      clearInterval(tick.current);
-      tick.current = null;
-    }
+    setDraft((d) => ({ ...d, mode: profile.mode }));
+  }, [profile.mode]);
+
+  useEffect(() => {
+    if (running) timer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+    else if (timer.current) clearInterval(timer.current);
     return () => {
-      if (tick.current) clearInterval(tick.current);
+      if (timer.current) clearInterval(timer.current);
     };
   }, [running]);
 
-  const durationSec = useMemo(() => {
-    if (elapsed > 0) return elapsed;
-    const m = parseFloat(manualMin);
-    return Number.isFinite(m) && m > 0 ? Math.round(m * 60) : null;
-  }, [elapsed, manualMin]);
-
-  const ready = method != null && afterfeel != null;
-
-  function reset() {
-    setMethod(null);
-    setAfterfeel(null);
-    setEdging("tidak");
-    setEdgeCycles(null);
-    setTrigger(null);
-    setNote("");
-    setManualMin("");
-    setElapsed(0);
-    setRunning(false);
-    setDetail(false);
-  }
+  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft((d) => ({ ...d, [k]: v }));
 
   function save() {
-    if (!ready) return;
     add({
+      ...draft,
       at: new Date().toISOString(),
-      durationSec,
-      method: method!,
-      edging,
-      edgeCycles,
-      trigger,
-      afterfeel: afterfeel!,
-      note: note.trim(),
+      durationSec: seconds > 0 ? seconds : draft.durationSec,
     });
-    reset();
+    setDraft(emptyDraft(profile.mode));
+    setSeconds(0);
+    setRunning(false);
+    setDetail(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2600);
+    setTimeout(() => setSaved(false), 4000);
   }
 
   return (
     <div className="aurora min-h-screen">
       <Nav />
       <main className="mx-auto max-w-2xl px-5 pb-24 pt-12">
-        <h1 className="text-3xl font-semibold tracking-[-0.02em]">Catat</h1>
-        <p className="mt-3 text-sm leading-relaxed text-sand-500">
-          Dua pilihan sudah cukup untuk menyimpan. Sisanya muncul kalau kamu memang sedang ingin
-          menambah detail.
-        </p>
+        <Reveal>
+          <h1 className="text-4xl font-semibold tracking-[-0.025em]">Catat</h1>
+          <p className="mt-3 text-sm leading-relaxed text-sand-300">
+            Dua pilihan sudah cukup. Sisanya hanya kalau kamu memang ingin tahu lebih banyak nanti.
+          </p>
+        </Reveal>
 
-        {/* Wajib */}
-        <section className="mt-10">
-          <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Caranya</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {METHODS.map((m) => (
-              <Chip key={m} active={method === m} onClick={() => setMethod(m)}>
-                {m}
-              </Chip>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-8">
-          <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Rasanya sesudah</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {AFTERFEELS.map((a) => (
-              <Chip key={a.key} active={afterfeel === a.key} onClick={() => setAfterfeel(a.key)}>
-                {a.key}
-              </Chip>
-            ))}
-          </div>
-        </section>
-
-        {/* Durasi */}
-        <section className="mt-8 card rounded-3xl p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Timer — opsional, tidak pernah menghalangi tombol simpan */}
+        <Reveal delay={0.05}>
+          <div className="card mt-8 flex items-center justify-between rounded-3xl p-5">
             <div>
-              <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Durasi</h2>
-              <p className="mt-2 font-mono text-3xl text-sand-100">{clock(elapsed)}</p>
+              <p className="text-xs text-sand-500">Durasi</p>
+              <p className="font-mono text-2xl tabular-nums text-sand-100">
+                {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+                {String(seconds % 60).padStart(2, "0")}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <Pressable
-                type="button"
                 onClick={() => setRunning((r) => !r)}
-                className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-100 hover:bg-ink-800"
+                className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-200"
               >
-                {running ? "Jeda" : elapsed > 0 ? "Lanjut" : "Mulai timer"}
+                {running ? "Jeda" : seconds ? "Lanjut" : "Mulai"}
               </Pressable>
-              {elapsed > 0 && (
+              {seconds > 0 && (
                 <Pressable
-                  type="button"
                   onClick={() => {
-                    setElapsed(0);
+                    setSeconds(0);
                     setRunning(false);
                   }}
-                  className="rounded-full px-3 py-2.5 text-sm text-sand-500 hover:text-sand-100"
+                  className="rounded-full border hairline px-4 py-2.5 text-sm text-sand-500"
                 >
                   Nol
                 </Pressable>
               )}
             </div>
           </div>
-          {elapsed === 0 && (
-            <label className="mt-5 flex items-center gap-3 text-sm text-sand-300">
-              atau isi manual
-              <input
-                inputMode="decimal"
-                value={manualMin}
-                onChange={(e) => setManualMin(e.target.value)}
-                placeholder="menit"
-                className="w-28 rounded-xl border hairline bg-ink-900/60 px-3 py-2 font-mono text-sand-100 outline-none focus:border-teal-700"
-              />
-              <span className="text-sand-500">boleh dikosongkan</span>
-            </label>
-          )}
-        </section>
+        </Reveal>
 
-        {/* Detail opsional */}
-        <button
-          type="button"
-          onClick={() => setDetail((d) => !d)}
-          className="mt-8 text-sm text-teal-500 hover:text-teal-600"
-        >
-          {detail ? "Sembunyikan detail" : "Mau tambah detail?"}
-        </button>
+        {/* Cara */}
+        <Reveal delay={0.08}>
+          <div className="mt-8">
+            <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Cara</p>
+            <div className="flex flex-wrap gap-2">
+              {METHODS.map((m) => (
+                <Chip
+                  key={m}
+                  on={draft.method === m}
+                  onClick={() => {
+                    set("method", m as Method);
+                    if (m !== "alat bantu") set("device", null);
+                  }}
+                >
+                  {m}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </Reveal>
 
-        <AnimatePresence initial={false}>
-          {detail && (
+        {/* Alat bantu — muncul hanya kalau relevan */}
+        <AnimatePresence>
+          {draft.method === "alat bantu" && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="pt-6">
-                <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Edging</h2>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {EDGING.map((e) => (
-                    <Chip
-                      key={e}
-                      active={edging === e}
-                      onClick={() => {
-                        setEdging(e);
-                        if (e === "tidak") setEdgeCycles(null);
-                      }}
-                    >
-                      {e}
-                    </Chip>
-                  ))}
+              <div className="mt-8">
+                <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Alat</p>
+                <div className="space-y-5">
+                  {DEVICE_GROUPS.map((g) => {
+                    const items = devices.filter((d) => d.group === g.key);
+                    if (!items.length) return null;
+                    return (
+                      <div key={g.key}>
+                        <p className="mb-2 text-xs text-sand-500">{g.label}</p>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {items.map((d) => {
+                            const on = draft.device === d.key;
+                            return (
+                              <motion.button
+                                key={d.key}
+                                type="button"
+                                onClick={() => set("device", d.key)}
+                                whileHover={{ y: -2 }}
+                                whileTap={{ scale: 0.97 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 26 }}
+                                className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                                  on ? "border-teal-600 bg-teal-600/10" : "hairline hover:border-sand-500/25"
+                                }`}
+                              >
+                                <span className={on ? "text-teal-500" : "text-sand-500"}>
+                                  <DeviceIcon device={d.key} animate={on} />
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block truncate text-sm text-sand-100">{d.label}</span>
+                                  <span className="block truncate text-xs text-sand-500">{d.hint}</span>
+                                </span>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                {edging !== "tidak" && (
-                  <label className="mt-4 flex items-center gap-3 text-sm text-sand-300">
-                    Berapa siklus
-                    <input
-                      inputMode="numeric"
-                      value={edgeCycles ?? ""}
-                      onChange={(e) => setEdgeCycles(e.target.value ? +e.target.value : null)}
-                      className="w-20 rounded-xl border hairline bg-ink-900/60 px-3 py-2 font-mono text-sand-100 outline-none focus:border-teal-700"
-                    />
-                  </label>
-                )}
-              </div>
 
-              <div className="pt-6">
-                <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">
-                  Yang mendorong
-                </h2>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {TRIGGERS.map((t) => (
-                    <Chip
-                      key={t}
-                      active={trigger === t}
-                      onClick={() => setTrigger(trigger === t ? null : t)}
+                <AnimatePresence>
+                  {chosen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-4 rounded-2xl border hairline p-4"
                     >
-                      {t}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Catatan</h2>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={3}
-                  className="mt-3 w-full resize-none rounded-2xl border hairline bg-ink-900/60 px-4 py-3 text-sm text-sand-100 outline-none focus:border-teal-700"
-                  placeholder="Kalau ada yang ingin diingat nanti."
-                />
+                      <p className="text-xs text-sand-500">Perawatan</p>
+                      <p className="mt-1 text-sm leading-relaxed text-sand-300">{chosen.care}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Simpan */}
-        <div className="sticky bottom-6 mt-10">
-          <Pressable
-            type="button"
-            onClick={save}
-            disabled={!ready}
-            className={`w-full rounded-2xl px-6 py-4 text-sm font-medium transition-colors ${
-              ready
-                ? "bg-teal-500 text-ink-950"
-                : "cursor-not-allowed bg-ink-700 text-sand-500"
-            }`}
+        {/* Rasa sesudah */}
+        <Reveal delay={0.1}>
+          <div className="mt-8">
+            <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Rasanya sesudah</p>
+            <div className="flex flex-wrap gap-2">
+              {AFTERFEELS.map((a) => (
+                <Chip
+                  key={a.key}
+                  on={draft.afterfeel === a.key}
+                  tone={a.medical ? "signal" : "teal"}
+                  onClick={() => set("afterfeel", a.key as Afterfeel)}
+                >
+                  {a.key}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Detail opsional */}
+        <Reveal delay={0.12}>
+          <button
+            onClick={() => setDetail((v) => !v)}
+            className="mt-8 text-sm text-sand-500 underline underline-offset-4 hover:text-sand-300"
           >
-            {ready ? "Simpan catatan" : "Pilih caranya dan rasanya"}
-          </Pressable>
-        </div>
+            {detail ? "Sembunyikan detail" : "Tambah detail (opsional)"}
+          </button>
+        </Reveal>
 
         <AnimatePresence>
-          {saved && (
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mt-4 text-center text-sm text-teal-500"
+          {detail && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
             >
-              Tersimpan di perangkat ini. <Link href="/rhythm" className="underline">Lihat ritme</Link>
-            </motion.p>
+              <div className="mt-6 space-y-7">
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Pelumas</p>
+                  <div className="flex flex-wrap gap-2">
+                    {LUBES.map((l) => (
+                      <Chip key={l} on={draft.lube === l} onClick={() => set("lube", l as Lube)}>
+                        {l}
+                      </Chip>
+                    ))}
+                  </div>
+                  {draft.lube === "berbasis silikon" && chosen && (
+                    <p className="mt-2 text-xs text-amber-400">
+                      Pelumas silikon bisa merusak permukaan alat berbahan silikon. Untuk alat, yang
+                      berbasis air lebih aman.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Edging</p>
+                  <div className="flex flex-wrap gap-2">
+                    {EDGING.map((e) => (
+                      <Chip key={e} on={draft.edging === e} onClick={() => set("edging", e as Edging)}>
+                        {e}
+                      </Chip>
+                    ))}
+                  </div>
+                  {draft.edging !== "tidak" && (
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      placeholder="Berapa siklus?"
+                      value={draft.edgeCycles ?? ""}
+                      onChange={(e) => set("edgeCycles", e.target.value ? Number(e.target.value) : null)}
+                      className="mt-3 w-40 rounded-2xl border hairline bg-ink-900/60 px-4 py-2.5 text-sm text-sand-100 outline-none focus:border-teal-600"
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Yang memicu</p>
+                  <div className="flex flex-wrap gap-2">
+                    {TRIGGERS.map((t) => (
+                      <Chip
+                        key={t}
+                        on={draft.trigger === t}
+                        onClick={() => set("trigger", draft.trigger === t ? null : (t as Trigger))}
+                      >
+                        {t}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Catatan</p>
+                  <textarea
+                    value={draft.note}
+                    onChange={(e) => set("note", e.target.value)}
+                    rows={3}
+                    placeholder="Apa pun yang ingin kamu ingat nanti."
+                    className="w-full rounded-2xl border hairline bg-ink-900/60 px-4 py-3 text-sm text-sand-100 outline-none placeholder:text-sand-500 focus:border-teal-600"
+                  />
+                </div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
-        <p className="mt-10 text-center text-xs text-sand-500">
-          {entries.length} catatan tersimpan di browser ini.
-        </p>
+        <Magnetic className="mt-10 inline-block">
+          <Pressable
+            onClick={save}
+            className="rounded-full bg-teal-600 px-8 py-4 text-sm font-medium text-ink-950"
+          >
+            Simpan
+          </Pressable>
+        </Magnetic>
+
+        <AnimatePresence>
+          {saved && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="card mt-6 flex items-center justify-between rounded-2xl p-4"
+            >
+              <span className="text-sm text-sand-200">Tersimpan.</span>
+              <Link href="/rhythm" className="text-sm text-teal-500 underline underline-offset-4">
+                Lihat ritme
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {ready && (
+          <p className="mt-10 text-sm text-sand-500">
+            {entries.length} catatan tersimpan.{" "}
+            <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
+              Atur cadangan
+            </Link>
+          </p>
+        )}
       </main>
     </div>
   );
