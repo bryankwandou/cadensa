@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Nav } from "@/components/Nav";
-import { Pressable } from "@/components/Motion";
-import { useEntries } from "@/lib/store";
+import { Pressable, Tilt3D } from "@/components/Motion";
+import { DeviceIcon } from "@/components/DeviceIcon";
+import { useVault } from "@/lib/vault";
+import { PHASE_NOTE, cycleCoupling, peakPhase, phaseDensity } from "@/lib/cycle";
 import {
   TARGET_BAND,
   bandState,
@@ -41,17 +43,20 @@ function Stat({
   const color =
     tone === "baik" ? "text-teal-500" : tone === "perhatian" ? "text-amber-400" : "text-sand-100";
   return (
-    <div className="card rounded-3xl p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-sand-500">{label}</p>
-      <p className={`mt-3 font-mono text-3xl ${color}`}>{value}</p>
-      <p className="mt-2 text-xs leading-relaxed text-sand-500">{hint}</p>
-    </div>
+    <Tilt3D max={6} className="relative rounded-3xl">
+      <div className="card rounded-3xl p-6">
+        <p className="text-xs uppercase tracking-[0.18em] text-sand-500">{label}</p>
+        <p className={`mt-3 font-mono text-3xl ${color}`}>{value}</p>
+        <p className="mt-2 text-xs leading-relaxed text-sand-500">{hint}</p>
+      </div>
+    </Tilt3D>
   );
 }
 
 export default function RhythmPage() {
-  const { entries, ready, seed, wipe, remove } = useEntries();
+  const { entries, ready, seed, wipe, remove, profile } = useVault();
   const [offset, setOffset] = useState(0);
+  const isWoman = profile.mode === "wanita";
 
   const anchor = useMemo(() => {
     const d = new Date();
@@ -83,6 +88,11 @@ export default function RhythmPage() {
     () => [...entries].sort((a, b) => +new Date(b.at) - +new Date(a.at)).slice(0, 12),
     [entries],
   );
+
+  const d90 = useMemo(() => lastDays(entries, 90, now), [entries]);
+  const coupling = isWoman ? cycleCoupling(d90, profile.cycle) : null;
+  const peak = isWoman ? peakPhase(d90, profile.cycle) : null;
+  const phases = isWoman && profile.cycle.lastPeriodStart ? phaseDensity(d90, profile.cycle) : null;
 
   if (!ready) return <div className="aurora min-h-screen"><Nav /></div>;
 
@@ -202,12 +212,25 @@ export default function RhythmPage() {
             hint="Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah."
             tone={ci == null ? "netral" : ci >= 60 ? "baik" : "perhatian"}
           />
-          <Stat
-            label="Pita bulan ini"
-            value={band === "dalam-pita" ? "dalam" : band === "sepi" ? "sepi" : "padat"}
-            hint={`Wilayah ${TARGET_BAND.low}–${TARGET_BAND.high}, digambar sebagai koridor bukan garis.`}
-            tone={band === "dalam-pita" ? "baik" : "perhatian"}
-          />
+          {isWoman ? (
+            <Stat
+              label="Keterikatan siklus"
+              value={coupling == null ? "—" : String(coupling)}
+              hint={
+                coupling == null
+                  ? "Butuh tanggal haid terakhir dan minimal delapan catatan."
+                  : `Seberapa terpusat doronganmu di satu fase. Puncaknya di fase ${peak}.`
+              }
+              tone={coupling == null ? "netral" : "baik"}
+            />
+          ) : (
+            <Stat
+              label="Pita bulan ini"
+              value={band === "dalam-pita" ? "dalam" : band === "sepi" ? "sepi" : "padat"}
+              hint={`Wilayah ${TARGET_BAND.low}–${TARGET_BAND.high}, digambar sebagai koridor bukan garis.`}
+              tone={band === "dalam-pita" ? "baik" : "perhatian"}
+            />
+          )}
           <Stat
             label="Kekosongan terpanjang"
             value={`${Math.round(gap)} hari`}
@@ -221,6 +244,62 @@ export default function RhythmPage() {
             tone={pos != null && pos < 0.4 ? "perhatian" : "baik"}
           />
         </section>
+
+        {/* Sebaran per fase siklus — hanya berarti di mode wanita */}
+        {phases && (
+          <section className="card mt-6 rounded-3xl p-6 sm:p-8">
+            <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">
+              Sebaran per fase siklus
+            </h2>
+            <p className="mt-2 text-xs text-sand-500">
+              Dihitung per hari fase, bukan per total, karena panjang tiap fase berbeda.
+            </p>
+            <div className="mt-6 space-y-3">
+              {phases.map((p, i) => {
+                const max = Math.max(...phases.map((x) => x.perDay), 0.0001);
+                const isPeak = p.phase === peak;
+                return (
+                  <div key={p.phase}>
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className={isPeak ? "text-teal-500" : "text-sand-300"}>{p.phase}</span>
+                      <span className="font-mono text-xs text-sand-500">
+                        {p.count} catatan · {p.days} hari
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-ink-800">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{
+                          background: isPeak
+                            ? "linear-gradient(90deg, var(--color-teal-500), var(--color-teal-700))"
+                            : "rgba(214,205,190,0.22)",
+                        }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(p.perDay / max) * 100}%` }}
+                        transition={{ type: "spring", stiffness: 200, damping: 28, delay: i * 0.08 }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {peak && (
+              <p className="mt-5 text-sm leading-relaxed text-sand-300">{PHASE_NOTE[peak]}</p>
+            )}
+          </section>
+        )}
+
+        {isWoman && !phases && (
+          <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6">
+            <p className="text-sm leading-relaxed text-sand-300">
+              Isi tanggal haid terakhir di{" "}
+              <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
+                pengaturan
+              </Link>{" "}
+              supaya catatanmu bisa dibaca terhadap fase siklus, bukan sekadar terhadap tanggal.
+            </p>
+          </div>
+        )}
 
         <p className="mt-4 text-xs text-sand-500">
           Beban edging bulan ini: <span className="font-mono">{Math.round(load)}</span>
@@ -241,7 +320,12 @@ export default function RhythmPage() {
               const meta = afterfeelMeta(e.afterfeel);
               return (
                 <li key={e.id} className="flex items-center justify-between gap-4 py-3.5">
-                  <div className="min-w-0">
+                  {e.device && (
+                    <span className="shrink-0 text-sand-500">
+                      <DeviceIcon device={e.device} size={22} />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-sand-100">
                       {d.getDate()} {MONTHS[d.getMonth()].slice(0, 3)} ·{" "}
                       {String(d.getHours()).padStart(2, "0")}.

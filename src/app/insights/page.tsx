@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Stagger, StaggerItem, Pressable } from "@/components/Motion";
-import { useEntries } from "@/lib/store";
-import { readEntries, type ReadingKind } from "@/lib/signals";
+import { useVault } from "@/lib/vault";
+import { readAll, type ReadingKind } from "@/lib/signals";
 
 const KIND_LABEL: Record<ReadingKind, string> = {
   medis: "Perlu diperiksa",
@@ -22,8 +22,8 @@ const KIND_STYLE: Record<ReadingKind, string> = {
 };
 
 export default function InsightsPage() {
-  const { entries, ready, seed } = useEntries();
-  const readings = useMemo(() => readEntries(entries), [entries]);
+  const { entries, ready, seed, profile } = useVault();
+  const readings = useMemo(() => readAll(entries, profile), [entries, profile]);
 
   if (!ready) return <div className="aurora min-h-screen"><Nav /></div>;
 
