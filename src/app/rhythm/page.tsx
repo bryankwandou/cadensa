@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Nav } from "@/components/Nav";
 import { Pressable, Tilt3D } from "@/components/Motion";
 import { DeviceIcon } from "@/components/DeviceIcon";
+import { Glyph } from "@/components/Glyph";
 import { useVault } from "@/lib/vault";
 import { PHASE_NOTE, cycleCoupling, peakPhase, phaseDensity } from "@/lib/cycle";
 import {
@@ -320,11 +321,13 @@ export default function RhythmPage() {
               const meta = afterfeelMeta(e.afterfeel);
               return (
                 <li key={e.id} className="flex items-center justify-between gap-4 py-3.5">
-                  {e.device && (
-                    <span className="shrink-0 text-sand-500">
-                      <DeviceIcon device={e.device} size={22} />
-                    </span>
-                  )}
+                  <span className="shrink-0 text-sand-500">
+                    {e.device ? (
+                      <DeviceIcon device={e.device} size={24} />
+                    ) : (
+                      <Glyph set="method" name={e.method} size={24} />
+                    )}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-sand-100">
                       {d.getDate()} {MONTHS[d.getMonth()].slice(0, 3)} ·{" "}
@@ -339,7 +342,7 @@ export default function RhythmPage() {
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs ${
+                      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs ${
                         meta.medical
                           ? "bg-signal-500/12 text-signal-500"
                           : meta.valence > 0
@@ -347,6 +350,7 @@ export default function RhythmPage() {
                             : "bg-ink-700 text-sand-300"
                       }`}
                     >
+                      <Glyph set="feel" name={e.afterfeel} size={16} />
                       {e.afterfeel}
                     </span>
                     <button
