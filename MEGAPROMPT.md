@@ -323,3 +323,74 @@ tidak ada orang lain yang bisa membaca datanya.
 - Kelengkapan isian opsional di atas 40 persen — penanda kepercayaan.
 - Lebih dari sepertiga pengguna aktif membuka halaman wawasan mingguan.
 - Nol kejadian keamanan. Ini bukan target, ini syarat hidup.
+
+---
+
+## 12. KEPUTUSAN YANG DIAMBIL SETELAH MVP PERTAMA BERJALAN
+
+Bagian ini ditulis belakangan, setelah versi pertama dipakai orang. Isinya keputusan yang
+tidak terlihat dari perencanaan awal dan baru muncul karena ada yang memakainya.
+
+### 12.1 Penyimpanan lokal saja adalah cacat, bukan kemurnian
+
+Laporan pertama yang masuk bukan tentang fitur, melainkan tentang catatan yang hilang. Itu
+bukan kejadian langka: penyimpanan peramban dibersihkan sistem saat ruang menipis, dihapus
+bersama riwayat, dan hilang total di mode penyamaran. Untuk aplikasi kebiasaan yang nilainya
+justru tumbuh dari riwayat panjang, kehilangan riwayat berarti kehilangan produknya.
+
+Jawabannya bukan memilih antara privasi dan keandalan, karena keduanya bisa dipenuhi
+sekaligus. Yang dipilih adalah **brankas terenkripsi ujung-ke-ujung**:
+
+- Kunci data dibuat acak sekali saat mendaftar, lalu dibungkus dengan kunci turunan PBKDF2
+  dari kata sandi. Ganti kata sandi karena itu cukup membungkus ulang, bukan mengenkripsi
+  ulang seluruh riwayat — dan itu menghapus satu kelas kegagalan yang biasanya merusak data
+  di tengah proses.
+- Kata sandi asli tidak pernah dikirim. Yang dikirim turunan PBKDF2 dengan info berbeda,
+  yang di server di-hash lagi dengan scrypt.
+- Kunci ditahan di `sessionStorage`, bukan `localStorage`. Menutup tab mengakhiri sesi
+  kriptografisnya, sehingga perangkat yang dipinjam tidak membocorkan isi brankas.
+
+**Harga yang diterima dengan sadar:** tidak ada pemulihan kata sandi. Ini disebut
+terang-terangan di halaman privasi dan saat mendaftar, karena alur pemulihan yang benar-benar
+bekerja berarti kami bisa membaca isinya — dan itu membatalkan seluruh premis produk.
+Penggantinya kunci pemulihan sekali tampil dan berkas cadangan yang bisa dipegang sendiri.
+
+Aturan tambahan yang lahir dari sini: **31. Data yang bisa hilang diam-diam sama saja dengan
+data yang tidak pernah dicatat.**
+
+### 12.2 Mode perempuan bukan mode pria dengan kata ganti yang diganti
+
+Godaan terbesarnya adalah memakai ulang seluruh mesin dan hanya mengganti label. Itu ditolak
+karena satu alasan yang tidak bisa ditawar: angka 21 berasal dari penelitian tentang prostat.
+Memindahkannya ke tubuh yang tidak punya prostat akan menjadi klaim kesehatan tanpa dasar,
+dan produk yang mengarang satu angka akan kehilangan hak untuk dipercaya soal angka lainnya.
+
+Yang dipakai sebagai gantinya adalah pertanyaan yang memang punya jawaban: apakah dorongan
+naik dan turun mengikuti siklus, dan apakah polanya berulang. Karena itu mode perempuan punya
+metriknya sendiri — **keterikatan siklus** menggantikan pita bulanan, dan sebaran dihitung per
+hari fase, bukan per total, karena panjang tiap fase berbeda dan membandingkan totalnya akan
+menyesatkan. Katalog alat, mesin bacaan, dan halaman ritmenya ikut menyesuaikan.
+
+Aturan tambahan: **32. Kalau sebuah angka tidak punya dasar untuk satu kelompok pengguna,
+jangan pindahkan angkanya — pindahkan pertanyaannya.**
+
+### 12.3 Katalog alat yang rinci adalah fitur medis, bukan fitur kelengkapan
+
+Awalnya "alat bantu" hanyalah satu pilihan. Itu membuang informasi yang justru paling
+menjelaskan: gesekan, tekanan, dan bahan tiap jenis berbeda jauh, dan perbedaan itulah yang
+menjelaskan kenapa keluhan fisik muncul pada sebagian orang saja. Tanpa rincian, keluhan yang
+sebenarnya berasal dari satu alat akan dijawab dengan saran mengubah kebiasaan — salah alamat,
+dan merusak kepercayaan.
+
+Karena itu katalognya dikelompokkan, tiap jenis membawa perkiraan intensitas dan catatan
+perawatannya sendiri, dan mesin bacaan bisa memisahkan keluhan yang berasal dari alat dari
+keluhan yang berasal dari pola.
+
+**Ikonnya digambar sebagai garis vektor, bukan berkas gambar.** Alasannya berlapis: tajam di
+layar mana pun tanpa menambah unduhan, ikut warna tema — dan yang paling menentukan, tidak ada
+berkas gambar yang tersimpan di perangkat atau singgah di riwayat unduhan. Bentuknya sengaja
+abstrak: cukup untuk dikenali pemakainya, tidak cukup untuk dipahami orang yang melirik dari
+samping. Ini penerapan langsung dari aturan nomor 1.
+
+Aturan tambahan: **33. Rincian yang tidak mengubah saran adalah beban; rincian yang mengubah
+saran adalah kewajiban.**
