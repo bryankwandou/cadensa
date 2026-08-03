@@ -5,7 +5,31 @@ import { neon } from "@neondatabase/serverless";
  * teks buram: kalau seluruh basis data ini bocor, isinya tidak bisa dibaca siapa pun
  * yang tidak memegang kata sandi penggunanya.
  */
-export const sql = neon(process.env.DATABASE_URL!);
+type Sql = ReturnType<typeof neon>;
+
+let client: Sql | null = null;
+
+/**
+ * Sambungan dibuat saat dipakai, bukan saat modul dimuat.
+ *
+ * Bedanya bukan gaya. `neon()` melempar kalau alamat basis datanya kosong, dan
+ * memanggilnya di tingkat modul membuat kegagalan itu terjadi saat Next.js
+ * mengumpulkan data rute — sehingga seluruh build gagal, bukan hanya rute akun.
+ * Dengan cara ini, aplikasi tanpa basis data tetap terbangun utuh dan hanya rute
+ * akun yang menjawab galat.
+ */
+function db(): Sql {
+  if (!client) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL belum diisi, jadi akun tidak bisa dipakai.");
+    client = neon(url);
+  }
+  return client;
+}
+
+/** Dipakai sebagai template tag persis seperti klien Neon aslinya. */
+export const sql: Sql = ((strings: TemplateStringsArray, ...values: unknown[]) =>
+  (db() as unknown as (s: TemplateStringsArray, ...v: unknown[]) => unknown)(strings, ...values)) as Sql;
 
 let ensured: Promise<void> | null = null;
 
