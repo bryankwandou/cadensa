@@ -11,7 +11,7 @@ import type { Mode } from "@/lib/types";
 type Tab = "masuk" | "daftar" | "pemulihan";
 
 const input =
-  "w-full rounded-2xl border hairline bg-ink-900/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors placeholder:text-sand-500 focus:border-teal-600";
+  "w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors placeholder:text-sand-500 focus:border-teal-600";
 
 export default function MasukPage() {
   const router = useRouter();
@@ -49,8 +49,9 @@ export default function MasukPage() {
         <Nav />
         <main className="mx-auto max-w-lg px-5 pb-24 pt-16">
           <Reveal>
-            <h1 className="text-3xl font-semibold tracking-[-0.025em]">Simpan kunci pemulihan</h1>
-            <p className="mt-4 text-sm leading-relaxed text-sand-300">
+            <p className="eyebrow">Sekali tampil</p>
+            <h1 className="display mt-2.5 text-[2.6rem]">Simpan kunci pemulihan</h1>
+            <p className="mt-5 text-sm leading-relaxed text-sand-300">
               Catatanmu dikunci di perangkat ini sebelum dikirim, dan kuncinya diturunkan dari kata
               sandimu. Itu berarti kami tidak bisa membukanya untukmu — termasuk kalau kata sandinya
               lupa. Baris di bawah ini adalah satu-satunya jalan masuk cadangan.
@@ -119,10 +120,11 @@ export default function MasukPage() {
       <Nav />
       <main className="mx-auto max-w-lg px-5 pb-24 pt-12">
         <Reveal>
-          <h1 className="text-3xl font-semibold tracking-[-0.025em]">
+          <p className="eyebrow">Brankas</p>
+          <h1 className="display mt-2.5 text-[2.6rem]">
             {tab === "daftar" ? "Buat akun" : tab === "pemulihan" ? "Buka dengan kunci pemulihan" : "Masuk"}
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-sand-300">
+          <p className="mt-5 text-sm leading-relaxed text-sand-300">
             Akun dipakai untuk satu hal saja: memindahkan catatanmu antar perangkat tanpa
             kehilangan. Isinya dikunci di sini dulu, jadi yang tersimpan di server adalah teks acak.
           </p>
@@ -161,8 +163,8 @@ export default function MasukPage() {
           </div>
         </Reveal>
 
-        <Tilt3D max={4} className="relative mt-6 rounded-3xl">
-          <div className="card rounded-3xl p-6">
+        <Tilt3D max={4} className="relative mt-6 rounded-panel">
+          <div className="surface rounded-panel p-7">
             <AnimatePresence mode="wait">
               <motion.form
                 key={tab}
@@ -311,7 +313,7 @@ export default function MasukPage() {
                 <Pressable
                   type="submit"
                   disabled={busy}
-                  className="w-full rounded-2xl bg-teal-600 px-6 py-3.5 text-sm font-medium text-ink-950 disabled:opacity-50"
+                  className="w-full rounded-field bg-teal-500 px-6 py-3.5 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400 disabled:opacity-50"
                 >
                   {busy ? "Sebentar…" : tab === "daftar" ? "Buat akun" : tab === "pemulihan" ? "Buka brankas" : "Masuk"}
                 </Pressable>

@@ -44,11 +44,11 @@ function Stat({
   const color =
     tone === "baik" ? "text-teal-500" : tone === "perhatian" ? "text-amber-400" : "text-sand-100";
   return (
-    <Tilt3D max={6} className="relative rounded-3xl">
-      <div className="card rounded-3xl p-6">
-        <p className="text-xs uppercase tracking-[0.18em] text-sand-500">{label}</p>
-        <p className={`mt-3 font-mono text-3xl ${color}`}>{value}</p>
-        <p className="mt-2 text-xs leading-relaxed text-sand-500">{hint}</p>
+    <Tilt3D max={6} className="relative h-full rounded-card">
+      <div className="surface h-full rounded-card px-6 py-6">
+        <p className="eyebrow">{label}</p>
+        <p className={`num mt-3.5 text-[2rem] leading-none ${color}`}>{value}</p>
+        <p className="mt-3 text-xs leading-relaxed text-sand-500">{hint}</p>
       </div>
     </Tilt3D>
   );
@@ -102,8 +102,8 @@ export default function RhythmPage() {
       <div className="aurora min-h-screen">
         <Nav />
         <main className="mx-auto max-w-2xl px-5 pt-24 text-center">
-          <h1 className="text-3xl font-semibold tracking-[-0.02em]">Belum ada apa-apa di sini</h1>
-          <p className="mt-4 leading-relaxed text-sand-300">
+          <h1 className="display text-[2.6rem]">Belum ada apa-apa di sini</h1>
+          <p className="mx-auto mt-5 max-w-md leading-relaxed text-sand-300">
             Ritme baru terbaca setelah beberapa catatan. Kalau ingin melihat bentuk halaman ini
             lebih dulu, muat data contoh — semuanya tetap tinggal di perangkat ini dan bisa
             dihapus kapan saja.
@@ -133,10 +133,12 @@ export default function RhythmPage() {
       <main className="mx-auto max-w-4xl px-5 pb-24 pt-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-[-0.02em]">
-              {MONTHS[anchor.getMonth()]} {anchor.getFullYear()}
+            <p className="eyebrow">Ritme</p>
+            <h1 className="display mt-2.5 text-[2.6rem]">
+              {MONTHS[anchor.getMonth()]}{" "}
+              <span className="text-sand-500">{anchor.getFullYear()}</span>
             </h1>
-            <p className="mt-2 text-sm text-sand-500">
+            <p className="mt-3 text-sm text-sand-500">
               {monthEntries.length} catatan
               {isThisMonth && ` · laju saat ini mengarah ke sekitar ${proj.projected}`}
             </p>
@@ -159,7 +161,7 @@ export default function RhythmPage() {
         </div>
 
         {/* Pita ritme */}
-        <section className="card mt-8 rounded-3xl p-6 sm:p-8">
+        <section className="surface mt-8 rounded-panel p-7 sm:p-9">
           <div className="flex items-center justify-between text-xs text-sand-500">
             <span>Kepadatan menunjukkan frekuensi, tinggi menunjukkan rasa sesudahnya</span>
             <span className="font-mono">
@@ -248,10 +250,8 @@ export default function RhythmPage() {
 
         {/* Sebaran per fase siklus — hanya berarti di mode wanita */}
         {phases && (
-          <section className="card mt-6 rounded-3xl p-6 sm:p-8">
-            <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">
-              Sebaran per fase siklus
-            </h2>
+          <section className="surface mt-6 rounded-panel p-7 sm:p-9">
+            <h2 className="eyebrow">Sebaran per fase siklus</h2>
             <p className="mt-2 text-xs text-sand-500">
               Dihitung per hari fase, bukan per total, karena panjang tiap fase berbeda.
             </p>
@@ -314,7 +314,7 @@ export default function RhythmPage() {
 
         {/* Riwayat */}
         <section className="mt-14">
-          <h2 className="text-xs uppercase tracking-[0.18em] text-sand-500">Terakhir dicatat</h2>
+          <h2 className="eyebrow">Terakhir dicatat</h2>
           <ul className="mt-4 divide-y divide-[rgba(214,205,190,0.08)]">
             {recent.map((e) => {
               const d = new Date(e.at);

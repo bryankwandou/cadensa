@@ -47,8 +47,9 @@ export default function PrivacyPage() {
       <Nav />
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12">
         <Reveal>
-          <h1 className="text-4xl font-semibold tracking-[-0.025em]">Privasi</h1>
-          <p className="mt-5 max-w-2xl leading-relaxed text-sand-300">
+          <p className="eyebrow">Yang disimpan, dan di mana</p>
+          <h1 className="display mt-2.5 text-[3rem]">Privasi</h1>
+          <p className="mt-6 max-w-2xl leading-relaxed text-sand-300">
             Data seperti ini termasuk yang paling sensitif yang bisa dimiliki seseorang. Satu
             kebocoran berarti kematian merek yang permanen, dan itulah alasan kebanyakan orang
             tidak mau membangun produk di kategori ini. Cadensa memikulnya dengan cara yang paling
@@ -60,8 +61,8 @@ export default function PrivacyPage() {
         <div className="mt-12 space-y-4">
           {POINTS.map((p, i) => (
             <Reveal key={p.t} delay={i * 0.04}>
-              <div className="card rounded-3xl p-7">
-                <h2 className="text-lg font-medium text-sand-100">{p.t}</h2>
+              <div className="surface rounded-card p-7">
+                <h2 className="display-sm text-xl text-sand-100">{p.t}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-sand-300">{p.d}</p>
               </div>
             </Reveal>
@@ -69,8 +70,8 @@ export default function PrivacyPage() {
         </div>
 
         <Reveal delay={0.1}>
-          <div className="mt-12 rounded-3xl border border-amber-500/30 bg-amber-500/5 p-7">
-            <h2 className="text-lg font-medium text-amber-400">Harga dari janji ini</h2>
+          <div className="mt-12 rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-8">
+            <h2 className="display-sm text-xl text-amber-400">Harga dari janji ini</h2>
             <p className="mt-3 text-sm leading-relaxed text-sand-300">
               Karena kunci tidak pernah kami pegang, tidak ada tombol &ldquo;lupa kata sandi&rdquo;
               yang bisa mengembalikan catatanmu. Yang ada adalah kunci pemulihan yang kami tunjukkan

@@ -43,14 +43,14 @@ export function OptionTile({
       whileTap={{ scale: 0.96 }}
       transition={{ type: "spring", stiffness: 380, damping: 24 }}
       style={{ transformStyle: "preserve-3d", perspective: 600 }}
-      className={`relative flex flex-col items-center gap-2 rounded-2xl border text-center transition-colors ${
+      className={`relative flex flex-col items-center gap-2 rounded-field border text-center transition-colors ${
         size === "sm" ? "px-2 py-3" : "px-3 py-4"
       } ${active ? ring : "hairline hover:border-sand-500/30"}`}
     >
       {active && (
         <motion.span
           layoutId={`tile-${set}`}
-          className={`absolute inset-0 rounded-2xl ring-1 ${
+          className={`absolute inset-0 rounded-field ring-1 ${
             tone === "signal" ? "ring-signal-500/40" : "ring-teal-500/40"
           }`}
           transition={{ type: "spring", stiffness: 420, damping: 34 }}

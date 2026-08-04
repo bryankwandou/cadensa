@@ -1,10 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { VaultProvider } from "@/lib/vault";
 
 const sans = Geist({ variable: "--font-sans-var", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-mono-var", subsets: ["latin"] });
+
+/**
+ * Serif dengan sumbu optik. Dipilih, bukan diterima begitu saja: kategori ini
+ * penuh sans netral yang membuat semua aplikasi kesehatan terlihat sama, dan
+ * kehangatan huruf inilah yang memisahkan Cadensa dari aplikasi kebugaran.
+ */
+const display = Fraunces({
+  variable: "--font-display-var",
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+});
 
 export const metadata: Metadata = {
   title: "Cadensa — ritme, bukan skor",
@@ -21,12 +32,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#06100f",
+  themeColor: "#040b0b",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${sans.variable} ${mono.variable} h-full`}>
+    <html lang="id" className={`${sans.variable} ${mono.variable} ${display.variable} h-full`}>
       <body className="min-h-full antialiased">
         <VaultProvider>{children}</VaultProvider>
       </body>

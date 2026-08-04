@@ -44,26 +44,26 @@ export function CadenceBand() {
   const max = Math.max(1, ...days);
 
   return (
-    <div className="card rounded-3xl p-6 sm:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="surface rounded-panel p-7 sm:p-9">
+      <div className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-sand-500">Cadence Index</p>
-          <div className="mt-1 flex items-baseline gap-2">
+          <p className="eyebrow">Cadence Index</p>
+          <div className="mt-2 flex items-baseline gap-2.5">
             <motion.span
               key={index}
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-              className="font-mono text-5xl font-semibold text-teal-500"
+              transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+              className="num text-[3.5rem] leading-none text-teal-400"
             >
               {index ?? "—"}
             </motion.span>
-            <span className="text-sand-500">/ 100</span>
+            <span className="num text-sm text-sand-500">/ 100</span>
           </div>
         </div>
         <p className="max-w-xs text-sm leading-relaxed text-sand-300">
           Jumlah yang sama, sebaran berbeda. Yang berhubungan dengan kesehatan prostat adalah
-          keteraturannya — dan hanya angka ini yang menangkapnya.
+          keteraturannya, dan hanya angka ini yang menangkapnya.
         </p>
       </div>
 
@@ -75,7 +75,7 @@ export function CadenceBand() {
             style={{
               background:
                 n === 0
-                  ? "rgba(214,205,190,0.08)"
+                  ? "rgba(207,198,184,0.07)"
                   : "linear-gradient(180deg, var(--color-teal-500), var(--color-teal-700))",
             }}
             animate={{ height: `${n === 0 ? 6 : 18 + (n / max) * 82}%` }}

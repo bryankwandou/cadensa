@@ -31,14 +31,15 @@ export default function InsightsPage() {
     <div className="aurora min-h-screen">
       <Nav />
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12">
-        <h1 className="text-3xl font-semibold tracking-[-0.02em]">Bacaan</h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-sand-500">
+        <p className="eyebrow">Di perangkat ini</p>
+        <h1 className="display mt-2.5 text-[2.75rem]">Bacaan</h1>
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-sand-500">
           Semua di halaman ini dihitung di perangkatmu, dari catatan yang tersimpan di browser
           ini. Tidak ada permintaan jaringan yang membawa isinya keluar.
         </p>
 
         {readings.length === 0 ? (
-          <div className="card mt-10 rounded-3xl p-8">
+          <div className="surface mt-10 rounded-panel p-8">
             <p className="leading-relaxed text-sand-300">
               {entries.length < 3
                 ? "Pola baru muncul setelah beberapa catatan. Tiga adalah batas paling awal di mana angka apa pun masih berarti sesuatu."
@@ -66,22 +67,20 @@ export default function InsightsPage() {
             {readings.map((r) => (
               <StaggerItem
                 key={r.id}
-                className={`card rounded-3xl p-7 ${
-                  r.kind === "medis" ? "ring-1 ring-signal-500/30" : ""
+                className={`surface rounded-panel p-8 ${
+                  r.kind === "medis" ? "ring-1 ring-signal-500/25" : ""
                 }`}
               >
                 <span
-                  className={`inline-block rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.14em] ${KIND_STYLE[r.kind]}`}
+                  className={`inline-block rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${KIND_STYLE[r.kind]}`}
                 >
                   {KIND_LABEL[r.kind]}
                 </span>
-                <h2 className="mt-4 text-xl font-medium text-sand-100">{r.title}</h2>
-                <p className="mt-3 leading-relaxed text-sand-300">{r.body}</p>
-                <div className="mt-5 rounded-2xl border hairline bg-ink-900/40 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-sand-500">
-                    Satu langkah
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-sand-100">{r.action}</p>
+                <h2 className="display-sm mt-5 text-2xl text-sand-100">{r.title}</h2>
+                <p className="mt-4 leading-relaxed text-sand-300">{r.body}</p>
+                <div className="surface-sunken mt-6 rounded-card p-5">
+                  <p className="eyebrow">Satu langkah</p>
+                  <p className="mt-2.5 text-sm leading-relaxed text-sand-100">{r.action}</p>
                 </div>
               </StaggerItem>
             ))}

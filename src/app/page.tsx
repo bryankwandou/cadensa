@@ -14,6 +14,7 @@ import {
   StaggerItem,
   Tilt3D,
 } from "@/components/Motion";
+import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
 import { Glyph } from "@/components/Glyph";
 import { AFTERFEELS, DEVICES, METHODS, TRIGGERS } from "@/lib/types";
@@ -38,7 +39,7 @@ const SIGNALS = [
   {
     name: "Kompulsivitas",
     read: "Sering, tapi hampir tidak pernah diikuti rasa lega.",
-    why: "Jumlah tinggi yang tetap terasa enak bukan masalah. Yang membedakan adalah jaraknya dengan rasa lega — dan hanya kombinasi ini yang menangkapnya.",
+    why: "Jumlah tinggi yang tetap terasa enak bukan masalah. Yang membedakan adalah jaraknya dengan rasa lega, dan hanya kombinasi ini yang menangkapnya.",
   },
 ];
 
@@ -60,42 +61,44 @@ const STEPS = [
   },
 ];
 
-const CTA = "rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-950";
-const CTA_GHOST = "rounded-full border hairline px-6 py-3 text-sm text-sand-100 hover:bg-ink-800";
+const CTA =
+  "inline-block rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400";
+const CTA_GHOST =
+  "inline-block rounded-full border hairline px-6 py-3 text-sm text-sand-100 transition-colors hover:bg-ink-800";
 
 export default function Home() {
   return (
     <div className="aurora min-h-screen">
       <Nav />
 
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-5 pb-16 pt-20 sm:pt-28">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
+      {/* Hero. Sengaja tidak rata tengah: teks bertumpu di kiri, tanda melewati tepi kanan. */}
+      <section className="mx-auto max-w-6xl px-5 pb-24 pt-16 sm:pt-24">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-7">
             <Reveal>
-              <span className="inline-flex items-center gap-2 rounded-full border hairline px-3.5 py-1.5 text-xs tracking-wide text-sand-300">
+              <span className="inline-flex items-center gap-2.5 rounded-full border hairline px-3.5 py-1.5 text-xs text-sand-300">
                 <motion.span
                   className="size-1.5 rounded-full bg-teal-500"
-                  animate={{ opacity: [1, 0.35, 1] }}
-                  transition={{ duration: 2.6, repeat: Infinity }}
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
                 Kesehatan reproduksi, dibaca dari ritme
               </span>
             </Reveal>
 
             <Reveal delay={0.06}>
-              <h1 className="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-6xl">
+              <h1 className="display mt-7 text-[3.4rem] sm:text-[4.6rem]">
                 Ritme,
                 <br />
-                bukan skor.
+                <span className="text-teal-400">bukan skor.</span>
               </h1>
             </Reveal>
 
             <Reveal delay={0.12}>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-sand-300">
+              <p className="mt-7 max-w-xl text-[1.0625rem] leading-relaxed text-sand-300">
                 Pria yang berejakulasi sekitar dua puluh satu kali sebulan menunjukkan angka
                 kejadian kanker prostat yang lebih rendah dibanding yang hanya empat sampai tujuh
-                kali. Cadensa mengubah temuan itu menjadi kebiasaan yang bisa dilihat dan dijaga —
+                kali. Cadensa mengubah temuan itu menjadi kebiasaan yang bisa dilihat dan dijaga,
                 dan mengunci catatannya di perangkatmu sebelum apa pun terkirim.
               </p>
             </Reveal>
@@ -103,170 +106,190 @@ export default function Home() {
             <Reveal delay={0.18}>
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Magnetic>
-                  <Link href="/log" className={`${CTA} inline-block`}>
+                  <Link href="/log" className={CTA}>
                     Mulai mencatat
                   </Link>
                 </Magnetic>
-                <Magnetic>
-                  <Link href="/masuk" className={`${CTA_GHOST} inline-block`}>
-                    Buat akun & amankan
-                  </Link>
-                </Magnetic>
+                <Link
+                  href="/masuk"
+                  className="text-sm text-sand-300 underline decoration-sand-500/40 underline-offset-[6px] transition-colors hover:text-sand-100"
+                >
+                  Buat akun dan amankan
+                </Link>
               </div>
             </Reveal>
 
             <Reveal delay={0.24}>
-              <p className="mt-6 max-w-lg text-sm leading-relaxed text-sand-500">
-                Perlu disebut jujur: temuan itu adalah korelasi, bukan sebab-akibat. Cadensa
+              <p className="mt-8 max-w-md border-l border-sand-500/20 pl-4 text-sm leading-relaxed text-sand-500">
+                Perlu disebut jujur: temuan itu korelasi, bukan sebab-akibat. Cadensa
                 memperlakukannya sebagai penanda ritme sehat, bukan sebagai janji.
               </p>
             </Reveal>
           </div>
 
-          <Reveal delay={0.1} y={28}>
-            <Parallax depth={26}>
-              <div className="relative mx-auto flex aspect-square w-full max-w-md items-center justify-center">
-                <div className="absolute inset-8 rounded-full bg-teal-700/10 blur-3xl" />
-                <PulseRing size={300} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                <motion.div
-                  animate={{ rotateZ: [0, 2, 0, -2, 0], rotateY: [0, 6, 0, -6, 0] }}
-                  transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <Mark size={340} />
-                </motion.div>
-              </div>
-            </Parallax>
-          </Reveal>
+          <div className="lg:col-span-5">
+            <Reveal delay={0.1} y={28}>
+              <Parallax depth={30}>
+                <div className="relative mx-auto flex aspect-square w-full max-w-sm items-center justify-center lg:-mr-16 lg:max-w-md">
+                  <div className="absolute inset-10 rounded-full bg-teal-700/12 blur-3xl" />
+                  <PulseRing size={290} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  <motion.div
+                    animate={{ rotateZ: [0, 1.6, 0, -1.6, 0], rotateY: [0, 5, 0, -5, 0] }}
+                    transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+                    <Mark size={330} />
+                  </motion.div>
+                </div>
+              </Parallax>
+            </Reveal>
+          </div>
         </div>
 
-        {/* Angka yang naik ke nilainya */}
-        <Stagger className="mt-16 grid gap-4 sm:grid-cols-3">
-          {[
-            { n: 21, s: "", t: "kali sebulan — wilayah, bukan garis" },
-            { n: DEVICES.length, s: "", t: "jenis alat dengan ikon dan catatan perawatan" },
-            { n: 0, s: "", t: "baris data terbaca yang tersimpan di server kami" },
-          ].map((x) => (
-            <StaggerItem key={x.t}>
-              <Tilt3D max={7} className="relative rounded-3xl">
-                <div className="card rounded-3xl p-6">
-                  <p className="font-mono text-4xl text-teal-500">
-                    <Counter to={x.n} suffix={x.s} />
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-sand-500">{x.t}</p>
-                </div>
-              </Tilt3D>
-            </StaggerItem>
-          ))}
-        </Stagger>
+        {/* Tiga angka dibaca sebagai satu baris, bukan tiga kartu sejajar. */}
+        <Reveal delay={0.1}>
+          <div className="mt-20 grid gap-px overflow-hidden rounded-panel border hairline sm:grid-cols-3">
+            {[
+              { n: 21, t: "kali sebulan, digambar sebagai wilayah bukan garis" },
+              { n: DEVICES.length, t: "jenis alat, tiap satu dengan catatan perawatannya" },
+              { n: 0, t: "baris terbaca yang tersimpan di server kami" },
+            ].map((x, i) => (
+              <div
+                key={x.t}
+                className={`surface px-7 py-8 ${i === 1 ? "sm:border-x sm:border-[rgba(207,198,184,0.085)]" : ""}`}
+              >
+                <p className="num text-[2.75rem] leading-none text-teal-400">
+                  <Counter to={x.n} />
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-sand-500">{x.t}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
-      {/* Kontras */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <Reveal>
-          <h2 className="max-w-2xl text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
-            Yang sudah ada berdiri di premis sebaliknya
-          </h2>
-        </Reveal>
-        <Stagger className="mt-10 grid gap-5 md:grid-cols-2">
-          <StaggerItem>
-            <Tilt3D max={6} className="relative h-full rounded-3xl">
-              <div className="card h-full rounded-3xl p-7">
-                <p className="text-xs uppercase tracking-[0.18em] text-sand-500">Aplikasi pantang</p>
-                <p className="mt-3 text-lg leading-relaxed text-sand-100">
-                  Menghitung hari menahan diri, memberi lencana, dan membangun rasa bersalah saat
-                  hitungannya patah.
-                </p>
-                <p className="mt-4 text-sm leading-relaxed text-sand-500">
-                  Hitungan yang patah membuat orang berhenti memakai aplikasinya. Di kategori ini
-                  kepergiannya permanen, karena bercampur rasa malu.
-                </p>
-              </div>
-            </Tilt3D>
-          </StaggerItem>
-          <StaggerItem>
-            <Tilt3D max={6} className="relative h-full rounded-3xl">
-              <div className="card h-full rounded-3xl p-7 ring-1 ring-teal-700/40">
-                <p className="text-xs uppercase tracking-[0.18em] text-teal-500">Cadensa</p>
-                <p className="mt-3 text-lg leading-relaxed text-sand-100">
-                  Tidak menghitung hari pantang dan tidak punya hitungan yang bisa patah. Yang
-                  ditampilkan pita ritme yang melebar dan menyempit.
-                </p>
-                <p className="mt-4 text-sm leading-relaxed text-sand-500">
-                  Dua puluh satu digambar sebagai wilayah, bukan garis. Tidak ada papan peringkat,
-                  tidak ada yang bisa gagal.
-                </p>
-              </div>
-            </Tilt3D>
-          </StaggerItem>
-        </Stagger>
+      <div className="mx-auto max-w-6xl px-5">
+        <hr className="rule" />
+      </div>
+
+      {/* 01 Posisi */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="01"
+          eyebrow="Posisi"
+          title={
+            <>
+              Yang sudah ada berdiri
+              <br className="hidden sm:block" /> di premis sebaliknya
+            </>
+          }
+        />
+
+        <div className="mt-14 grid gap-10 lg:grid-cols-12">
+          <Reveal className="lg:col-span-5">
+            <p className="eyebrow">Aplikasi pantang</p>
+            <p className="display-sm mt-4 text-2xl text-sand-300">
+              Menghitung hari menahan diri, memberi lencana, dan membangun rasa bersalah saat
+              hitungannya patah.
+            </p>
+            <p className="mt-5 text-sm leading-relaxed text-sand-500">
+              Hitungan yang patah membuat orang berhenti memakai aplikasinya. Di kategori ini
+              kepergiannya permanen, karena bercampur rasa malu.
+            </p>
+          </Reveal>
+
+          <div className="hidden lg:col-span-1 lg:flex lg:justify-center">
+            <span className="h-full w-px bg-gradient-to-b from-transparent via-sand-500/20 to-transparent" />
+          </div>
+
+          <Reveal delay={0.08} className="lg:col-span-6">
+            <p className="eyebrow text-teal-500">Cadensa</p>
+            <p className="display-sm mt-4 text-2xl text-sand-100">
+              Tidak menghitung hari pantang, dan tidak punya hitungan yang bisa patah. Yang
+              ditampilkan pita ritme yang melebar dan menyempit.
+            </p>
+            <p className="mt-5 text-sm leading-relaxed text-sand-500">
+              Dua puluh satu digambar sebagai wilayah, bukan garis. Tidak ada papan peringkat, dan
+              tidak ada yang bisa gagal.
+            </p>
+          </Reveal>
+        </div>
       </section>
 
-      {/* Cadence Index — interaktif */}
-      <section className="mx-auto max-w-4xl px-5 py-16">
-        <Reveal>
-          <h2 className="text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
-            Jumlah bukan ukuran yang tepat
-          </h2>
-          <p className="mt-4 max-w-2xl leading-relaxed text-sand-300">
-            Dua orang dengan dua puluh satu catatan bisa sangat berbeda: satu tersebar rata, satu
-            menumpuk di minggu terakhir. Geser sendiri dan lihat indeksnya runtuh sementara
-            jumlahnya tidak berubah.
-          </p>
-        </Reveal>
-        <Reveal delay={0.1} className="mt-8">
+      {/* 02 Peragaan */}
+      <section className="mx-auto max-w-4xl px-5 py-20">
+        <SectionHead
+          n="02"
+          eyebrow="Peragaan"
+          title="Jumlah bukan ukuran yang tepat"
+          lead="Dua orang dengan dua puluh satu catatan bisa sangat berbeda: satu tersebar rata, satu menumpuk di minggu terakhir. Geser sendiri, dan lihat indeksnya runtuh sementara jumlahnya tidak berubah."
+        />
+        <Reveal delay={0.1} className="mt-10">
           <CadenceBand />
         </Reveal>
       </section>
 
-      {/* Katalog alat */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <Reveal>
-          <h2 className="max-w-3xl text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
-            Alatnya disebut dengan nama yang tepat
-          </h2>
-          <p className="mt-4 max-w-2xl leading-relaxed text-sand-300">
-            {DEVICES.length} jenis, dikelompokkan, masing-masing dengan ikon dan catatan perawatan.
-            Ada dua alasan rinciannya sampai sejauh ini. Gesekan dan tekanan tiap jenis berbeda
-            jauh, dan itu satu-satunya cara menjelaskan kenapa keluhan fisik muncul pada sebagian
-            orang saja. Yang kedua lebih sederhana: penyebutan yang tepat menghilangkan rasa
-            canggung.
-          </p>
-        </Reveal>
-        <Reveal delay={0.08} className="mt-10">
+      {/* 03 Katalog */}
+      <section className="py-24">
+        <div className="mx-auto max-w-6xl px-5">
+          <SectionHead
+            n="03"
+            eyebrow="Katalog"
+            title="Alatnya disebut dengan nama yang tepat"
+            lead={
+              <>
+                {DEVICES.length} jenis, dikelompokkan, masing-masing dengan ikon dan catatan
+                perawatan. Rinciannya sejauh ini karena gesekan dan tekanan tiap jenis berbeda jauh,
+                dan itu satu-satunya cara menjelaskan kenapa keluhan fisik muncul pada sebagian
+                orang saja.
+              </>
+            }
+          />
+        </div>
+        <Reveal delay={0.08} className="mt-12">
           <DeviceMarquee />
         </Reveal>
-        <Reveal delay={0.12}>
-          <p className="mt-6 max-w-2xl text-sm leading-relaxed text-sand-500">
-            Ikonnya digambar sebagai garis vektor, bukan berkas gambar. Tajam di layar mana pun
-            tanpa menambah unduhan, ikut warna tema — dan yang paling menentukan, tidak ada berkas
-            gambar yang tersimpan di perangkat atau singgah di riwayat unduhan. Bentuknya cukup
-            untuk dikenali pemakainya, tidak cukup untuk dipahami orang yang melirik dari samping.
-          </p>
-        </Reveal>
+        <div className="mx-auto mt-8 max-w-6xl px-5">
+          <Reveal delay={0.12}>
+            <p className="max-w-xl text-sm leading-relaxed text-sand-500">
+              Ikonnya digambar sebagai garis vektor, bukan berkas gambar. Tajam di layar mana pun
+              tanpa menambah unduhan, ikut warna tema, dan yang paling menentukan, tidak ada berkas
+              gambar yang singgah di riwayat unduhan. Bentuknya cukup untuk dikenali pemakainya,
+              tidak cukup untuk dipahami orang yang melirik dari samping.
+            </p>
+          </Reveal>
+        </div>
       </section>
 
-      {/* Kosakata rupa */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <Reveal>
-          <h2 className="max-w-3xl text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
-            Setiap pilihan punya rupanya sendiri
-          </h2>
-          <p className="mt-4 max-w-2xl leading-relaxed text-sand-300">
-            Alur catat punya anggaran waktu dua belas detik, dan di layar sekecil ponsel bentuk
-            terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya
-            berupa teks. Arahkan kursor untuk melihatnya bergerak.
-          </p>
-        </Reveal>
+      {/* 04 Kosakata rupa */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="04"
+          eyebrow="Kosakata"
+          title="Setiap pilihan punya rupanya sendiri"
+          lead="Alur catat punya anggaran dua belas detik, dan di layar sekecil ponsel bentuk terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya berupa teks."
+        />
 
-        <div className="mt-10 space-y-8">
+        <div className="mt-12 space-y-9">
           {[
-            { t: "Rasanya sesudah", set: "feel" as const, items: AFTERFEELS.map((a) => ({ n: a.key, medis: a.medical })) },
-            { t: "Cara", set: "method" as const, items: METHODS.map((m) => ({ n: m, medis: false })) },
-            { t: "Yang memicu", set: "trigger" as const, items: TRIGGERS.map((t) => ({ n: t, medis: false })) },
+            {
+              t: "Rasanya sesudah",
+              set: "feel" as const,
+              items: AFTERFEELS.map((a) => ({ n: a.key, medis: a.medical })),
+            },
+            {
+              t: "Cara",
+              set: "method" as const,
+              items: METHODS.map((m) => ({ n: m, medis: false })),
+            },
+            {
+              t: "Yang memicu",
+              set: "trigger" as const,
+              items: TRIGGERS.map((t) => ({ n: t, medis: false })),
+            },
           ].map((row, ri) => (
             <Reveal key={row.t} delay={ri * 0.06}>
-              <p className="mb-3 text-xs uppercase tracking-[0.18em] text-sand-500">{row.t}</p>
+              <p className="eyebrow mb-4">{row.t}</p>
               <Stagger className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
                 {row.items.map((it) => (
                   <StaggerItem key={it.n}>
@@ -274,8 +297,8 @@ export default function Home() {
                       whileHover={{ y: -5, rotateX: 12, rotateY: -8 }}
                       transition={{ type: "spring", stiffness: 340, damping: 20 }}
                       style={{ transformStyle: "preserve-3d", perspective: 600 }}
-                      className={`flex h-full flex-col items-center gap-2 rounded-2xl border p-3 text-center ${
-                        it.medis ? "border-signal-500/30" : "hairline"
+                      className={`surface-sunken flex h-full flex-col items-center gap-2.5 rounded-field p-3.5 text-center ${
+                        it.medis ? "border-signal-500/25" : ""
                       }`}
                     >
                       <span className={it.medis ? "text-signal-500" : "text-teal-500"}>
@@ -291,169 +314,218 @@ export default function Home() {
         </div>
 
         <Reveal delay={0.1}>
-          <p className="mt-8 max-w-2xl text-sm leading-relaxed text-sand-500">
+          <p className="mt-9 max-w-xl text-sm leading-relaxed text-sand-500">
             Empat rupa terakhir di baris pertama bertanda merah karena berhubungan dengan tubuh,
             bukan suasana hati. Warna itu dicadangkan untuk satu makna saja di seluruh aplikasi, dan
-            memilih salah satunya membawa catatanmu ke jalur yang berbeda — jalur yang tidak pernah
-            dijawab dengan saran mengubah teknik.
+            memilih salah satunya membawa catatanmu ke jalur yang tidak pernah dijawab dengan saran
+            mengubah teknik.
           </p>
         </Reveal>
       </section>
 
-      {/* Sinyal psikologis */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <Reveal>
-          <h2 className="max-w-3xl text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
-            Catatan yang dibuat tanpa penonton adalah data suasana batin yang paling jujur
-          </h2>
-          <p className="mt-4 max-w-2xl leading-relaxed text-sand-300">
-            Empat pola bisa terbaca tanpa Cadensa perlu bertanya apa pun. Semuanya disajikan
-            sebagai yang tubuhmu tunjukkan minggu ini, bukan sebagai label klinis.
-          </p>
-        </Reveal>
-        <Stagger className="mt-10 grid gap-5 sm:grid-cols-2">
-          {SIGNALS.map((s) => (
-            <StaggerItem key={s.name}>
-              <Tilt3D max={6} className="relative h-full rounded-3xl">
-                <div className="card h-full rounded-3xl p-7">
-                  <h3 className="text-lg font-medium text-sand-100">{s.name}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-teal-500">{s.read}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-sand-500">{s.why}</p>
+      <div className="mx-auto max-w-6xl px-5">
+        <hr className="rule" />
+      </div>
+
+      {/* 05 Sinyal. Daftar bernomor, bukan grid kartu. */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="05"
+          eyebrow="Sinyal"
+          title={
+            <>
+              Catatan yang dibuat tanpa penonton
+              <br className="hidden sm:block" /> adalah data batin yang paling jujur
+            </>
+          }
+          lead="Empat pola terbaca tanpa Cadensa perlu bertanya apa pun. Semuanya disajikan sebagai yang tubuhmu tunjukkan minggu ini, bukan sebagai label klinis."
+        />
+
+        <div className="mt-14 divide-y divide-[rgba(207,198,184,0.08)] border-y border-[rgba(207,198,184,0.08)]">
+          {SIGNALS.map((s, i) => (
+            <Reveal key={s.name} delay={i * 0.05}>
+              <div className="grid gap-4 py-8 lg:grid-cols-12 lg:gap-10">
+                <div className="lg:col-span-3">
+                  <span className="num text-xs text-teal-600">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="display-sm mt-2 text-xl text-sand-100">{s.name}</h3>
                 </div>
-              </Tilt3D>
-            </StaggerItem>
+                <p className="text-[0.9375rem] leading-relaxed text-teal-500/90 lg:col-span-4">
+                  {s.read}
+                </p>
+                <p className="text-[0.9375rem] leading-relaxed text-sand-500 lg:col-span-5">{s.why}</p>
+              </div>
+            </Reveal>
           ))}
-        </Stagger>
+        </div>
       </section>
 
-      {/* Mode wanita */}
-      <section className="mx-auto max-w-5xl px-5 py-20">
+      {/* 06 Mode perempuan */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
         <Reveal>
-          <div className="card rounded-3xl p-8 sm:p-12">
-            <p className="text-xs uppercase tracking-[0.18em] text-amber-400">Mode perempuan</p>
-            <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.02em]">
-              Bukan aplikasi yang sama dengan kata ganti yang diganti
-            </h2>
-            <p className="mt-5 max-w-2xl leading-relaxed text-sand-300">
-              Angka dua puluh satu tidak dipindahkan ke sini. Temuan yang mendasarinya berasal dari
-              penelitian tentang prostat — organ yang tidak ada di tubuh perempuan — jadi memakai
-              ulang angkanya akan jadi klaim kesehatan tanpa dasar. Yang dipakai sebagai gantinya
-              adalah pertanyaan yang memang punya jawaban: apakah dorongan naik dan turun mengikuti
-              siklus, dan apakah polanya berulang dari bulan ke bulan.
-            </p>
-            <Stagger className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                ["Keterikatan siklus", "Menggantikan pita bulanan. Mengukur seberapa terpusat doronganmu di satu fase, 0 sampai 100."],
-                ["Sebaran per fase", "Haid, folikular, ovulasi, luteal — dihitung per hari fase, karena panjang tiap fase berbeda."],
-                ["Katalog sendiri", "Daftar alat menyesuaikan mode, lengkap dengan yang khusus dan tanpa yang tidak relevan."],
-              ].map(([t, d]) => (
-                <StaggerItem key={t}>
-                  <Tilt3D max={8} className="relative h-full rounded-2xl">
-                    <div className="h-full rounded-2xl border hairline p-5">
-                      <p className="text-sm font-medium text-sand-100">{t}</p>
-                      <p className="mt-2 text-xs leading-relaxed text-sand-500">{d}</p>
+          <div className="surface-raised overflow-hidden rounded-panel">
+            <div className="grid lg:grid-cols-12">
+              <div className="p-8 sm:p-12 lg:col-span-7">
+                <p className="eyebrow flex items-center gap-3">
+                  <span className="text-teal-600">06</span>
+                  <span className="h-px w-8 bg-sand-500/30" />
+                  Mode perempuan
+                </p>
+                <h2 className="display mt-5 text-[2.1rem] sm:text-[2.6rem]">
+                  Bukan aplikasi yang sama dengan kata ganti yang diganti
+                </h2>
+                <p className="mt-6 leading-relaxed text-sand-300">
+                  Angka dua puluh satu tidak dipindahkan ke sini. Dasarnya penelitian tentang
+                  prostat, organ yang tidak ada di tubuh perempuan, jadi memakai ulang angkanya akan
+                  jadi klaim kesehatan tanpa dasar. Produk yang mengarang satu angka kehilangan hak
+                  dipercaya soal angka lainnya.
+                </p>
+                <p className="mt-4 leading-relaxed text-sand-500">
+                  Yang dipakai sebagai gantinya adalah pertanyaan yang memang punya jawaban: apakah
+                  dorongan naik dan turun mengikuti siklus, dan apakah polanya berulang.
+                </p>
+                <Magnetic className="mt-8 inline-block">
+                  <Link href="/pengaturan" className={CTA_GHOST}>
+                    Ganti mode
+                  </Link>
+                </Magnetic>
+              </div>
+
+              <div className="surface-sunken lg:col-span-5">
+                <dl className="divide-y divide-[rgba(207,198,184,0.07)]">
+                  {[
+                    [
+                      "Keterikatan siklus",
+                      "Menggantikan pita bulanan. Seberapa terpusat doronganmu di satu fase, 0 sampai 100.",
+                    ],
+                    [
+                      "Sebaran per fase",
+                      "Haid, folikular, ovulasi, luteal. Dihitung per hari fase, karena panjang tiap fase berbeda.",
+                    ],
+                    [
+                      "Katalog sendiri",
+                      "Daftar alat menyesuaikan mode: yang khusus muncul, yang tidak relevan hilang.",
+                    ],
+                  ].map(([t, d]) => (
+                    <div key={t} className="px-8 py-7">
+                      <dt className="text-sm font-medium text-sand-100">{t}</dt>
+                      <dd className="mt-2 text-sm leading-relaxed text-sand-500">{d}</dd>
                     </div>
-                  </Tilt3D>
-                </StaggerItem>
-              ))}
-            </Stagger>
-            <Magnetic className="mt-8 inline-block">
-              <Link href="/pengaturan" className={`${CTA_GHOST} inline-block`}>
-                Ganti mode
-              </Link>
-            </Magnetic>
+                  ))}
+                </dl>
+              </div>
+            </div>
           </div>
         </Reveal>
       </section>
 
-      {/* Alur */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <Stagger className="grid gap-5 md:grid-cols-3">
-          {STEPS.map((s) => (
-            <StaggerItem key={s.n}>
-              <Tilt3D max={7} className="relative h-full rounded-3xl">
-                <div className="h-full rounded-3xl border hairline p-7">
-                  <span className="font-mono text-sm text-teal-500">{s.n}</span>
-                  <h3 className="mt-4 text-xl font-medium">{s.t}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-sand-500">{s.d}</p>
+      {/* 07 Alur. Tiga langkah sebagai baris, bukan tiga kartu. */}
+      <section className="mx-auto max-w-4xl px-5 py-20">
+        <SectionHead n="07" eyebrow="Alur" title="Tiga langkah, dan tidak ada yang keempat" />
+        <div className="mt-12 space-y-1">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 0.06}>
+              <div className="flex items-baseline gap-6 border-b border-[rgba(207,198,184,0.07)] py-7">
+                <span className="num shrink-0 text-sm text-teal-600">{s.n}</span>
+                <div>
+                  <h3 className="display-sm text-2xl text-sand-100">{s.t}</h3>
+                  <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-sand-500">{s.d}</p>
                 </div>
-              </Tilt3D>
-            </StaggerItem>
+              </div>
+            </Reveal>
           ))}
-        </Stagger>
+        </div>
       </section>
 
-      {/* Penyimpanan & privasi */}
-      <section className="mx-auto max-w-4xl px-5 py-20">
-        <Reveal className="card rounded-3xl p-8 sm:p-12">
-          <h2 className="text-balance text-3xl font-semibold tracking-[-0.02em]">
-            Catatanmu tidak akan hilang, dan tetap tidak bisa dibaca siapa pun
-          </h2>
-          <p className="mt-5 leading-relaxed text-sand-300">
-            Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, terutama saat ruang
-            penyimpanan menipis — dan catatan yang hilang begitu saja adalah cacat, bukan fitur.
-            Karena itu ada akun. Tapi sebelum apa pun terkirim, catatanmu dikunci dulu di perangkat
-            ini dengan AES-GCM, memakai kunci yang diturunkan dari kata sandimu di perambanmu
-            sendiri. Yang sampai ke server adalah teks acak.
-          </p>
-          <Stagger className="mt-8 grid gap-4 sm:grid-cols-3">
+      {/* 08 Penyimpanan */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="08"
+          eyebrow="Penyimpanan"
+          title={
+            <>
+              Catatanmu tidak akan hilang,
+              <br className="hidden sm:block" /> dan tetap tidak terbaca siapa pun
+            </>
+          }
+          lead="Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, dan catatan yang hilang begitu saja adalah cacat, bukan fitur. Karena itu ada akun. Tapi sebelum apa pun terkirim, catatanmu dikunci dulu di perangkat ini dengan AES-GCM, memakai kunci yang diturunkan dari kata sandimu di perambanmu sendiri."
+        />
+
+        <div className="mt-14 grid gap-12 lg:grid-cols-12">
+          <Stagger className="space-y-2.5 lg:col-span-7">
             {[
               ["Terkunci sebelum dikirim", "Enkripsi terjadi di perangkatmu, bukan di server."],
-              ["Kata sandi tidak dikirim", "Yang dikirim turunan PBKDF2-nya. Kata sandi aslinya tidak pernah keluar."],
+              [
+                "Kata sandi tidak dikirim",
+                "Yang dikirim turunan PBKDF2-nya. Kata sandi aslinya tidak pernah keluar dari peramban.",
+              ],
               ["Bocor pun tidak terbaca", "Kalau seluruh basis datanya dicuri, isinya tetap teks acak."],
-            ].map(([t, d]) => (
+            ].map(([t, d], i) => (
               <StaggerItem key={t}>
-                <Tilt3D max={8} className="relative h-full rounded-2xl">
-                  <div className="h-full rounded-2xl border hairline p-5">
-                    <p className="text-sm font-medium text-sand-100">{t}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-sand-500">{d}</p>
+                <Tilt3D max={4} className="relative">
+                  <div className="surface flex items-start gap-5 rounded-card px-7 py-6">
+                    <span className="num mt-0.5 text-xs text-teal-600">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <p className="font-medium text-sand-100">{t}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-sand-500">{d}</p>
+                    </div>
                   </div>
                 </Tilt3D>
               </StaggerItem>
             ))}
           </Stagger>
-          <p className="mt-6 text-sm leading-relaxed text-sand-500">
-            Harganya disebut terang-terangan: karena kunci tidak pernah kami pegang, tidak ada
-            tombol lupa kata sandi yang bisa mengembalikan catatanmu. Yang ada kunci pemulihan
-            sekali tampil, dan cadangan yang bisa kamu unduh sendiri kapan saja.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Magnetic>
-              <Link href="/masuk" className={`${CTA} inline-block`}>
-                Buat akun
-              </Link>
-            </Magnetic>
-            <Magnetic>
-              <Link href="/privacy" className={`${CTA_GHOST} inline-block`}>
-                Baca cara kerjanya
-              </Link>
-            </Magnetic>
-          </div>
-        </Reveal>
+
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <div className="border-l-2 border-amber-400/40 pl-6">
+              <p className="display-sm text-lg text-amber-400">Harga dari janji ini</p>
+              <p className="mt-4 text-sm leading-relaxed text-sand-300">
+                Karena kunci tidak pernah kami pegang, tidak ada tombol lupa kata sandi yang bisa
+                mengembalikan catatanmu. Yang ada kunci pemulihan sekali tampil, dan cadangan yang
+                bisa kamu unduh sendiri kapan saja.
+              </p>
+              <p className="mt-4 text-sm leading-relaxed text-sand-500">
+                Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di
+                balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.
+              </p>
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <Magnetic>
+                  <Link href="/masuk" className={CTA}>
+                    Buat akun
+                  </Link>
+                </Magnetic>
+                <Link
+                  href="/privacy"
+                  className="text-sm text-sand-300 underline decoration-sand-500/40 underline-offset-[6px] hover:text-sand-100"
+                >
+                  Cara kerjanya
+                </Link>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* Penutup */}
-      <section className="mx-auto max-w-4xl px-5 pb-28 pt-10 text-center">
+      <section className="mx-auto max-w-3xl px-5 pb-32 pt-16">
         <Reveal>
-          <h2 className="text-balance text-4xl font-semibold tracking-[-0.025em]">
-            Mulai dari satu catatan
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl leading-relaxed text-sand-300">
-            Tidak perlu akun untuk mencoba. Cadensa berguna sebelum kamu mendaftar apa pun — akun
+          <h2 className="display text-[2.6rem] sm:text-[3.4rem]">Mulai dari satu catatan</h2>
+          <p className="mt-6 max-w-lg leading-relaxed text-sand-300">
+            Tidak perlu akun untuk mencoba. Cadensa berguna sebelum kamu mendaftar apa pun. Akun
             hanya menjaga supaya yang sudah kamu catat tidak hilang.
           </p>
           <Magnetic className="mt-9 inline-block">
-            <Link href="/log" className={`${CTA} inline-block px-7 py-3.5`}>
+            <Link href="/log" className={`${CTA} px-8 py-4`}>
               Buka pencatat
             </Link>
           </Magnetic>
         </Reveal>
       </section>
 
-      <footer className="border-t hairline py-10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 text-xs text-sand-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>Cadensa — ritme, bukan skor.</p>
-          <p className="max-w-md">
+      <footer className="border-t hairline py-12">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 text-xs leading-relaxed text-sand-500 sm:flex-row sm:items-start sm:justify-between">
+          <p className="display-sm text-base text-sand-300">Cadensa, ritme bukan skor.</p>
+          <p className="max-w-sm">
             Bukan alat diagnosis. Kalau ada nyeri berulang, darah, atau keluhan yang menetap,
             periksakan ke dokter.
           </p>
