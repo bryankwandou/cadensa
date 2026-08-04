@@ -1,32 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  /* Ink — malam dalam */
+  /* Ink — malam dalam. Elevasi datang dari tangga ini, bukan dari bayangan. */
+  --color-ink-975: #040b0b;
   --color-ink-950: #06100f;
   --color-ink-900: #0a1817;
+  --color-ink-850: #0c1d1c;
   --color-ink-800: #0f2321;
   --color-ink-700: #17332f;
   --color-ink-600: #21453f;
 
-  /* Teal — ritme */
+  /* Teal — satu-satunya aksen */
+  --color-teal-400: #5ce4d3;
   --color-teal-500: #2ed3c0;
   --color-teal-600: #16b3a3;
   --color-teal-700: #0e7c86;
 
-  /* Amber — perhatian, bukan bahaya */
+  /* Amber — perhatian yang butuh tindakan. Bukan aksen kedua. */
   --color-amber-400: #f2b860;
   --color-amber-500: #e09b3d;
 
-  /* Pasir — teks */
+  /* Pasir — tiga tingkat teks, tidak lebih */
   --color-sand-100: #f4efe6;
-  --color-sand-300: #d6cdbe;
-  --color-sand-500: #9aa8a2;
+  --color-sand-300: #cfc6b8;
+  --color-sand-500: #8f9d98;
 
   /* Merah dicadangkan untuk satu makna saja: anjuran medis */
   --color-signal-500: #e2685f;
 
   --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-var), Georgia, serif;
   --font-mono: var(--font-mono-var), ui-monospace, monospace;
+
+  /* Radius menurut peran, bukan seragam */
+  --radius-panel: 1.75rem;
+  --radius-card: 1.25rem;
+  --radius-field: 0.875rem;
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
@@ -35,13 +46,14 @@
 
 html,
 body {
-  background: var(--color-ink-950);
+  background: var(--color-ink-975);
   color: var(--color-sand-100);
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
@@ -49,22 +61,98 @@ body {
   color: var(--color-sand-100);
 }
 
-/* Latar bernapas — gerakan yang tidak menarik perhatian ke dirinya sendiri */
-.aurora {
-  background:
-    radial-gradient(60rem 40rem at 15% -10%, rgba(46, 211, 192, 0.13), transparent 60%),
-    radial-gradient(48rem 34rem at 95% 8%, rgba(242, 184, 96, 0.09), transparent 62%),
-    radial-gradient(56rem 40rem at 50% 110%, rgba(14, 124, 134, 0.16), transparent 60%);
+/* Display serif. Sumbu optik Fraunces dinaikkan supaya judul besar terasa
+   digambar, bukan sekadar diperbesar. */
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 20, "WONK" 1, "opsz" 40;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  font-weight: 400;
 }
 
+.display-sm {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 14, "WONK" 0, "opsz" 20;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  font-weight: 400;
+}
+
+/* Angka tidak boleh bergeser saat berubah — pergeseran membuat orang ragu
+   pada angkanya. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Penomoran editorial untuk penanda bagian */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-sand-500);
+}
+
+/* Latar bernapas. Satu-satunya gerakan yang berjalan terus di halaman. */
+.aurora {
+  position: relative;
+  background:
+    radial-gradient(58rem 38rem at 12% -8%, rgba(46, 211, 192, 0.11), transparent 62%),
+    radial-gradient(44rem 30rem at 92% 6%, rgba(242, 184, 96, 0.055), transparent 64%),
+    radial-gradient(60rem 42rem at 48% 108%, rgba(14, 124, 134, 0.13), transparent 62%);
+}
+
+/* Butir halus. Menghapus kesan "gradasi CSS bersih" yang membuat halaman gelap
+   terlihat seperti cetakan pertama dari generator mana pun. */
+.aurora::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+}
+
+.aurora > * {
+  position: relative;
+}
+
+/* Tiga tingkat permukaan. Perbedaannya latar, bukan bayangan. */
+.surface {
+  background: linear-gradient(176deg, rgba(23, 51, 47, 0.42), rgba(10, 24, 23, 0.5));
+  border: 1px solid rgba(207, 198, 184, 0.085);
+}
+
+.surface-raised {
+  background: linear-gradient(176deg, rgba(33, 69, 63, 0.5), rgba(12, 29, 28, 0.6));
+  border: 1px solid rgba(207, 198, 184, 0.13);
+}
+
+.surface-sunken {
+  background: rgba(4, 11, 11, 0.55);
+  border: 1px solid rgba(207, 198, 184, 0.06);
+}
+
+/* Nama lama dipertahankan supaya halaman yang belum disentuh tidak rusak. */
 .card {
-  background: linear-gradient(180deg, rgba(23, 51, 47, 0.55), rgba(10, 24, 23, 0.55));
-  border: 1px solid rgba(214, 205, 190, 0.1);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(176deg, rgba(23, 51, 47, 0.42), rgba(10, 24, 23, 0.5));
+  border: 1px solid rgba(207, 198, 184, 0.085);
 }
 
 .hairline {
-  border-color: rgba(214, 205, 190, 0.1);
+  border-color: rgba(207, 198, 184, 0.1);
+}
+
+/* Garis pemisah yang meredup di kedua ujungnya — pemisah lurus penuh terasa
+   seperti tabel, bukan seperti halaman. */
+.rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(207, 198, 184, 0.16), transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

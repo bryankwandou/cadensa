@@ -87,18 +87,18 @@ export default function LogPage() {
       <Nav />
       <main className="mx-auto max-w-2xl px-5 pb-24 pt-12">
         <Reveal>
-          <h1 className="text-4xl font-semibold tracking-[-0.025em]">Catat</h1>
-          <p className="mt-3 text-sm leading-relaxed text-sand-300">
+          <h1 className="display text-[2.75rem]">Catat</h1>
+          <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-sand-300">
             Dua pilihan sudah cukup. Sisanya hanya kalau kamu memang ingin tahu lebih banyak nanti.
           </p>
         </Reveal>
 
         {/* Timer — opsional, tidak pernah menghalangi tombol simpan */}
         <Reveal delay={0.05}>
-          <div className="card mt-8 flex items-center justify-between rounded-3xl p-5">
+          <div className="surface mt-9 flex items-center justify-between rounded-panel px-6 py-5">
             <div>
-              <p className="text-xs text-sand-500">Durasi</p>
-              <p className="font-mono text-2xl tabular-nums text-sand-100">
+              <p className="eyebrow">Durasi</p>
+              <p className="num mt-1.5 text-[1.75rem] text-sand-100">
                 {String(Math.floor(seconds / 60)).padStart(2, "0")}:
                 {String(seconds % 60).padStart(2, "0")}
               </p>
@@ -128,7 +128,7 @@ export default function LogPage() {
         {/* Cara */}
         <Reveal delay={0.08}>
           <div className="mt-8">
-            <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Cara</p>
+            <p className="eyebrow mb-3.5">Cara</p>
             <div className="grid grid-cols-4 gap-2">
               {METHODS.map((m) => (
                 <OptionTile
@@ -158,7 +158,7 @@ export default function LogPage() {
               className="overflow-hidden"
             >
               <div className="mt-8">
-                <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Alat</p>
+                <p className="eyebrow mb-3.5">Alat</p>
                 <div className="space-y-5">
                   {DEVICE_GROUPS.map((g) => {
                     const items = devices.filter((d) => d.group === g.key);
@@ -202,9 +202,9 @@ export default function LogPage() {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="mt-4 rounded-2xl border hairline p-4"
+                      className="surface-sunken mt-4 rounded-card p-5"
                     >
-                      <p className="text-xs text-sand-500">Perawatan</p>
+                      <p className="eyebrow">Perawatan</p>
                       <p className="mt-1 text-sm leading-relaxed text-sand-300">{chosen.care}</p>
                     </motion.div>
                   )}
@@ -217,7 +217,7 @@ export default function LogPage() {
         {/* Rasa sesudah */}
         <Reveal delay={0.1}>
           <div className="mt-8">
-            <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Rasanya sesudah</p>
+            <p className="eyebrow mb-3.5">Rasanya sesudah</p>
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
               {AFTERFEELS.map((a) => (
                 <OptionTile
@@ -260,7 +260,7 @@ export default function LogPage() {
             >
               <div className="mt-6 space-y-7">
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Pelumas</p>
+                  <p className="eyebrow mb-3.5">Pelumas</p>
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {LUBES.map((l) => (
                       <OptionTile
@@ -283,7 +283,7 @@ export default function LogPage() {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Edging</p>
+                  <p className="eyebrow mb-3.5">Edging</p>
                   <div className="grid grid-cols-3 gap-2">
                     {EDGING.map((e) => (
                       <OptionTile
@@ -304,13 +304,13 @@ export default function LogPage() {
                       placeholder="Berapa siklus?"
                       value={draft.edgeCycles ?? ""}
                       onChange={(e) => set("edgeCycles", e.target.value ? Number(e.target.value) : null)}
-                      className="mt-3 w-40 rounded-2xl border hairline bg-ink-900/60 px-4 py-2.5 text-sm text-sand-100 outline-none focus:border-teal-600"
+                      className="mt-3 w-40 rounded-field border hairline bg-ink-975/60 px-4 py-2.5 text-sm text-sand-100 outline-none focus:border-teal-600"
                     />
                   )}
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Yang memicu</p>
+                  <p className="eyebrow mb-3.5">Yang memicu</p>
                   <div className="grid grid-cols-4 gap-2">
                     {TRIGGERS.map((t) => (
                       <OptionTile
@@ -327,13 +327,13 @@ export default function LogPage() {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-widest text-sand-500">Catatan</p>
+                  <p className="eyebrow mb-3.5">Catatan</p>
                   <textarea
                     value={draft.note}
                     onChange={(e) => set("note", e.target.value)}
                     rows={3}
                     placeholder="Apa pun yang ingin kamu ingat nanti."
-                    className="w-full rounded-2xl border hairline bg-ink-900/60 px-4 py-3 text-sm text-sand-100 outline-none placeholder:text-sand-500 focus:border-teal-600"
+                    className="w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none placeholder:text-sand-500 focus:border-teal-600"
                   />
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function LogPage() {
         <Magnetic className="mt-10 inline-block">
           <Pressable
             onClick={save}
-            className="rounded-full bg-teal-600 px-8 py-4 text-sm font-medium text-ink-950"
+            className="rounded-full bg-teal-500 px-9 py-4 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400"
           >
             Simpan
           </Pressable>
@@ -356,7 +356,7 @@ export default function LogPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="card mt-6 flex items-center justify-between rounded-2xl p-4"
+              className="surface-raised mt-6 flex items-center justify-between rounded-card px-5 py-4"
             >
               <span className="text-sm text-sand-200">Tersimpan.</span>
               <Link href="/rhythm" className="text-sm text-teal-500 underline underline-offset-4">

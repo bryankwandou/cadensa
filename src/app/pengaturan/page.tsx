@@ -10,13 +10,13 @@ import { daysUntilNextPeriod } from "@/lib/cycle";
 import type { Mode } from "@/lib/types";
 
 const input =
-  "w-full rounded-2xl border hairline bg-ink-900/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors focus:border-teal-600";
+  "w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors focus:border-teal-600";
 
 function Section({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
     <Reveal>
-      <section className="card rounded-3xl p-6">
-        <h2 className="text-lg font-medium text-sand-100">{title}</h2>
+      <section className="surface rounded-panel p-7">
+        <h2 className="display-sm text-xl text-sand-100">{title}</h2>
         {note && <p className="mt-2 text-sm leading-relaxed text-sand-300">{note}</p>}
         <div className="mt-5">{children}</div>
       </section>
@@ -50,8 +50,9 @@ export default function PengaturanPage() {
       <Nav />
       <main className="mx-auto max-w-3xl space-y-5 px-5 pb-24 pt-12">
         <Reveal>
-          <h1 className="text-4xl font-semibold tracking-[-0.025em]">Pengaturan</h1>
-          <p className="mt-4 max-w-xl leading-relaxed text-sand-300">
+          <p className="eyebrow">Mode, cadangan, akun</p>
+          <h1 className="display mt-2.5 text-[3rem]">Pengaturan</h1>
+          <p className="mt-6 max-w-xl leading-relaxed text-sand-300">
             {user
               ? `Masuk sebagai ${user.username}. Catatanmu tersimpan di perangkat ini sekaligus tersalin terenkripsi ke server.`
               : "Belum masuk. Catatanmu hanya ada di perangkat ini — kalau penyimpanan peramban dibersihkan, catatannya ikut hilang."}
@@ -60,8 +61,8 @@ export default function PengaturanPage() {
 
         {!user && (
           <Reveal delay={0.04}>
-            <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6">
-              <h2 className="text-lg font-medium text-amber-400">Catatanmu belum punya cadangan</h2>
+            <div className="rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-7">
+              <h2 className="display-sm text-xl text-amber-400">Catatanmu belum punya cadangan</h2>
               <p className="mt-2 text-sm leading-relaxed text-sand-300">
                 Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, terutama saat ruang
                 penyimpanan menipis. Buat akun, atau unduh cadangan secara berkala.

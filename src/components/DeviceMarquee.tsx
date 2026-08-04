@@ -41,8 +41,8 @@ export function DeviceMarquee() {
               animate={on ? { rotateY: 18, rotateX: -8, z: 40 } : { rotateY: 0, rotateX: 0, z: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
               style={{ transformStyle: "preserve-3d" }}
-              className={`flex w-40 shrink-0 flex-col gap-2 rounded-2xl border p-4 ${
-                on ? "border-teal-600 bg-teal-600/10" : "hairline bg-ink-900/30"
+              className={`flex w-40 shrink-0 flex-col gap-2.5 rounded-card border p-4 ${
+                on ? "border-teal-600 bg-teal-600/10" : "surface-sunken"
               }`}
             >
               <span className={on ? "text-teal-500" : "text-sand-500"}>

@@ -47,7 +47,7 @@ export function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b hairline bg-ink-950/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b hairline bg-ink-975/75 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-5">
         <Link href="/" aria-label="Cadensa, beranda" className="shrink-0">
           <Wordmark size={28} />
@@ -93,7 +93,7 @@ export function Nav() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -6, scale: 0.97 }}
                     transition={{ duration: 0.16 }}
-                    className="card absolute right-0 mt-2 w-52 rounded-2xl p-2"
+                    className="surface-raised absolute right-0 mt-2 w-52 rounded-card p-2 backdrop-blur-xl"
                   >
                     <div className="px-3 py-2 text-xs text-sand-500">Masuk sebagai {user.username}</div>
                     <Link
@@ -119,7 +119,7 @@ export function Nav() {
           ) : (
             <Link
               href="/masuk"
-              className="rounded-full bg-teal-600 px-4 py-1.5 text-sm font-medium text-ink-950 transition-colors hover:bg-teal-500"
+              className="rounded-full bg-teal-500 px-4 py-1.5 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400"
             >
               Masuk
             </Link>
