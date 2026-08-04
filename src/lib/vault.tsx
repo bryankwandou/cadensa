@@ -12,10 +12,12 @@ import {
 } from "react";
 import {
   DEFAULT_CYCLE,
+  type AccentKey,
   type CycleProfile,
   type Draft,
   type Entry,
   type Mode,
+  type MotionLevel,
 } from "./types";
 import { buildSample } from "./sample";
 import {
@@ -34,7 +36,14 @@ import {
 const KEY = "cadensa.vault.v2";
 const LEGACY_KEY = "cadensa.entries.v1";
 
-export type Profile = { mode: Mode; cycle: CycleProfile };
+export type Profile = {
+  mode: Mode;
+  cycle: CycleProfile;
+  /** Nama panggilan yang dipakai aplikasi. Kosong berarti tidak menyapa sama sekali. */
+  name: string;
+  accent: AccentKey;
+  motion: MotionLevel;
+};
 export type VaultData = { entries: Entry[]; profile: Profile; rev: number };
 export type User = { id: string; username: string; email: string; mode: Mode };
 
@@ -46,7 +55,11 @@ export type SyncState =
   | { kind: "terkunci" }
   | { kind: "gagal"; message: string };
 
-const EMPTY: VaultData = { entries: [], profile: { mode: "pria", cycle: DEFAULT_CYCLE }, rev: 0 };
+const EMPTY: VaultData = {
+  entries: [],
+  profile: { mode: "pria", cycle: DEFAULT_CYCLE, name: "", accent: "teal", motion: "penuh" },
+  rev: 0,
+};
 
 function readLocal(): VaultData {
   if (typeof window === "undefined") return EMPTY;

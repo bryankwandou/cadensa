@@ -7,7 +7,7 @@ import { Nav } from "@/components/Nav";
 import { Pressable, Reveal } from "@/components/Motion";
 import { useVault } from "@/lib/vault";
 import { daysUntilNextPeriod } from "@/lib/cycle";
-import type { Mode } from "@/lib/types";
+import { ACCENTS, MOTION_LEVELS, type Mode } from "@/lib/types";
 
 const input =
   "w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors focus:border-teal-600";
@@ -76,6 +76,87 @@ export default function PengaturanPage() {
             </div>
           </Reveal>
         )}
+
+        <Section
+          title="Milikmu sendiri"
+          note="Warna, nama panggilan, dan seberapa banyak yang bergerak. Semuanya ikut terenkripsi bersama catatan, jadi bahkan warna kesukaanmu pun tidak terbaca server."
+        >
+          <div className="space-y-7">
+            <div>
+              <p className="eyebrow mb-3">Warna</p>
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
+                {ACCENTS.map((a) => {
+                  const on = profile.accent === a.key;
+                  return (
+                    <motion.button
+                      key={a.key}
+                      type="button"
+                      onClick={() => setProfile({ accent: a.key })}
+                      whileHover={{ y: -3 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 24 }}
+                      className={`flex flex-col items-center gap-2.5 rounded-field border px-2 py-3.5 ${
+                        on ? "border-teal-600 bg-teal-600/10" : "hairline hover:border-sand-500/30"
+                      }`}
+                      aria-pressed={on}
+                    >
+                      <span
+                        className="size-7 rounded-full"
+                        style={{ background: `linear-gradient(140deg, ${a.c400}, ${a.c700})` }}
+                      />
+                      <span className={`text-[11px] ${on ? "text-sand-100" : "text-sand-500"}`}>
+                        {a.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="eyebrow mb-3">Nama panggilan</p>
+              <input
+                className={`${input} max-w-xs`}
+                placeholder="Kosongkan kalau tidak mau disapa"
+                maxLength={24}
+                value={profile.name}
+                onChange={(e) => setProfile({ name: e.target.value })}
+              />
+              <p className="mt-2.5 text-xs text-sand-500">
+                Dipakai hanya di halaman catat. Tidak pernah muncul di judul tab maupun notifikasi,
+                supaya layarmu tetap aman dilihat orang lain.
+              </p>
+            </div>
+
+            <div>
+              <p className="eyebrow mb-3">Gerakan</p>
+              <div className="flex max-w-sm gap-2">
+                {MOTION_LEVELS.map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setProfile({ motion: m })}
+                    className={`relative flex-1 rounded-field border px-4 py-3 text-sm capitalize transition-colors ${
+                      profile.motion === m ? "border-teal-600 text-sand-100" : "hairline text-sand-300"
+                    }`}
+                  >
+                    {profile.motion === m && (
+                      <motion.span
+                        layoutId="motion-pill"
+                        className="absolute inset-0 rounded-field bg-teal-600/10"
+                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative">{m}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2.5 text-xs text-sand-500">
+                Mode tenang menghentikan semua gerakan yang berjalan terus. Umpan balik saat kamu
+                menyentuh sesuatu tetap ada, karena tanpa itu antarmuka terasa rusak, bukan tenang.
+              </p>
+            </div>
+          </div>
+        </Section>
 
         <Section
           title="Mode pencatatan"
