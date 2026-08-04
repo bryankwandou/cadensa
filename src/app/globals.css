@@ -163,3 +163,17 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Mode tenang, dipilih sendiri di pengaturan. Gerakan yang berjalan terus
+   dihentikan; transisi saat menyentuh sesuatu tetap ada, karena tanpa itu
+   antarmuka terasa rusak, bukan tenang. */
+:root[data-motion="tenang"] *,
+:root[data-motion="tenang"] *::before,
+:root[data-motion="tenang"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+:root[data-motion="tenang"] .aurora::before {
+  opacity: 0.28;
+}

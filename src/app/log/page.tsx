@@ -87,7 +87,8 @@ export default function LogPage() {
       <Nav />
       <main className="mx-auto max-w-2xl px-5 pb-24 pt-12">
         <Reveal>
-          <h1 className="display text-[2.75rem]">Catat</h1>
+          {profile.name && <p className="eyebrow">Halo, {profile.name}</p>}
+          <h1 className={`display text-[2.75rem] ${profile.name ? "mt-2" : ""}`}>Catat</h1>
           <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-sand-300">
             Dua pilihan sudah cukup. Sisanya hanya kalau kamu memang ingin tahu lebih banyak nanti.
           </p>

@@ -77,6 +77,7 @@ const INDEX = [
   { id: "perempuan", n: "07", label: "Mode perempuan" },
   { id: "alur", n: "08", label: "Alur" },
   { id: "penyimpanan", n: "09", label: "Penyimpanan" },
+  { id: "suara", n: "10", label: "Suara pengguna" },
 ];
 
 const CTA =
@@ -564,6 +565,61 @@ export default function Home() {
                   Cara kerjanya
                 </Link>
               </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 10 Suara pengguna. Satu ulasan, dan angka penilaian yang apa adanya.
+             Menampilkan 2,9 memang merugikan, tapi menyembunyikannya akan
+             membuat seluruh halaman ini kehilangan hak untuk dipercaya. */}
+      <section id="suara" className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="10"
+          eyebrow="Suara pengguna"
+          title="Satu ulasan, dan angka yang belum bagus"
+        />
+
+        <div className="mt-14 grid gap-10 lg:grid-cols-12">
+          <Reveal className="lg:col-span-7">
+            <figure className="surface rounded-panel p-8 sm:p-10">
+              <span className="display block text-5xl leading-none text-teal-600/40" aria-hidden>
+                &ldquo;
+              </span>
+              <blockquote className="display-sm -mt-3 text-xl leading-relaxed text-sand-100">
+                Dulu susah dikendalikan, bisa kapan saja dan di mana saja. Sekarang lebih disiplin,
+                di jam yang sama, dan sudah siap sedia. Masukan dari analisisnya banyak membantu.
+              </blockquote>
+              <figcaption className="mt-7 flex flex-wrap items-center gap-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs text-sand-500">
+                <span>Pengguna anonim</span>
+                <span className="h-3 w-px bg-sand-500/25" />
+                <span>Dipendekkan seizinnya, tanpa mengubah maksudnya</span>
+              </figcaption>
+            </figure>
+          </Reveal>
+
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <div className="surface-sunken rounded-panel p-8">
+              <p className="eyebrow">Penilaian saat ini</p>
+              <p className="num mt-3 text-[3.5rem] leading-none text-amber-400">
+                2,9
+                <span className="ml-2 text-base text-sand-500">/ 5</span>
+              </p>
+              <p className="mt-1 text-xs text-sand-500">dari 1 ulasan tertulis</p>
+
+              <p className="mt-6 text-sm leading-relaxed text-sand-300">
+                Angka ini tidak bagus, dan kami memilih menampilkannya. Halaman yang memuat keberatan
+                terhadap penelitiannya sendiri tidak bisa sekaligus menyembunyikan penilaian
+                penggunanya.
+              </p>
+              <p className="mt-4 text-sm leading-relaxed text-sand-500">
+                Keluhan yang paling sering: tampilannya terasa dibuat untuk semua orang, dan karena
+                itu tidak untuk siapa-siapa. Jawabannya sudah ada di{" "}
+                <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
+                  pengaturan
+                </Link>{" "}
+                — enam warna, nama panggilan, dan kendali atas seberapa banyak yang bergerak.
+              </p>
             </div>
           </Reveal>
         </div>

@@ -161,3 +161,33 @@ export const DEFAULT_CYCLE: CycleProfile = {
   cycleLengthDays: 28,
   periodLengthDays: 5,
 };
+
+/**
+ * Personalisasi.
+ *
+ * Keluhan yang paling sering muncul bukan soal fitur, melainkan bahwa
+ * aplikasinya terasa dibuat untuk semua orang dan karena itu tidak untuk
+ * siapa-siapa. Tiga hal di bawah ini yang paling murah diberikan dan paling
+ * terasa: warna yang dipilih sendiri, nama panggilan yang dipakai aplikasi, dan
+ * kendali atas seberapa banyak yang bergerak.
+ *
+ * Semuanya ikut terenkripsi bersama catatan, jadi bahkan preferensi warna pun
+ * tidak terbaca server.
+ */
+export const ACCENTS = [
+  { key: "teal", label: "Laut", c400: "#5ce4d3", c500: "#2ed3c0", c600: "#16b3a3", c700: "#0e7c86" },
+  { key: "ember", label: "Bara", c400: "#ffb27a", c500: "#f5924f", c600: "#d9722f", c700: "#a34f1c" },
+  { key: "iris", label: "Nila", c400: "#b9a6ff", c500: "#9a83f5", c600: "#7b62db", c700: "#5741a8" },
+  { key: "moss", label: "Lumut", c400: "#a8dc86", c500: "#84c65e", c600: "#63a441", c700: "#42702c" },
+  { key: "clay", label: "Tanah", c400: "#e8a9a0", c500: "#d4867c", c600: "#b2685e", c700: "#7e453e" },
+  { key: "steel", label: "Baja", c400: "#9fc4e0", c500: "#78a6c9", c600: "#5885a8", c700: "#3a5b76" },
+] as const;
+
+export type AccentKey = (typeof ACCENTS)[number]["key"];
+
+export function accentMeta(key: string) {
+  return ACCENTS.find((a) => a.key === key) ?? ACCENTS[0];
+}
+
+export const MOTION_LEVELS = ["penuh", "tenang"] as const;
+export type MotionLevel = (typeof MOTION_LEVELS)[number];
