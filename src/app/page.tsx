@@ -19,6 +19,7 @@ import {
 } from "@/components/Motion";
 import { AppPreview } from "@/components/AppPreview";
 import { CAVEATS, EvidenceChart } from "@/components/Evidence";
+import { Portrait } from "@/components/Portrait";
 import { ScrollRibbon, SectionIndex } from "@/components/Ribbon";
 import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
@@ -79,6 +80,16 @@ const INDEX = [
   { id: "penyimpanan", n: "09", label: "Penyimpanan" },
   { id: "suara", n: "10", label: "Suara pengguna" },
 ];
+
+/**
+ * Ulasan pertama. Satu tempat, supaya potretnya tinggal diisi begitu ada foto
+ * berwajah — dan supaya jelas bahwa isinya data, bukan hiasan yang dikarang.
+ */
+const TESTIMONI = {
+  nama: "Penguji pertama",
+  keterangan: "Dipendekkan seizinnya, tanpa mengubah maksudnya",
+  foto: null as string | null,
+};
 
 const CTA =
   "inline-block rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400";
@@ -590,10 +601,13 @@ export default function Home() {
                 Dulu susah dikendalikan, bisa kapan saja dan di mana saja. Sekarang lebih disiplin,
                 di jam yang sama, dan sudah siap sedia. Masukan dari analisisnya banyak membantu.
               </blockquote>
-              <figcaption className="mt-7 flex flex-wrap items-center gap-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs text-sand-500">
-                <span>Pengguna anonim</span>
-                <span className="h-3 w-px bg-sand-500/25" />
-                <span>Dipendekkan seizinnya, tanpa mengubah maksudnya</span>
+              <figcaption className="mt-8 flex items-center gap-4 border-t border-[rgba(207,198,184,0.08)] pt-6">
+                {/* Ganti src menjadi jalur foto begitu ada potret berwajah. */}
+                <Portrait src={TESTIMONI.foto} name={TESTIMONI.nama} />
+                <span className="min-w-0">
+                  <span className="block text-sm text-sand-100">{TESTIMONI.nama}</span>
+                  <span className="block text-xs text-sand-500">{TESTIMONI.keterangan}</span>
+                </span>
               </figcaption>
             </figure>
           </Reveal>
