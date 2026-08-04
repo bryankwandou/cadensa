@@ -18,6 +18,7 @@ import {
   Tilt3D,
 } from "@/components/Motion";
 import { AppPreview } from "@/components/AppPreview";
+import { CAVEATS, EvidenceChart } from "@/components/Evidence";
 import { ScrollRibbon, SectionIndex } from "@/components/Ribbon";
 import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
@@ -67,14 +68,15 @@ const STEPS = [
 ];
 
 const INDEX = [
-  { id: "posisi", n: "01", label: "Posisi" },
-  { id: "peragaan", n: "02", label: "Peragaan" },
-  { id: "katalog", n: "03", label: "Katalog" },
-  { id: "kosakata", n: "04", label: "Kosakata" },
-  { id: "sinyal", n: "05", label: "Sinyal" },
-  { id: "perempuan", n: "06", label: "Mode perempuan" },
-  { id: "alur", n: "07", label: "Alur" },
-  { id: "penyimpanan", n: "08", label: "Penyimpanan" },
+  { id: "bukti", n: "01", label: "Dasar bukti" },
+  { id: "posisi", n: "02", label: "Posisi" },
+  { id: "peragaan", n: "03", label: "Peragaan" },
+  { id: "katalog", n: "04", label: "Katalog" },
+  { id: "kosakata", n: "05", label: "Kosakata" },
+  { id: "sinyal", n: "06", label: "Sinyal" },
+  { id: "perempuan", n: "07", label: "Mode perempuan" },
+  { id: "alur", n: "08", label: "Alur" },
+  { id: "penyimpanan", n: "09", label: "Penyimpanan" },
 ];
 
 const CTA =
@@ -200,10 +202,43 @@ export default function Home() {
         <ScrollRibbon />
       </div>
 
-      {/* 01 Posisi */}
-      <section id="posisi" className="mx-auto max-w-6xl px-5 py-24">
+      {/* 01 Dasar bukti. Yang meyakinkan di produk kesehatan bukan wajah tersenyum,
+             melainkan angka yang bisa diperiksa sendiri oleh pembacanya. */}
+      <section id="bukti" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="01"
+          eyebrow="Dasar bukti"
+          title="Angkanya bisa kamu periksa sendiri"
+          lead="Seluruh produk ini berdiri di atas satu penelitian, jadi penelitian itu ditampilkan apa adanya — lengkap dengan selang kepercayaannya, dan lengkap dengan bagian yang melemahkannya."
+        />
+
+        <div className="mt-14 grid gap-10 lg:grid-cols-12">
+          <Reveal className="lg:col-span-7">
+            <EvidenceChart />
+          </Reveal>
+
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <p className="eyebrow">Keberatan terhadap angka ini</p>
+            <p className="mt-4 text-sm leading-relaxed text-sand-300">
+              Ditulis sendiri, bukan menunggu orang lain menemukannya. Produk yang menyembunyikan
+              kelemahan buktinya tidak layak dipercaya soal hal lain.
+            </p>
+            <dl className="mt-6 divide-y divide-[rgba(207,198,184,0.08)] border-y border-[rgba(207,198,184,0.08)]">
+              {CAVEATS.map((c) => (
+                <div key={c.t} className="py-5">
+                  <dt className="text-sm font-medium text-amber-400">{c.t}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-sand-500">{c.d}</dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 02 Posisi */}
+      <section id="posisi" className="mx-auto max-w-6xl px-5 py-24">
+        <SectionHead
+          n="02"
           eyebrow="Posisi"
           title={
             <>
@@ -247,7 +282,7 @@ export default function Home() {
       {/* 02 Peragaan */}
       <section id="peragaan" className="mx-auto max-w-4xl px-5 py-20">
         <SectionHead
-          n="02"
+          n="03"
           eyebrow="Peragaan"
           title="Jumlah bukan ukuran yang tepat"
           lead="Dua orang dengan dua puluh satu catatan bisa sangat berbeda: satu tersebar rata, satu menumpuk di minggu terakhir. Geser sendiri, dan lihat indeksnya runtuh sementara jumlahnya tidak berubah."
@@ -261,7 +296,7 @@ export default function Home() {
       <section id="katalog" className="py-24">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHead
-            n="03"
+            n="04"
             eyebrow="Katalog"
             title="Alatnya disebut dengan nama yang tepat"
             lead={
@@ -292,7 +327,7 @@ export default function Home() {
       {/* 04 Kosakata rupa */}
       <section id="kosakata" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="04"
+          n="05"
           eyebrow="Kosakata"
           title="Setiap pilihan punya rupanya sendiri"
           lead="Alur catat punya anggaran dua belas detik, dan di layar sekecil ponsel bentuk terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya berupa teks."
@@ -358,7 +393,7 @@ export default function Home() {
       {/* 05 Sinyal. Daftar bernomor, bukan grid kartu. */}
       <section id="sinyal" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="05"
+          n="06"
           eyebrow="Sinyal"
           title={
             <>
@@ -394,7 +429,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-12">
               <div className="p-8 sm:p-12 lg:col-span-7">
                 <p className="eyebrow flex items-center gap-3">
-                  <span className="text-teal-600">06</span>
+                  <span className="text-teal-600">07</span>
                   <span className="h-px w-8 bg-sand-500/30" />
                   Mode perempuan
                 </p>
@@ -448,7 +483,7 @@ export default function Home() {
 
       {/* 07 Alur. Tiga langkah sebagai baris, bukan tiga kartu. */}
       <section id="alur" className="mx-auto max-w-4xl px-5 py-20">
-        <SectionHead n="07" eyebrow="Alur" title="Tiga langkah, dan tidak ada yang keempat" />
+        <SectionHead n="08" eyebrow="Alur" title="Tiga langkah, dan tidak ada yang keempat" />
         <div className="mt-12 space-y-1">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 0.06}>
@@ -467,7 +502,7 @@ export default function Home() {
       {/* 08 Penyimpanan */}
       <section id="penyimpanan" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="08"
+          n="09"
           eyebrow="Penyimpanan"
           title={
             <>
