@@ -242,7 +242,7 @@ export default function PengaturanPage() {
               Ganti kata sandi
             </Pressable>
             {newRecovery && (
-              <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+              <div className="mt-4 rounded-card border border-amber-500/25 bg-amber-500/[0.04] p-4">
                 <p className="mb-2 text-xs text-amber-400">Kunci pemulihanmu tetap sama. Ini salinannya:</p>
                 <code className="block break-all font-mono text-xs text-amber-400">{newRecovery}</code>
               </div>

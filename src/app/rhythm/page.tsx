@@ -291,7 +291,7 @@ export default function RhythmPage() {
         )}
 
         {isWoman && !phases && (
-          <div className="mt-6 rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6">
+          <div className="mt-6 rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-7">
             <p className="text-sm leading-relaxed text-sand-300">
               Isi tanggal haid terakhir di{" "}
               <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">

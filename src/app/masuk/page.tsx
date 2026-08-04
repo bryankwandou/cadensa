@@ -56,7 +56,7 @@ export default function MasukPage() {
               sandimu. Itu berarti kami tidak bisa membukanya untukmu — termasuk kalau kata sandinya
               lupa. Baris di bawah ini adalah satu-satunya jalan masuk cadangan.
             </p>
-            <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
+            <div className="mt-6 rounded-card border border-amber-500/25 bg-amber-500/[0.04] p-5">
               <code className="block break-all font-mono text-xs leading-relaxed text-amber-400">
                 {recovery}
               </code>
@@ -132,7 +132,7 @@ export default function MasukPage() {
 
         {needsUnlock && tab !== "pemulihan" && (
           <Reveal delay={0.05}>
-            <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-400">
+            <div className="mt-6 rounded-card border border-amber-500/25 bg-amber-500/[0.04] p-4 text-sm text-amber-400">
               Sesi kriptografismu berakhir saat tab ditutup. Masukkan kata sandi lagi untuk membuka
               brankas.
             </div>
@@ -323,7 +323,7 @@ export default function MasukPage() {
         </Tilt3D>
 
         <Reveal delay={0.12}>
-          <div className="mt-6 rounded-2xl border hairline p-5 text-xs leading-relaxed text-sand-500">
+          <div className="surface-sunken mt-6 rounded-card p-6 text-xs leading-relaxed text-sand-500">
             <p className="mb-2 text-sand-300">Masuk dengan Google — segera</p>
             Belum dipasang karena satu alasan teknis yang jujur: dengan Google, tidak ada kata sandi
             yang bisa dipakai menurunkan kunci enkripsi, sehingga brankas harus tetap dibuka dengan
