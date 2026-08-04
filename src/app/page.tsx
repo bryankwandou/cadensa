@@ -10,10 +10,15 @@ import {
   Parallax,
   PulseRing,
   Reveal,
+  RevealWords,
+  ScrollProgress,
+  Spotlight,
   Stagger,
   StaggerItem,
   Tilt3D,
 } from "@/components/Motion";
+import { AppPreview } from "@/components/AppPreview";
+import { ScrollRibbon, SectionIndex } from "@/components/Ribbon";
 import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
 import { Glyph } from "@/components/Glyph";
@@ -61,6 +66,17 @@ const STEPS = [
   },
 ];
 
+const INDEX = [
+  { id: "posisi", n: "01", label: "Posisi" },
+  { id: "peragaan", n: "02", label: "Peragaan" },
+  { id: "katalog", n: "03", label: "Katalog" },
+  { id: "kosakata", n: "04", label: "Kosakata" },
+  { id: "sinyal", n: "05", label: "Sinyal" },
+  { id: "perempuan", n: "06", label: "Mode perempuan" },
+  { id: "alur", n: "07", label: "Alur" },
+  { id: "penyimpanan", n: "08", label: "Penyimpanan" },
+];
+
 const CTA =
   "inline-block rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400";
 const CTA_GHOST =
@@ -69,12 +85,15 @@ const CTA_GHOST =
 export default function Home() {
   return (
     <div className="aurora min-h-screen">
+      <ScrollProgress />
+      <SectionIndex items={INDEX} />
       <Nav />
 
-      {/* Hero. Sengaja tidak rata tengah: teks bertumpu di kiri, tanda melewati tepi kanan. */}
-      <section className="mx-auto max-w-6xl px-5 pb-24 pt-16 sm:pt-24">
-        <div className="grid items-center gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+      {/* Hero. Sengaja tidak rata tengah: teks bertumpu di kiri, produknya di kanan
+          dan boleh melewati tepi. */}
+      <Spotlight className="mx-auto max-w-6xl px-5 pb-20 pt-16 sm:pt-24">
+        <div className="grid items-center gap-14 lg:grid-cols-12">
+          <div className="lg:col-span-6">
             <Reveal>
               <span className="inline-flex items-center gap-2.5 rounded-full border hairline px-3.5 py-1.5 text-xs text-sand-300">
                 <motion.span
@@ -88,9 +107,8 @@ export default function Home() {
 
             <Reveal delay={0.06}>
               <h1 className="display mt-7 text-[3.4rem] sm:text-[4.6rem]">
-                Ritme,
-                <br />
-                <span className="text-teal-400">bukan skor.</span>
+                <RevealWords text="Ritme," className="block" />
+                <RevealWords text="bukan skor." className="block text-teal-400" delay={0.12} />
               </h1>
             </Reveal>
 
@@ -127,18 +145,28 @@ export default function Home() {
             </Reveal>
           </div>
 
-          <div className="lg:col-span-5">
-            <Reveal delay={0.1} y={28}>
-              <Parallax depth={30}>
-                <div className="relative mx-auto flex aspect-square w-full max-w-sm items-center justify-center lg:-mr-16 lg:max-w-md">
-                  <div className="absolute inset-10 rounded-full bg-teal-700/12 blur-3xl" />
-                  <PulseRing size={290} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          {/* Produknya diperlihatkan, bukan hanya diceritakan. Tanda merek turun
+              jadi lapisan cahaya di belakangnya. */}
+          <div className="lg:col-span-6">
+            <Reveal delay={0.1} y={30}>
+              <Parallax depth={26}>
+                <div className="relative">
+                  <div className="absolute -inset-6 rounded-[3rem] bg-teal-700/10 blur-3xl" />
+                  <PulseRing
+                    size={340}
+                    className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40"
+                  />
+                  <div className="pointer-events-none absolute -right-10 -top-14 opacity-[0.07]">
+                    <Mark size={220} />
+                  </div>
                   <motion.div
-                    animate={{ rotateZ: [0, 1.6, 0, -1.6, 0], rotateY: [0, 5, 0, -5, 0] }}
-                    transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ transformStyle: "preserve-3d" }}
+                    initial={{ rotateX: 9, rotateY: -13, rotateZ: 1 }}
+                    whileHover={{ rotateX: 3, rotateY: -5, rotateZ: 0, scale: 1.015 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                    style={{ transformStyle: "preserve-3d", perspective: 1400 }}
+                    className="relative lg:-mr-10"
                   >
-                    <Mark size={330} />
+                    <AppPreview />
                   </motion.div>
                 </div>
               </Parallax>
@@ -166,14 +194,14 @@ export default function Home() {
             ))}
           </div>
         </Reveal>
-      </section>
+      </Spotlight>
 
       <div className="mx-auto max-w-6xl px-5">
-        <hr className="rule" />
+        <ScrollRibbon />
       </div>
 
       {/* 01 Posisi */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
+      <section id="posisi" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="01"
           eyebrow="Posisi"
@@ -217,7 +245,7 @@ export default function Home() {
       </section>
 
       {/* 02 Peragaan */}
-      <section className="mx-auto max-w-4xl px-5 py-20">
+      <section id="peragaan" className="mx-auto max-w-4xl px-5 py-20">
         <SectionHead
           n="02"
           eyebrow="Peragaan"
@@ -230,7 +258,7 @@ export default function Home() {
       </section>
 
       {/* 03 Katalog */}
-      <section className="py-24">
+      <section id="katalog" className="py-24">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHead
             n="03"
@@ -262,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* 04 Kosakata rupa */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
+      <section id="kosakata" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="04"
           eyebrow="Kosakata"
@@ -328,7 +356,7 @@ export default function Home() {
       </div>
 
       {/* 05 Sinyal. Daftar bernomor, bukan grid kartu. */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
+      <section id="sinyal" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="05"
           eyebrow="Sinyal"
@@ -360,7 +388,7 @@ export default function Home() {
       </section>
 
       {/* 06 Mode perempuan */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
+      <section id="perempuan" className="mx-auto max-w-6xl px-5 py-24">
         <Reveal>
           <div className="surface-raised overflow-hidden rounded-panel">
             <div className="grid lg:grid-cols-12">
@@ -419,7 +447,7 @@ export default function Home() {
       </section>
 
       {/* 07 Alur. Tiga langkah sebagai baris, bukan tiga kartu. */}
-      <section className="mx-auto max-w-4xl px-5 py-20">
+      <section id="alur" className="mx-auto max-w-4xl px-5 py-20">
         <SectionHead n="07" eyebrow="Alur" title="Tiga langkah, dan tidak ada yang keempat" />
         <div className="mt-12 space-y-1">
           {STEPS.map((s, i) => (
@@ -437,7 +465,7 @@ export default function Home() {
       </section>
 
       {/* 08 Penyimpanan */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
+      <section id="penyimpanan" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="08"
           eyebrow="Penyimpanan"
@@ -509,7 +537,9 @@ export default function Home() {
       {/* Penutup */}
       <section className="mx-auto max-w-3xl px-5 pb-32 pt-16">
         <Reveal>
-          <h2 className="display text-[2.6rem] sm:text-[3.4rem]">Mulai dari satu catatan</h2>
+          <h2 className="display text-[2.6rem] sm:text-[3.4rem]">
+            <RevealWords text="Mulai dari satu catatan" />
+          </h2>
           <p className="mt-6 max-w-lg leading-relaxed text-sand-300">
             Tidak perlu akun untuk mencoba. Cadensa berguna sebelum kamu mendaftar apa pun. Akun
             hanya menjaga supaya yang sudah kamu catat tidak hilang.

@@ -82,6 +82,105 @@ export function StaggerItem({
 }
 
 /**
+ * Garis kemajuan gulir. Setipis mungkin, di tepi paling atas.
+ *
+ * Halaman ini panjang dan isinya berurutan; tanpa penanda, pembaca tidak punya
+ * cara tahu seberapa jauh lagi. Ketebalan dua piksel adalah batas di mana
+ * penanda ini membantu tanpa ikut minta diperhatikan.
+ */
+export function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 28, restDelta: 0.001 });
+  return (
+    <motion.div
+      aria-hidden
+      className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-gradient-to-r from-teal-700 via-teal-400 to-teal-600"
+      style={{ scaleX }}
+    />
+  );
+}
+
+/**
+ * Judul yang tersingkap kata demi kata dari balik topeng.
+ *
+ * Serif display punya bentuk yang layak diperhatikan, dan penyingkapan bertahap
+ * memberi mata waktu untuk melihatnya. Dipakai hanya untuk judul utama —
+ * dipakai di mana-mana, efeknya berubah jadi gangguan.
+ */
+export function RevealWords({
+  text,
+  className = "",
+  delay = 0,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+}) {
+  const reduce = useReducedMotion();
+  if (reduce) return <span className={className}>{text}</span>;
+
+  return (
+    <motion.span
+      className={className}
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={{ hidden: {}, shown: { transition: { staggerChildren: 0.055, delayChildren: delay } } }}
+      aria-label={text}
+    >
+      {text.split(" ").map((w, i) => (
+        <span key={`${w}-${i}`} className="inline-block overflow-hidden align-bottom">
+          <motion.span
+            className="inline-block"
+            variants={{
+              hidden: { y: "108%", opacity: 0 },
+              shown: { y: "0%", opacity: 1, transition: { duration: 0.72, ease: EASE } },
+            }}
+          >
+            {w}
+            {i < text.split(" ").length - 1 ? " " : ""}
+          </motion.span>
+        </span>
+      ))}
+    </motion.span>
+  );
+}
+
+/**
+ * Sorotan lembut yang mengikuti kursor di dalam wadahnya. Memberi kesan bahwa
+ * permukaannya punya bahan, bukan sekadar warna datar.
+ */
+export function Spotlight({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(-500);
+  const my = useMotionValue(-500);
+  const bg = useMotionTemplate`radial-gradient(26rem 26rem at ${mx}px ${my}px, rgba(46,211,192,0.07), transparent 65%)`;
+
+  if (reduce) return <div className={className}>{children}</div>;
+
+  return (
+    <div
+      ref={ref}
+      className={`relative ${className}`}
+      onPointerMove={(e) => {
+        const r = ref.current?.getBoundingClientRect();
+        if (!r) return;
+        mx.set(e.clientX - r.left);
+        my.set(e.clientY - r.top);
+      }}
+      onPointerLeave={() => {
+        mx.set(-500);
+        my.set(-500);
+      }}
+    >
+      <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: bg }} />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
+/**
  * Kartu yang miring mengikuti kursor, dengan pantulan cahaya yang ikut bergerak.
  *
  * Kemiringannya sengaja ditahan di bawah 10 derajat. Lebih dari itu, tulisan di
