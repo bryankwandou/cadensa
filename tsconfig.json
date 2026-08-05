@@ -30,5 +30,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "//": "scripts/ berisi pemeriksa yang dijalankan Node langsung dari sumber, jadi impornya memakai ekstensi .ts yang sengaja dilarang di dalam bundel aplikasi.",
+  "exclude": ["node_modules", "scripts"]
 }
