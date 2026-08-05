@@ -44,7 +44,22 @@ const mins = (sec: number) => `${Math.round(sec / 60)} menit`;
  *  3. Satu saran per bacaan.
  *  4. Dugaan masalah medis keluar sebagai jalur terpisah, tidak dicampur saran kebiasaan.
  */
-export function readEntries(entries: Entry[], now = new Date()): Reading[] {
+/**
+ * Alasan kenapa kemerataan itu penting berbeda menurut mode, dan perbedaannya
+ * bukan kehalusan bahasa.
+ *
+ * Pita 21 berasal dari penelitian tentang prostat. Menyebut prostat kepada
+ * pengguna yang tidak punya prostat bukan sekadar janggal — itu klaim kesehatan
+ * yang salah alamat, dan satu kalimat seperti itu cukup untuk membatalkan
+ * kepercayaan pada seluruh bacaan lainnya.
+ */
+function alasanKemerataan(mode: Mode): string {
+  return mode === "wanita"
+    ? "Ritme yang merata lebih mudah dibaca sebagai pola, dan pola itulah yang membuat pergeseran suasana hati bisa terlihat sejak awal."
+    : "Yang berhubungan dengan kesehatan prostat adalah keteraturannya, bukan totalnya.";
+}
+
+export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pria"): Reading[] {
   const out: Reading[] = [];
   if (entries.length < 3) return out;
 
@@ -97,7 +112,7 @@ export function readEntries(entries: Entry[], now = new Date()): Reading[] {
       kind: "ritme",
       strength: 0.7,
       title: "Jaraknya tidak merata",
-      body: `Indeks kadensmu ${ci} dari 100. Jumlahnya mungkin sudah cukup, tapi tersebar tidak rata — sebagian menumpuk, sebagian kosong panjang. Yang berhubungan dengan kesehatan prostat adalah keteraturannya, bukan totalnya.`,
+      body: `Indeks kadensmu ${ci} dari 100. Jumlahnya mungkin sudah cukup, tapi tersebar tidak rata — sebagian menumpuk, sebagian kosong panjang. ${alasanKemerataan(mode)}`,
       action: "Ambil satu hari tetap dalam seminggu yang biasanya kosong, dan biarkan itu jadi jangkar ritmemu.",
     });
   }
@@ -411,7 +426,7 @@ export function readAll(entries: Entry[], profile: Profile, now = new Date()): R
 
 /** Mode wanita memakai bacaan bersama, dikurangi yang bersandar pada pita 21. */
 function readCycleMode(entries: Entry[], profile: Profile, now: Date): Reading[] {
-  const shared = readEntries(entries, now).filter(
+  const shared = readEntries(entries, now, "wanita").filter(
     (r) => !["ritme-sepi", "ritme-padat"].includes(r.id),
   );
   return [...readCycle(entries, profile, now), ...shared];
