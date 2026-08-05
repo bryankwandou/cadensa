@@ -94,9 +94,18 @@ export function SectionIndex({ items }: { items: { id: string; n: string; label:
   }, [items]);
 
   return (
+    /*
+     * Ambang lebarnya bukan `xl`.
+     *
+     * Isi halaman lebarnya 1152px dan rata tengah, jadi di 1280px hanya tersisa
+     * 64px di tiap sisi — penanda ini akan menempel bahkan menimpa tulisannya.
+     * Ruang yang benar-benar cukup baru ada di atas 1500px. Ambang tingginya
+     * juga perlu, karena di jendela pendek daftar sepuluh butir ini terpotong
+     * dan yang terlihat justru deretan angka menggantung tanpa awal.
+     */
     <nav
       aria-label="Bagian halaman"
-      className="pointer-events-none fixed left-6 top-1/2 z-40 hidden -translate-y-1/2 xl:block"
+      className="pointer-events-none fixed left-8 top-1/2 z-30 hidden max-h-[70vh] -translate-y-1/2 overflow-hidden min-[1500px]:[@media(min-height:760px)]:block"
     >
       <ul className="space-y-3.5">
         {items.map((it, i) => {
