@@ -7,6 +7,7 @@ import { Nav } from "@/components/Nav";
 import { Pressable, Tilt3D } from "@/components/Motion";
 import { DeviceIcon } from "@/components/DeviceIcon";
 import { Glyph } from "@/components/Glyph";
+import { CadenceRing } from "@/components/CadenceRing";
 import { useVault } from "@/lib/vault";
 import { PHASE_NOTE, cycleCoupling, peakPhase, phaseDensity } from "@/lib/cycle";
 import {
@@ -160,15 +161,60 @@ export default function RhythmPage() {
           </div>
         </div>
 
-        {/* Pita ritme */}
+        {/* Cincin kadens — sebulan sebagai lingkaran, bukan perlombaan menuju tanggal 30. */}
         <section className="surface mt-8 rounded-panel p-7 sm:p-9">
+          <div className="grid items-center gap-10 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <CadenceRing
+                days={days.map((d) => ({
+                  day: d.day,
+                  count: d.count,
+                  valence: d.count ? d.valence / d.count : 0,
+                  future: isThisMonth && d.day > now.getDate(),
+                }))}
+                index={ci}
+                total={monthEntries.length}
+                bandLow={TARGET_BAND.low}
+                bandHigh={TARGET_BAND.high}
+              />
+            </div>
+
+            <div className="lg:col-span-5">
+              <p className="text-sm leading-relaxed text-sand-300">
+                Sebulan digambar melingkar karena deret lurus punya garis akhir, dan garis akhir
+                membuat orang mengejar angka. Yang berhubungan dengan kesehatan prostat bukan
+                totalnya, melainkan jaraknya — dan jarak paling mudah dilihat sebagai celah.
+              </p>
+              <dl className="mt-6 space-y-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs">
+                {[
+                  ["var(--color-teal-400)", "Terasa lega atau nikmat"],
+                  ["var(--color-sand-500)", "Netral"],
+                  ["var(--color-amber-400)", "Hampa, menyesal, atau lelah"],
+                  ["rgba(207,198,184,0.13)", "Tidak ada catatan"],
+                ].map(([c, t]) => (
+                  <div key={t} className="flex items-center gap-3">
+                    <span className="h-1 w-6 shrink-0 rounded-full" style={{ background: c }} />
+                    <dt className="text-sand-500">{t}</dt>
+                  </div>
+                ))}
+              </dl>
+              <p className="num mt-5 text-[11px] text-sand-500">
+                pita {TARGET_BAND.low}–{TARGET_BAND.high} · arahkan kursor ke satu jari-jari
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Deret harian, tetap dipertahankan karena membaca urutan tanggal
+            memang lebih mudah lurus daripada melingkar. */}
+        <section className="surface mt-5 rounded-panel p-7 sm:p-9">
           <div className="flex items-center justify-between text-xs text-sand-500">
-            <span>Kepadatan menunjukkan frekuensi, tinggi menunjukkan rasa sesudahnya</span>
-            <span className="font-mono">
+            <span>Urutan harian</span>
+            <span className="num">
               pita {TARGET_BAND.low}–{TARGET_BAND.high}
             </span>
           </div>
-          <div className="mt-6 flex h-40 items-end gap-[2px]">
+          <div className="mt-6 flex h-28 items-end gap-[2px]">
             {days.map((d) => {
               const future =
                 isThisMonth && d.day > now.getDate();

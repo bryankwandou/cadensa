@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 /**
@@ -19,21 +20,41 @@ export function Portrait({
   src,
   name,
   size = 56,
+  focus,
 }: {
   src?: string | null;
   name: string;
   size?: number;
+  /**
+   * Titik wajah pada foto sumber dalam persen, plus perbesaran.
+   *
+   * Foto yang dikirim orang hampir tidak pernah berupa potret siap pakai —
+   * biasanya seluruh badan, wajahnya kecil di sepertiga atas. Memotong lewat
+   * gaya, bukan lewat berkas, membuat foto aslinya tetap utuh dan pemotongannya
+   * bisa diperbaiki kapan saja tanpa mengunggah ulang apa pun.
+   */
+  focus?: { x: number; y: number; zoom: number };
 }) {
   const reduce = useReducedMotion();
+  const [broken, setBroken] = useState(false);
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
-  if (src) {
+  if (src && !broken) {
+    const f = focus ?? { x: 50, y: 50, zoom: 1 };
     return (
       <span
-        className="relative block shrink-0 overflow-hidden rounded-full ring-1 ring-[rgba(207,198,184,0.16)]"
+        className="relative block shrink-0 overflow-hidden rounded-full ring-1 ring-[rgba(207,198,184,0.18)]"
         style={{ width: size, height: size }}
       >
-        <Image src={src} alt={`Potret ${name}`} width={size} height={size} className="h-full w-full object-cover" />
+        <Image
+          src={src}
+          alt={`Potret ${name}`}
+          width={size * 4}
+          height={size * 4}
+          onError={() => setBroken(true)}
+          className="h-full w-full object-cover"
+          style={{ objectPosition: `${f.x}% ${f.y}%`, transform: `scale(${f.zoom})` }}
+        />
       </span>
     );
   }
