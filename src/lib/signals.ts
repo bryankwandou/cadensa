@@ -13,7 +13,7 @@ import {
   triggerCount,
   within,
 } from "./metrics";
-import { afterfeelMeta, deviceMeta, type Entry } from "./types";
+import { afterfeelMeta, deviceMeta, type Entry, type Mode } from "./types";
 import { PHASE_NOTE, cycleCoupling, daysUntilNextPeriod, peakPhase, phaseDensity, phaseOf } from "./cycle";
 import type { Profile } from "./vault";
 
