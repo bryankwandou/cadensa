@@ -14,10 +14,34 @@ const LINKS = [
   { href: "/pengaturan", label: "Pengaturan" },
 ];
 
-/** Titik status sinkron. Kecil, di pojok, tidak pernah menghalangi. */
+/**
+ * Titik status sinkron. Kecil, di pojok, tidak pernah menghalangi.
+ *
+ * Kecuali satu keadaan: saat brankas terkunci, titik ini berubah jadi tautan.
+ * Kunci ditahan di sessionStorage dan hilang begitu tab ditutup — itu disengaja
+ * demi perangkat yang dipinjam. Akibatnya pengguna kembali dalam keadaan "masuk
+ * tapi tidak bisa membaca apa pun", dan status yang hanya memberitahu tanpa
+ * menawarkan jalan keluar adalah jalan buntu, bukan informasi.
+ */
 function SyncDot() {
   const { sync, user } = useVault();
   if (!user) return null;
+
+  if (sync.kind === "terkunci") {
+    return (
+      <Link
+        href="/masuk"
+        className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/[0.06] px-3 py-1 text-xs text-amber-400 transition-colors hover:bg-amber-500/[0.12]"
+      >
+        <motion.span
+          className="h-1.5 w-1.5 rounded-full bg-amber-400"
+          animate={{ opacity: [1, 0.35, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+        Buka brankas
+      </Link>
+    );
+  }
 
   const map = {
     lokal: { c: "bg-sand-500", t: "Tersimpan di perangkat" },
@@ -43,7 +67,7 @@ function SyncDot() {
 
 export function Nav() {
   const path = usePathname();
-  const { user, logout } = useVault();
+  const { user, logout, sync } = useVault();
   const [open, setOpen] = useState(false);
 
   return (
@@ -96,6 +120,18 @@ export function Nav() {
                     className="surface-raised absolute right-0 mt-2 w-52 rounded-card p-2 backdrop-blur-xl"
                   >
                     <div className="px-3 py-2 text-xs text-sand-500">Masuk sebagai {user.username}</div>
+                    {sync.kind === "terkunci" && (
+                      <Link
+                        href="/masuk"
+                        onClick={() => setOpen(false)}
+                        className="mb-1 block rounded-xl border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-400 hover:bg-amber-500/[0.12]"
+                      >
+                        Buka brankas
+                        <span className="mt-0.5 block text-[11px] text-sand-500">
+                          Kuncinya hilang saat tab ditutup
+                        </span>
+                      </Link>
+                    )}
                     <Link
                       href="/pengaturan"
                       onClick={() => setOpen(false)}
