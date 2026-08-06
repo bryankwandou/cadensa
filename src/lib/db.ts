@@ -53,6 +53,28 @@ export function ensureSchema(): Promise<void> {
         revision   INTEGER NOT NULL DEFAULT 1,
         updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
+    /**
+     * Ulasan. Satu-satunya tabel di sini yang isinya memang dimaksudkan terbaca.
+     *
+     * Kuncinya `user_id` sebagai primary key, bukan kolom biasa: satu akun hanya
+     * boleh punya satu ulasan, dan menulis lagi berarti mengganti yang lama.
+     * Itu yang membuat angka penilaiannya tidak bisa digelembungkan dengan
+     * mengirim ulang kalimat yang sama berkali-kali.
+     *
+     * `approved` sengaja mulai dari false. Ulasan yang langsung tayang begitu
+     * dikirim adalah undangan bagi penyalahgunaan, dan halaman yang memajang
+     * keberatan terhadap penelitiannya sendiri tidak boleh punya celah itu.
+     */
+    await sql`
+      CREATE TABLE IF NOT EXISTS reviews (
+        user_id      TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        display_name TEXT NOT NULL,
+        rating       SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        body         TEXT NOT NULL,
+        approved     BOOLEAN NOT NULL DEFAULT false,
+        created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`;
   })();
   return ensured;
 }
