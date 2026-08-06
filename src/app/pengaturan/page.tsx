@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Nav } from "@/components/Nav";
 import { Pressable, Reveal } from "@/components/Motion";
 import { ReviewForm } from "@/components/ReviewForm";
+import { ReviewModeration } from "@/components/ReviewModeration";
 import { useVault } from "@/lib/vault";
 import { daysUntilNextPeriod } from "@/lib/cycle";
 import { ACCENTS, MOTION_LEVELS, type Mode } from "@/lib/types";
@@ -22,6 +23,29 @@ function Section({ title, note, children }: { title: string; note?: string; chil
         <div className="mt-5">{children}</div>
       </section>
     </Reveal>
+  );
+}
+
+/**
+ * Bagian peninjauan hanya menampakkan dirinya kalau rutenya menjawab. Bagi akun
+ * lain, tidak ada judul, tidak ada bingkai, tidak ada petunjuk bahwa panel ini
+ * ada sama sekali.
+ */
+function ModerationSection() {
+  const [ada, setAda] = useState(false);
+
+  useEffect(() => {
+    void fetch("/api/reviews/tinjau", { cache: "no-store" }).then((r) => setAda(r.ok));
+  }, []);
+
+  if (!ada) return null;
+  return (
+    <Section
+      title="Tinjau ulasan"
+      note="Ulasan masuk dalam keadaan menunggu. Yang kamu tayangkan langsung ikut menghitung angka penilaian di halaman depan — jadi angka itu selalu bisa ditelusuri kembali ke barisnya."
+    >
+      <ReviewModeration />
+    </Section>
   );
 }
 
@@ -237,6 +261,8 @@ export default function PengaturanPage() {
             )}
           </Section>
         )}
+
+        {user && <ModerationSection />}
 
         {user && (
           <Section
