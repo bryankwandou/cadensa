@@ -38,7 +38,9 @@ function SyncDot() {
           animate={{ opacity: [1, 0.35, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
-        Buka brankas
+        {/* Di ponsel, empat tautan dan tanda merek sudah memenuhi barisnya;
+            titiknya sendiri sudah cukup, dan menu akun tetap memuat jalan yang sama. */}
+        <span className="hidden sm:inline">Buka brankas</span>
       </Link>
     );
   }

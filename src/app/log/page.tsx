@@ -130,7 +130,10 @@ export default function LogPage() {
         <Reveal delay={0.08}>
           <div className="mt-8">
             <p className="eyebrow mb-3.5">Cara</p>
-            <div className="grid grid-cols-4 gap-2">
+            {/* Dua kolom di ponsel: "hubungan seksual" tidak muat di seperempat
+                lebar layar 360px, dan label yang terpotong lebih buruk daripada
+                dua baris. */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {METHODS.map((m) => (
                 <OptionTile
                   key={m}
@@ -219,7 +222,7 @@ export default function LogPage() {
         <Reveal delay={0.1}>
           <div className="mt-8">
             <p className="eyebrow mb-3.5">Rasanya sesudah</p>
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            <div className="grid grid-cols-3 gap-2 min-[420px]:grid-cols-4 sm:grid-cols-6">
               {AFTERFEELS.map((a) => (
                 <OptionTile
                   key={a.key}
@@ -312,7 +315,7 @@ export default function LogPage() {
 
                 <div>
                   <p className="eyebrow mb-3.5">Yang memicu</p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
                     {TRIGGERS.map((t) => (
                       <OptionTile
                         key={t}
