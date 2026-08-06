@@ -110,7 +110,7 @@ export default function Home() {
             </Reveal>
 
             <Reveal delay={0.06}>
-              <h1 className="display mt-7 text-[3.4rem] sm:text-[4.6rem]">
+              <h1 className="display mt-7 text-[2.85rem] min-[420px]:text-[3.4rem] sm:text-[4.6rem]">
                 <RevealWords text="Ritme," className="block" />
                 <RevealWords text="bukan skor." className="block text-teal-400" delay={0.12} />
               </h1>
@@ -355,7 +355,7 @@ export default function Home() {
           ].map((row, ri) => (
             <Reveal key={row.t} delay={ri * 0.06}>
               <p className="eyebrow mb-4">{row.t}</p>
-              <Stagger className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
+              <Stagger className="grid grid-cols-3 gap-2.5 min-[420px]:grid-cols-4 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
                 {row.items.map((it) => (
                   <StaggerItem key={it.n}>
                     <motion.div

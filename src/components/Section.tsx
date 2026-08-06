@@ -34,7 +34,7 @@ export function SectionHead({
           <span className="h-px w-8 bg-sand-500/30" />
           {eyebrow}
         </p>
-        <h2 className="display mt-5 text-[2.1rem] sm:text-[2.9rem]">{title}</h2>
+        <h2 className="display mt-5 text-[1.85rem] min-[420px]:text-[2.1rem] sm:text-[2.9rem]">{title}</h2>
         {lead && <p className={`mt-5 text-[1.0625rem] leading-relaxed text-sand-300 ${width}`}>{lead}</p>}
       </div>
     </Reveal>

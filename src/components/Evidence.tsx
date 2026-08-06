@@ -52,15 +52,21 @@ export function EvidenceChart() {
       <div className="mt-8 space-y-5">
         {ROWS.map((r, i) => (
           <div key={r.label}>
-            <div className="flex items-baseline justify-between gap-4">
-              <span className={`text-sm ${r.ref ? "text-sand-500" : "text-sand-100"}`}>
+            <div className="flex items-baseline justify-between gap-3">
+              {/* Keterangan pendamping turun ke baris sendiri di ponsel; dipaksa
+                  sebaris, ia mendorong angka rasionya keluar layar. */}
+              <span className={`min-w-0 text-sm ${r.ref ? "text-sand-500" : "text-sand-100"}`}>
                 {r.label}
-                {r.sub && <span className="ml-2 text-xs text-sand-500">{r.sub}</span>}
+                {r.sub && (
+                  <span className="block text-xs text-sand-500 sm:ml-2 sm:inline">{r.sub}</span>
+                )}
               </span>
-              <span className={`num text-sm ${r.ref ? "text-sand-500" : "text-teal-400"}`}>
+              <span
+                className={`num shrink-0 text-right text-sm ${r.ref ? "text-sand-500" : "text-teal-400"}`}
+              >
                 {r.hr.toFixed(2)}
                 {!r.ref && (
-                  <span className="ml-1.5 text-[10px] text-sand-500">
+                  <span className="block text-[10px] text-sand-500 sm:ml-1.5 sm:inline">
                     {r.lo.toFixed(2)}–{r.hi.toFixed(2)}
                   </span>
                 )}
