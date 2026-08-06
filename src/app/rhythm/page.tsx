@@ -96,7 +96,20 @@ export default function RhythmPage() {
   const peak = isWoman ? peakPhase(d90, profile.cycle) : null;
   const phases = isWoman && profile.cycle.lastPeriodStart ? phaseDensity(d90, profile.cycle) : null;
 
-  if (!ready) return <div className="aurora min-h-screen"><Nav /></div>;
+  // Rangka, bukan layar kosong: jeda membuka brankas selalu ada, dan halaman
+  // kosong selama jeda itu terbaca sebagai gagal memuat.
+  if (!ready)
+    return (
+      <div className="aurora min-h-screen">
+        <Nav />
+        <main className="mx-auto max-w-4xl px-5 pb-24 pt-12" aria-busy>
+          <div className="h-3 w-24 animate-pulse rounded-full bg-ink-700" />
+          <div className="mt-5 h-10 w-56 animate-pulse rounded-full bg-ink-700" />
+          <div className="surface mt-8 h-80 animate-pulse rounded-panel" />
+          <div className="surface mt-5 h-44 animate-pulse rounded-panel" />
+        </main>
+      </div>
+    );
 
   if (!entries.length) {
     return (

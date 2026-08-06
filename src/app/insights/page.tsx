@@ -75,10 +75,32 @@ export default function InsightsPage() {
     ];
   }, [entries, profile]);
 
+  /**
+   * Rangka, bukan layar kosong.
+   *
+   * Brankas dibuka di peramban, jadi selalu ada jeda sebelum ada yang bisa
+   * digambar. Halaman yang kosong selama jeda itu terbaca sebagai gagal memuat,
+   * dan di aplikasi yang menyimpan catatan pribadi, "gagal memuat" adalah
+   * ketakutan yang paling mahal.
+   */
   if (!ready)
     return (
       <div className="aurora min-h-screen">
         <Nav />
+        <main className="mx-auto max-w-3xl px-5 pb-24 pt-12" aria-busy>
+          <div className="h-3 w-32 animate-pulse rounded-full bg-ink-700" />
+          <div className="mt-5 h-10 w-44 animate-pulse rounded-full bg-ink-700" />
+          <div className="mt-9 grid grid-cols-2 gap-px overflow-hidden rounded-panel border hairline sm:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="surface h-24 animate-pulse" />
+            ))}
+          </div>
+          <div className="mt-12 space-y-3.5">
+            {[0, 1].map((i) => (
+              <div key={i} className="surface h-52 animate-pulse rounded-panel" />
+            ))}
+          </div>
+        </main>
       </div>
     );
 
