@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Nav } from "@/components/Nav";
 import { Pressable, Reveal } from "@/components/Motion";
+import { ReviewForm } from "@/components/ReviewForm";
 import { useVault } from "@/lib/vault";
 import { daysUntilNextPeriod } from "@/lib/cycle";
 import { ACCENTS, MOTION_LEVELS, type Mode } from "@/lib/types";
@@ -234,6 +235,15 @@ export default function PengaturanPage() {
                 bukan kepastian.
               </p>
             )}
+          </Section>
+        )}
+
+        {user && (
+          <Section
+            title="Tulis ulasan"
+            note="Satu akun satu ulasan, dan menulis lagi berarti mengganti yang lama. Ulasanmu ditinjau dulu sebelum tayang, dan angka penilaian di halaman depan dihitung langsung dari ulasan yang masuk — bukan ditulis tangan."
+          >
+            <ReviewForm nama={profile.name || user.username} />
           </Section>
         )}
 

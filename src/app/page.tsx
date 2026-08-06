@@ -19,7 +19,7 @@ import {
 } from "@/components/Motion";
 import { AppPreview } from "@/components/AppPreview";
 import { CAVEATS, EvidenceChart } from "@/components/Evidence";
-import { Portrait } from "@/components/Portrait";
+import { Reviews } from "@/components/Reviews";
 import { ScrollRibbon, SectionIndex } from "@/components/Ribbon";
 import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
@@ -80,16 +80,6 @@ const INDEX = [
   { id: "penyimpanan", n: "09", label: "Penyimpanan" },
   { id: "suara", n: "10", label: "Suara pengguna" },
 ];
-
-/**
- * Ulasan pertama. Satu tempat, supaya potretnya tinggal diisi begitu ada foto
- * berwajah — dan supaya jelas bahwa isinya data, bukan hiasan yang dikarang.
- */
-const TESTIMONI = {
-  nama: "Penguji pertama",
-  keterangan: "Dipendekkan seizinnya, tanpa mengubah maksudnya",
-  foto: null as string | null,
-};
 
 const CTA =
   "inline-block rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400";
@@ -588,54 +578,12 @@ export default function Home() {
         <SectionHead
           n="10"
           eyebrow="Suara pengguna"
-          title="Satu ulasan, dan angka yang belum bagus"
+          title="Apa yang benar-benar ditulis orang"
+          lead="Isinya diambil langsung dari basis data, dan angka penilaiannya dihitung dari baris yang ada di sana. Tidak ada tempat di mana pun untuk mengetik angka itu sendiri."
         />
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-12">
-          <Reveal className="lg:col-span-7">
-            <figure className="surface rounded-panel p-8 sm:p-10">
-              <span className="display block text-5xl leading-none text-teal-600/40" aria-hidden>
-                &ldquo;
-              </span>
-              <blockquote className="display-sm -mt-3 text-xl leading-relaxed text-sand-100">
-                Dulu susah dikendalikan, bisa kapan saja dan di mana saja. Sekarang lebih disiplin,
-                di jam yang sama, dan sudah siap sedia. Masukan dari analisisnya banyak membantu.
-              </blockquote>
-              <figcaption className="mt-8 flex items-center gap-4 border-t border-[rgba(207,198,184,0.08)] pt-6">
-                {/* Ganti src menjadi jalur foto begitu ada potret berwajah. */}
-                <Portrait src={TESTIMONI.foto} name={TESTIMONI.nama} />
-                <span className="min-w-0">
-                  <span className="block text-sm text-sand-100">{TESTIMONI.nama}</span>
-                  <span className="block text-xs text-sand-500">{TESTIMONI.keterangan}</span>
-                </span>
-              </figcaption>
-            </figure>
-          </Reveal>
-
-          <Reveal delay={0.08} className="lg:col-span-5">
-            <div className="surface-sunken rounded-panel p-8">
-              <p className="eyebrow">Penilaian saat ini</p>
-              <p className="num mt-3 text-[3.5rem] leading-none text-amber-400">
-                2,9
-                <span className="ml-2 text-base text-sand-500">/ 5</span>
-              </p>
-              <p className="mt-1 text-xs text-sand-500">dari 1 ulasan tertulis</p>
-
-              <p className="mt-6 text-sm leading-relaxed text-sand-300">
-                Angka ini tidak bagus, dan kami memilih menampilkannya. Halaman yang memuat keberatan
-                terhadap penelitiannya sendiri tidak bisa sekaligus menyembunyikan penilaian
-                penggunanya.
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-sand-500">
-                Keluhan yang paling sering: tampilannya terasa dibuat untuk semua orang, dan karena
-                itu tidak untuk siapa-siapa. Jawabannya sudah ada di{" "}
-                <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
-                  pengaturan
-                </Link>{" "}
-                — enam warna, nama panggilan, dan kendali atas seberapa banyak yang bergerak.
-              </p>
-            </div>
-          </Reveal>
+        <div className="mt-14">
+          <Reviews />
         </div>
       </section>
 
