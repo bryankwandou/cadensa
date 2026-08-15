@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { VaultProvider } from "@/lib/vault";
+import { I18nProvider, COOKIE_BAHASA } from "@/lib/i18n";
+import { bacaBahasa } from "@/lib/terjemah";
 import { Skin } from "@/components/Skin";
 
 const sans = Geist({ variable: "--font-sans-var", subsets: ["latin"] });
@@ -36,14 +39,31 @@ export const viewport: Viewport = {
   themeColor: "#040b0b",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+/**
+ * Bahasa dibaca dari cookie di server, bukan ditebak di klien.
+ *
+ * Kalau pilihannya baru dibaca setelah React hidup, pengguna Inggris melihat
+ * satu halaman penuh berbahasa Indonesia berkedip lebih dulu setiap kali
+ * membuka aplikasi — dan `lang` pada `<html>` sempat salah, yang berarti pembaca
+ * layar melafalkan halaman Inggris dengan pelafalan Indonesia sampai
+ * penggantinya jalan.
+ *
+ * Membaca cookie membuat seluruh dokumen ini dirender sesuai permintaan.
+ * Itu memang harganya, dan halaman ini toh tidak punya isi yang bisa dicache
+ * lintas pengguna.
+ */
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const bahasa = bacaBahasa((await cookies()).get(COOKIE_BAHASA)?.value);
+
   return (
-    <html lang="id" className={`${sans.variable} ${mono.variable} ${display.variable} h-full`}>
+    <html lang={bahasa} className={`${sans.variable} ${mono.variable} ${display.variable} h-full`}>
       <body className="min-h-full antialiased">
-        <VaultProvider>
-          <Skin />
-          {children}
-        </VaultProvider>
+        <I18nProvider awal={bahasa}>
+          <VaultProvider>
+            <Skin />
+            {children}
+          </VaultProvider>
+        </I18nProvider>
       </body>
     </html>
   );

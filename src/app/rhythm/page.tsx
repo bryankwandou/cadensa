@@ -9,6 +9,7 @@ import { DeviceIcon } from "@/components/DeviceIcon";
 import { Glyph } from "@/components/Glyph";
 import { CadenceRing } from "@/components/CadenceRing";
 import { useVault } from "@/lib/vault";
+import { useT } from "@/lib/i18n";
 import { PHASE_NOTE, cycleCoupling, peakPhase, phaseDensity } from "@/lib/cycle";
 import {
   TARGET_BAND,
@@ -24,6 +25,7 @@ import {
   startOfMonth,
   within,
 } from "@/lib/metrics";
+import { alasanKemerataan } from "@/lib/signals";
 import { afterfeelMeta } from "@/lib/types";
 
 const MONTHS = [
@@ -56,7 +58,11 @@ function Stat({
 }
 
 export default function RhythmPage() {
-  const { entries, ready, seed, wipe, remove, profile } = useVault();
+  // `wipe` tidak lagi diambil di sini: menghapus seluruh catatan sekarang hanya
+  // ada di halaman pengaturan. `seed` tetap dipakai, tapi hanya oleh keadaan
+  // kosong di bawah — saat belum ada apa pun yang bisa hilang.
+  const { entries, ready, seed, remove, profile } = useVault();
+  const { t } = useT();
   const [offset, setOffset] = useState(0);
   const isWoman = profile.mode === "wanita";
 
@@ -116,24 +122,24 @@ export default function RhythmPage() {
       <div className="aurora min-h-screen">
         <Nav />
         <main className="mx-auto max-w-2xl px-5 pt-24 text-center">
-          <h1 className="display text-[2.6rem]">Belum ada apa-apa di sini</h1>
+          <h1 className="display text-[2.6rem]">{t("Belum ada apa-apa di sini")}</h1>
           <p className="mx-auto mt-5 max-w-md leading-relaxed text-sand-300">
-            Ritme baru terbaca setelah beberapa catatan. Kalau ingin melihat bentuk halaman ini
-            lebih dulu, muat data contoh — semuanya tetap tinggal di perangkat ini dan bisa
-            dihapus kapan saja.
+            {t(
+              "Ritme baru terbaca setelah beberapa catatan. Kalau ingin melihat bentuk halaman ini lebih dulu, muat data contoh — semuanya tetap tinggal di perangkat ini dan bisa dihapus kapan saja.",
+            )}
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link
               href="/log"
               className="rounded-full bg-teal-500 px-6 py-3 text-sm font-medium text-ink-950"
             >
-              Catat yang pertama
+              {t("Catat yang pertama")}
             </Link>
             <Pressable
               onClick={seed}
               className="rounded-full border hairline px-6 py-3 text-sm text-sand-100 hover:bg-ink-800"
             >
-              Muat data contoh
+              {t("Muat data contoh")}
             </Pressable>
           </div>
         </main>
@@ -147,14 +153,18 @@ export default function RhythmPage() {
       <main className="mx-auto max-w-4xl px-5 pb-24 pt-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="eyebrow">Ritme</p>
+            <p className="eyebrow">{t("Ritme")}</p>
             <h1 className="display mt-2.5 text-[2.6rem]">
-              {MONTHS[anchor.getMonth()]}{" "}
+              {t(MONTHS[anchor.getMonth()])}{" "}
               <span className="text-sand-500">{anchor.getFullYear()}</span>
             </h1>
             <p className="mt-3 text-sm text-sand-500">
-              {monthEntries.length} catatan
-              {isThisMonth && ` · laju saat ini mengarah ke sekitar ${proj.projected}`}
+              {isThisMonth
+                ? t("{n} catatan · laju saat ini mengarah ke sekitar {proyeksi}", {
+                    n: monthEntries.length,
+                    proyeksi: proj.projected,
+                  })
+                : t("{n} catatan", { n: monthEntries.length })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -162,14 +172,14 @@ export default function RhythmPage() {
               onClick={() => setOffset((o) => o - 1)}
               className="rounded-full border hairline px-4 py-2 text-sm text-sand-300 hover:bg-ink-800"
             >
-              Sebelumnya
+              {t("Sebelumnya")}
             </Pressable>
             <Pressable
               onClick={() => setOffset((o) => Math.min(0, o + 1))}
               disabled={offset >= 0}
               className="rounded-full border hairline px-4 py-2 text-sm text-sand-300 disabled:opacity-40 hover:bg-ink-800"
             >
-              Berikutnya
+              {t("Berikutnya")}
             </Pressable>
           </div>
         </div>
@@ -193,10 +203,19 @@ export default function RhythmPage() {
             </div>
 
             <div className="lg:col-span-5">
+              {/*
+                Alasannya diambil dari `signals.ts`, bukan ditulis ulang di sini.
+                Kalimat tetap yang dulu ada di tempat ini menyebut prostat kepada
+                siapa pun yang membuka halaman — termasuk pengguna mode wanita,
+                yang tidak punya organ itu. Mesin bacaan sudah lama menghindari
+                hal tersebut lewat `alasanKemerataan`; yang tertinggal justru
+                paragraf di sekelilingnya.
+              */}
               <p className="text-sm leading-relaxed text-sand-300">
-                Sebulan digambar melingkar karena deret lurus punya garis akhir, dan garis akhir
-                membuat orang mengejar angka. Yang berhubungan dengan kesehatan prostat bukan
-                totalnya, melainkan jaraknya — dan jarak paling mudah dilihat sebagai celah.
+                {t(
+                  "Sebulan digambar melingkar karena deret lurus punya garis akhir, dan garis akhir membuat orang mengejar angka. Yang penting bukan totalnya, melainkan jaraknya — dan jarak paling mudah dilihat sebagai celah. {alasan}",
+                  { alasan: alasanKemerataan(profile.mode, t) },
+                )}
               </p>
               <dl className="mt-6 space-y-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs">
                 {[
@@ -204,15 +223,15 @@ export default function RhythmPage() {
                   ["var(--color-sand-500)", "Netral"],
                   ["var(--color-amber-400)", "Hampa, menyesal, atau lelah"],
                   ["rgba(207,198,184,0.13)", "Tidak ada catatan"],
-                ].map(([c, t]) => (
-                  <div key={t} className="flex items-center gap-3">
+                ].map(([c, label]) => (
+                  <div key={label} className="flex items-center gap-3">
                     <span className="h-1 w-6 shrink-0 rounded-full" style={{ background: c }} />
-                    <dt className="text-sand-500">{t}</dt>
+                    <dt className="text-sand-500">{t(label)}</dt>
                   </div>
                 ))}
               </dl>
               <p className="num mt-5 text-[11px] text-sand-500">
-                pita {TARGET_BAND.low}–{TARGET_BAND.high} · arahkan kursor ke satu jari-jari
+                {t("pita")} {TARGET_BAND.low}–{TARGET_BAND.high} · {t("arahkan kursor ke satu jari-jari")}
               </p>
             </div>
           </div>
@@ -222,9 +241,9 @@ export default function RhythmPage() {
             memang lebih mudah lurus daripada melingkar. */}
         <section className="surface mt-5 rounded-panel p-7 sm:p-9">
           <div className="flex items-center justify-between text-xs text-sand-500">
-            <span>Urutan harian</span>
+            <span>{t("Urutan harian")}</span>
             <span className="num">
-              pita {TARGET_BAND.low}–{TARGET_BAND.high}
+              {t("pita")} {TARGET_BAND.low}–{TARGET_BAND.high}
             </span>
           </div>
           <div className="mt-6 flex h-28 items-end gap-[2px]">
@@ -254,7 +273,7 @@ export default function RhythmPage() {
                     damping: 26,
                     delay: d.day * 0.012,
                   }}
-                  title={`${d.day} — ${d.count} catatan`}
+                  title={`${d.day} — ${t("{n} catatan", { n: d.count })}`}
                 />
               );
             })}
@@ -271,38 +290,43 @@ export default function RhythmPage() {
           <Stat
             label="Cadence Index"
             value={ci == null ? "—" : String(ci)}
-            hint="Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah."
+            hint={t("Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah.")}
             tone={ci == null ? "netral" : ci >= 60 ? "baik" : "perhatian"}
           />
           {isWoman ? (
             <Stat
-              label="Keterikatan siklus"
+              label={t("Keterikatan siklus")}
               value={coupling == null ? "—" : String(coupling)}
               hint={
                 coupling == null
-                  ? "Butuh tanggal haid terakhir dan minimal delapan catatan."
-                  : `Seberapa terpusat doronganmu di satu fase. Puncaknya di fase ${peak}.`
+                  ? t("Butuh tanggal haid terakhir dan minimal delapan catatan.")
+                  : t("Seberapa terpusat doronganmu di satu fase. Puncaknya di fase {fase}.", {
+                      fase: t(peak ?? ""),
+                    })
               }
               tone={coupling == null ? "netral" : "baik"}
             />
           ) : (
             <Stat
-              label="Pita bulan ini"
-              value={band === "dalam-pita" ? "dalam" : band === "sepi" ? "sepi" : "padat"}
-              hint={`Wilayah ${TARGET_BAND.low}–${TARGET_BAND.high}, digambar sebagai koridor bukan garis.`}
+              label={t("Pita bulan ini")}
+              value={t(band === "dalam-pita" ? "dalam" : band === "sepi" ? "sepi" : "padat")}
+              hint={t("Wilayah {rendah}–{tinggi}, digambar sebagai koridor bukan garis.", {
+                rendah: TARGET_BAND.low,
+                tinggi: TARGET_BAND.high,
+              })}
               tone={band === "dalam-pita" ? "baik" : "perhatian"}
             />
           )}
           <Stat
-            label="Kekosongan terpanjang"
-            value={`${Math.round(gap)} hari`}
-            hint="Rentang terpanjang tanpa catatan dalam sebulan terakhir."
+            label={t("Kekosongan terpanjang")}
+            value={t("{n} hari", { n: Math.round(gap) })}
+            hint={t("Rentang terpanjang tanpa catatan dalam sebulan terakhir.")}
             tone={gap >= 9 ? "perhatian" : "netral"}
           />
           <Stat
-            label="Rasa yang enak"
+            label={t("Rasa yang enak")}
             value={pos == null ? "—" : `${Math.round(pos * 100)}%`}
-            hint="Bagian catatan bulan ini yang ditandai lega atau nikmat."
+            hint={t("Bagian catatan bulan ini yang ditandai lega atau nikmat.")}
             tone={pos != null && pos < 0.4 ? "perhatian" : "baik"}
           />
         </section>
@@ -310,9 +334,9 @@ export default function RhythmPage() {
         {/* Sebaran per fase siklus — hanya berarti di mode wanita */}
         {phases && (
           <section className="surface mt-6 rounded-panel p-7 sm:p-9">
-            <h2 className="eyebrow">Sebaran per fase siklus</h2>
+            <h2 className="eyebrow">{t("Sebaran per fase siklus")}</h2>
             <p className="mt-2 text-xs text-sand-500">
-              Dihitung per hari fase, bukan per total, karena panjang tiap fase berbeda.
+              {t("Dihitung per hari fase, bukan per total, karena panjang tiap fase berbeda.")}
             </p>
             <div className="mt-6 space-y-3">
               {phases.map((p, i) => {
@@ -321,9 +345,11 @@ export default function RhythmPage() {
                 return (
                   <div key={p.phase}>
                     <div className="flex items-baseline justify-between text-sm">
-                      <span className={isPeak ? "text-teal-500" : "text-sand-300"}>{p.phase}</span>
+                      <span className={isPeak ? "text-teal-500" : "text-sand-300"}>
+                        {t(p.phase)}
+                      </span>
                       <span className="font-mono text-xs text-sand-500">
-                        {p.count} catatan · {p.days} hari
+                        {t("{n} catatan", { n: p.count })} · {t("{n} hari", { n: p.days })}
                       </span>
                     </div>
                     <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-ink-800">
@@ -344,7 +370,7 @@ export default function RhythmPage() {
               })}
             </div>
             {peak && (
-              <p className="mt-5 text-sm leading-relaxed text-sand-300">{PHASE_NOTE[peak]}</p>
+              <p className="mt-5 text-sm leading-relaxed text-sand-300">{t(PHASE_NOTE[peak])}</p>
             )}
           </section>
         )}
@@ -352,28 +378,28 @@ export default function RhythmPage() {
         {isWoman && !phases && (
           <div className="mt-6 rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-7">
             <p className="text-sm leading-relaxed text-sand-300">
-              Isi tanggal haid terakhir di{" "}
+              {t("Isi tanggal haid terakhir di")}{" "}
               <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
-                pengaturan
+                {t("pengaturan")}
               </Link>{" "}
-              supaya catatanmu bisa dibaca terhadap fase siklus, bukan sekadar terhadap tanggal.
+              {t("supaya catatanmu bisa dibaca terhadap fase siklus, bukan sekadar terhadap tanggal.")}
             </p>
           </div>
         )}
 
         <p className="mt-4 text-xs text-sand-500">
-          Beban edging bulan ini: <span className="font-mono">{Math.round(load)}</span>
+          {t("Beban edging bulan ini:")} <span className="font-mono">{Math.round(load)}</span>
         </p>
 
         <div className="mt-8">
           <Link href="/insights" className="text-sm text-teal-500 hover:text-teal-600">
-            Baca apa yang terbaca dari pola ini
+            {t("Baca apa yang terbaca dari pola ini")}
           </Link>
         </div>
 
         {/* Riwayat */}
         <section className="mt-14">
-          <h2 className="eyebrow">Terakhir dicatat</h2>
+          <h2 className="eyebrow">{t("Terakhir dicatat")}</h2>
           <ul className="mt-4 divide-y divide-[rgba(214,205,190,0.08)]">
             {recent.map((e) => {
               const d = new Date(e.at);
@@ -389,14 +415,16 @@ export default function RhythmPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm text-sand-100">
-                      {d.getDate()} {MONTHS[d.getMonth()].slice(0, 3)} ·{" "}
+                      {d.getDate()} {t(MONTHS[d.getMonth()]).slice(0, 3)} ·{" "}
                       {String(d.getHours()).padStart(2, "0")}.
-                      {String(d.getMinutes()).padStart(2, "0")} · {e.method}
+                      {String(d.getMinutes()).padStart(2, "0")} · {t(e.method)}
                     </p>
                     <p className="mt-1 text-xs text-sand-500">
-                      {e.durationSec ? `${Math.round(e.durationSec / 60)} menit` : "durasi tidak dicatat"}
-                      {e.edging !== "tidak" && ` · edging ${e.edging}`}
-                      {e.trigger && ` · ${e.trigger}`}
+                      {e.durationSec
+                        ? t("{n} menit", { n: Math.round(e.durationSec / 60) })
+                        : t("durasi tidak dicatat")}
+                      {e.edging !== "tidak" && ` · ${t("edging")} ${t(e.edging)}`}
+                      {e.trigger && ` · ${t(e.trigger)}`}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
@@ -410,14 +438,14 @@ export default function RhythmPage() {
                       }`}
                     >
                       <Glyph set="feel" name={e.afterfeel} size={16} />
-                      {e.afterfeel}
+                      {t(e.afterfeel)}
                     </span>
                     <button
                       onClick={() => remove(e.id)}
                       className="text-xs text-sand-500 hover:text-sand-100"
-                      aria-label="Hapus catatan ini"
+                      aria-label={t("Hapus catatan ini")}
                     >
-                      hapus
+                      {t("hapus")}
                     </button>
                   </div>
                 </li>
@@ -426,22 +454,25 @@ export default function RhythmPage() {
           </ul>
         </section>
 
-        <div className="mt-12 flex flex-wrap gap-3">
-          <Pressable
-            onClick={seed}
-            className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-300 hover:bg-ink-800"
-          >
-            Ganti dengan data contoh
-          </Pressable>
-          <Pressable
-            onClick={() => {
-              if (confirm("Hapus semua catatan di perangkat ini? Tidak ada salinan lain.")) wipe();
-            }}
-            className="rounded-full border border-signal-500/40 px-5 py-2.5 text-sm text-signal-500 hover:bg-signal-500/10"
-          >
-            Hapus semua
-          </Pressable>
-        </div>
+        {/*
+          Dua tombol pernah berdiri di sini: "Ganti dengan data contoh" dan
+          "Hapus semua". Keduanya dicabut atas permintaan pemilik produk, dan
+          pencabutannya tidak menghilangkan satu pun kemampuan.
+
+          Menghapus seluruh catatan tetap bisa dilakukan, tempatnya di halaman
+          pengaturan — bersama unduh cadangan dan hapus akun. Di sanalah orang
+          datang ketika memang berniat membuang sesuatu, dan di sana tombol itu
+          didahului tawaran mengunduh cadangan lebih dulu.
+
+          Data contoh tetap tersedia bagi yang benar-benar membutuhkannya:
+          pengguna baru yang catatannya masih nol, lewat keadaan kosong di
+          halaman ini dan di halaman bacaan. Di sana tidak ada apa pun yang bisa
+          hilang.
+
+          Yang hilang justru satu-satunya hal yang memang berbahaya: tombol
+          perusak di kaki halaman yang paling sering dibuka, jauh dari niat
+          menghapus dan dekat dengan jari yang sekadar menggulir sampai bawah.
+        */}
       </main>
     </div>
   );

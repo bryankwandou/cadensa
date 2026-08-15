@@ -16,6 +16,7 @@ import {
 import { afterfeelMeta, deviceMeta, type Entry, type Mode } from "./types";
 import { PHASE_NOTE, cycleCoupling, daysUntilNextPeriod, peakPhase, phaseDensity, phaseOf } from "./cycle";
 import type { Profile } from "./vault";
+import { apaAdanya, type Terjemah } from "./terjemah";
 
 export type ReadingKind = "ritme" | "sinyal" | "praktik" | "medis";
 
@@ -32,7 +33,7 @@ export type Reading = {
 };
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
-const mins = (sec: number) => `${Math.round(sec / 60)} menit`;
+const mins = (sec: number, t: Terjemah) => t("{n} menit", { n: Math.round(sec / 60) });
 
 /**
  * Mesin bacaan Cadensa. Berjalan sepenuhnya di perangkat — tidak ada catatan
@@ -53,13 +54,18 @@ const mins = (sec: number) => `${Math.round(sec / 60)} menit`;
  * yang salah alamat, dan satu kalimat seperti itu cukup untuk membatalkan
  * kepercayaan pada seluruh bacaan lainnya.
  */
-function alasanKemerataan(mode: Mode): string {
+export function alasanKemerataan(mode: Mode, t: Terjemah = apaAdanya): string {
   return mode === "wanita"
-    ? "Ritme yang merata lebih mudah dibaca sebagai pola, dan pola itulah yang membuat pergeseran suasana hati bisa terlihat sejak awal."
-    : "Yang berhubungan dengan kesehatan prostat adalah keteraturannya, bukan totalnya.";
+    ? t("Ritme yang merata lebih mudah dibaca sebagai pola, dan pola itulah yang membuat pergeseran suasana hati bisa terlihat sejak awal.")
+    : t("Yang berhubungan dengan kesehatan prostat adalah keteraturannya, bukan totalnya.");
 }
 
-export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pria"): Reading[] {
+export function readEntries(
+  entries: Entry[],
+  now = new Date(),
+  mode: Mode = "pria",
+  t: Terjemah = apaAdanya,
+): Reading[] {
   const out: Reading[] = [];
   if (entries.length < 3) return out;
 
@@ -75,9 +81,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "medis-berulang",
       kind: "medis",
       strength: 1,
-      title: "Keluhan fisik berulang",
-      body: `Dalam 30 hari terakhir kamu mencatat rasa ngilu, perih, atau nyeri sebanyak ${flags} kali. Rasa sesekali setelah sesi panjang itu wajar; yang berulang seperti ini tidak masuk kategori itu.`,
-      action: "Bawa ringkasan ini ke dokter atau urolog. Ini bukan hal yang diselesaikan dengan mengubah teknik.",
+      title: t("Keluhan fisik berulang"),
+      body: t(
+        "Dalam 30 hari terakhir kamu mencatat rasa ngilu, perih, atau nyeri sebanyak {n} kali. Rasa sesekali setelah sesi panjang itu wajar; yang berulang seperti ini tidak masuk kategori itu.",
+        { n: flags },
+      ),
+      action: t("Bawa ringkasan ini ke dokter atau urolog. Ini bukan hal yang diselesaikan dengan mengubah teknik."),
     });
   }
 
@@ -91,18 +100,24 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "ritme-sepi",
       kind: "ritme",
       strength: 0.6,
-      title: "Bulan ini berjalan lebih lambat",
-      body: `Sampai hari ini ada ${proj.soFar} catatan, dan dengan laju yang sama bulan ini akan berhenti di sekitar ${proj.projected}. Itu di bawah pita yang biasanya dikaitkan dengan kesehatan prostat yang lebih baik.`,
-      action: "Tidak perlu mengejar angka. Cukup perhatikan apakah penurunannya datang dari lelah, stres, atau memang tidak ada dorongan.",
+      title: t("Bulan ini berjalan lebih lambat"),
+      body: t(
+        "Sampai hari ini ada {n} catatan, dan dengan laju yang sama bulan ini akan berhenti di sekitar {proyeksi}. Itu di bawah pita yang biasanya dikaitkan dengan kesehatan prostat yang lebih baik.",
+        { n: proj.soFar, proyeksi: proj.projected },
+      ),
+      action: t("Tidak perlu mengejar angka. Cukup perhatikan apakah penurunannya datang dari lelah, stres, atau memang tidak ada dorongan."),
     });
   } else if (band === "padat") {
     out.push({
       id: "ritme-padat",
       kind: "ritme",
       strength: 0.5,
-      title: "Bulan ini lebih padat dari biasanya",
-      body: `Laju saat ini mengarah ke sekitar ${proj.projected} kejadian bulan ini, di atas pita biasa. Padat sendiri bukan masalah selama rasa sesudahnya tetap enak.`,
-      action: "Cek halaman ritme: kalau rasa sesudahnya mulai bergeser ke netral atau hampa, itu penanda yang lebih berarti daripada jumlahnya.",
+      title: t("Bulan ini lebih padat dari biasanya"),
+      body: t(
+        "Laju saat ini mengarah ke sekitar {proyeksi} kejadian bulan ini, di atas pita biasa. Padat sendiri bukan masalah selama rasa sesudahnya tetap enak.",
+        { proyeksi: proj.projected },
+      ),
+      action: t("Cek halaman ritme: kalau rasa sesudahnya mulai bergeser ke netral atau hampa, itu penanda yang lebih berarti daripada jumlahnya."),
     });
   }
 
@@ -111,9 +126,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "ritme-menumpuk",
       kind: "ritme",
       strength: 0.7,
-      title: "Jaraknya tidak merata",
-      body: `Indeks kadensmu ${ci} dari 100. Jumlahnya mungkin sudah cukup, tapi tersebar tidak rata — sebagian menumpuk, sebagian kosong panjang. ${alasanKemerataan(mode)}`,
-      action: "Ambil satu hari tetap dalam seminggu yang biasanya kosong, dan biarkan itu jadi jangkar ritmemu.",
+      title: t("Jaraknya tidak merata"),
+      body: t(
+        "Indeks kadensmu {ci} dari 100. Jumlahnya mungkin sudah cukup, tapi tersebar tidak rata — sebagian menumpuk, sebagian kosong panjang. {alasan}",
+        { ci, alasan: alasanKemerataan(mode, t) },
+      ),
+      action: t("Ambil satu hari tetap dalam seminggu yang biasanya kosong, dan biarkan itu jadi jangkar ritmemu."),
     });
   }
 
@@ -123,9 +141,9 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "ritme-kosong",
       kind: "ritme",
       strength: 0.55,
-      title: `Kekosongan ${Math.round(gap)} hari`,
-      body: `Ini rentang terpanjang dalam sebulan terakhir. Kalau penyebabnya sakit atau bepergian, tidak ada yang perlu dibaca dari sini.`,
-      action: "Kalau bukan keduanya, biasanya yang menahan bukan tubuh tapi beban pikiran. Catat satu alasan di entri berikutnya.",
+      title: t("Kekosongan {n} hari", { n: Math.round(gap) }),
+      body: t("Ini rentang terpanjang dalam sebulan terakhir. Kalau penyebabnya sakit atau bepergian, tidak ada yang perlu dibaca dari sini."),
+      action: t("Kalau bukan keduanya, biasanya yang menahan bukan tubuh tapi beban pikiran. Catat satu alasan di entri berikutnya."),
     });
   }
 
@@ -143,9 +161,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
         id: "sinyal-stres",
         kind: "sinyal",
         strength: 0.85,
-        title: "Yang tubuhmu tunjukkan dua minggu ini",
-        body: `Frekuensimu naik dibanding dua minggu sebelumnya, tapi durasinya justru memendek — dari sekitar ${mins(prevMed!)} ke ${mins(nowMed!)} — dan beberapa kali kamu menandai alasannya stres atau bosan. Pola cepat dan sering seperti ini biasanya bukan soal gairah, tapi cara tubuh menurunkan tekanan.`,
-        action: "Lihat ke belakang dua minggu ini: ada satu hal yang sedang menekan. Itu yang perlu diurus, bukan kebiasaannya.",
+        title: t("Yang tubuhmu tunjukkan dua minggu ini"),
+        body: t(
+          "Frekuensimu naik dibanding dua minggu sebelumnya, tapi durasinya justru memendek — dari sekitar {sebelum} ke {sekarang} — dan beberapa kali kamu menandai alasannya stres atau bosan. Pola cepat dan sering seperti ini biasanya bukan soal gairah, tapi cara tubuh menurunkan tekanan.",
+          { sebelum: mins(prevMed!, t), sekarang: mins(nowMed!, t) },
+        ),
+        action: t("Lihat ke belakang dua minggu ini: ada satu hal yang sedang menekan. Itu yang perlu diurus, bukan kebiasaannya."),
       });
     }
   }
@@ -161,11 +182,25 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "sinyal-datar",
       kind: "sinyal",
       strength: dropped ? 0.9 : 0.7,
-      title: "Rasa sesudahnya mendatar",
-      body: `Hanya ${pct(posNow)} catatan bulan ini yang kamu tandai lega atau nikmat${
-        dropped ? `, turun dari ${pct(posBefore!)} pada periode sebelumnya` : ""
-      }, dan ada kekosongan ${Math.round(gap)} hari di dalamnya. Kombinasi jarang dan datar biasanya bukan soal libido.`,
-      action: "Perhatikan apakah hal lain yang biasanya kamu nikmati juga terasa tawar belakangan ini. Kalau iya, itu layak dibicarakan dengan seseorang.",
+      title: t("Rasa sesudahnya mendatar"),
+      body: t(
+        "Hanya {sekarang} catatan bulan ini yang kamu tandai lega atau nikmat{turun}, dan ada kekosongan {jeda} hari di dalamnya. Kombinasi jarang dan datar biasanya bukan soal libido.",
+        {
+          sekarang: pct(posNow),
+          jeda: Math.round(gap),
+          /*
+            Anak kalimatnya diterjemahkan utuh, bukan dirangkai dari potongan.
+            Urutan kata Inggris dan Indonesia berbeda, dan menyambung potongan
+            per kata menghasilkan kalimat yang benar secara kata tapi janggal
+            secara bahasa — persis jenis kejanggalan yang paling cepat terbaca
+            sebagai terjemahan mesin.
+          */
+          turun: dropped
+            ? t(", turun dari {sebelum} pada periode sebelumnya", { sebelum: pct(posBefore!) })
+            : "",
+        },
+      ),
+      action: t("Perhatikan apakah hal lain yang biasanya kamu nikmati juga terasa tawar belakangan ini. Kalau iya, itu layak dibicarakan dengan seseorang."),
     });
   }
 
@@ -178,11 +213,15 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "sinyal-tidur",
       kind: "sinyal",
       strength: shifted ? 0.75 : 0.55,
-      title: "Jamnya bergeser ke dini hari",
-      body: `${pct(lateNow)} kejadian dua minggu ini jatuh antara pukul 23.00 dan 04.00${
-        shifted ? ", naik jelas dibanding dua minggu sebelumnya" : ""
-      }. Pola larut malam yang menetap lebih sering berhubungan dengan susah tidur daripada dengan dorongan seksual.`,
-      action: "Coba geser satu sesi ke sore atau pagi minggu ini, lalu lihat apakah tidurmu ikut berubah.",
+      title: t("Jamnya bergeser ke dini hari"),
+      body: t(
+        "{bagian} kejadian dua minggu ini jatuh antara pukul 23.00 dan 04.00{naik}. Pola larut malam yang menetap lebih sering berhubungan dengan susah tidur daripada dengan dorongan seksual.",
+        {
+          bagian: pct(lateNow),
+          naik: shifted ? t(", naik jelas dibanding dua minggu sebelumnya") : "",
+        },
+      ),
+      action: t("Coba geser satu sesi ke sore atau pagi minggu ini, lalu lihat apakah tidurmu ikut berubah."),
     });
   }
 
@@ -192,9 +231,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "sinyal-tanpa-lega",
       kind: "sinyal",
       strength: 0.8,
-      title: "Sering, tapi jarang terasa lega",
-      body: `Ada ${d30.length} catatan dalam 30 hari, dan hanya ${pct(posNow)} yang kamu tandai lega atau nikmat. Yang menarik di sini bukan jumlahnya — jumlah tinggi yang tetap terasa enak bukan masalah. Yang terbaca adalah jaraknya dengan rasa lega.`,
-      action: "Kalau pola ini bertahan beberapa minggu lagi, satu sesi bicara dengan psikolog akan lebih menjawab daripada mengubah teknik.",
+      title: t("Sering, tapi jarang terasa lega"),
+      body: t(
+        "Ada {n} catatan dalam 30 hari, dan hanya {bagian} yang kamu tandai lega atau nikmat. Yang menarik di sini bukan jumlahnya — jumlah tinggi yang tetap terasa enak bukan masalah. Yang terbaca adalah jaraknya dengan rasa lega.",
+        { n: d30.length, bagian: pct(posNow) },
+      ),
+      action: t("Kalau pola ini bertahan beberapa minggu lagi, satu sesi bicara dengan psikolog akan lebih menjawab daripada mengubah teknik."),
     });
   }
 
@@ -209,9 +251,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
         id: "praktik-edging",
         kind: "praktik",
         strength: 0.8,
-        title: "Edging panjang berujung ngilu",
-        body: `Dari ${longEdge.length} sesi dengan edging lama bulan ini, ${hurt} berakhir dengan ngilu, perih, atau nyeri. Sesi pendek dan sedangmu hampir tidak pernah begitu.`,
-        action: "Potong siklus edging di tiga, bukan lima. Kebanyakan keluhan hilang di angka itu.",
+        title: t("Edging panjang berujung ngilu"),
+        body: t(
+          "Dari {n} sesi dengan edging lama bulan ini, {sakit} berakhir dengan ngilu, perih, atau nyeri. Sesi pendek dan sedangmu hampir tidak pernah begitu.",
+          { n: longEdge.length, sakit: hurt },
+        ),
+        action: t("Potong siklus edging di tiga, bukan lima. Kebanyakan keluhan hilang di angka itu."),
       });
     }
   }
@@ -225,9 +270,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
         id: "praktik-pelumas",
         kind: "praktik",
         strength: 0.65,
-        title: "Perih yang datang dari gesekan",
-        body: `Rasa perih muncul di ${sore} dari ${dry.length} sesi tanpa pelumas bulan ini, dan hampir tidak pernah di sesi yang memakai pelumas.`,
-        action: "Pakai pelumas berbahan air untuk beberapa sesi berikutnya, lalu bandingkan catatannya.",
+        title: t("Perih yang datang dari gesekan"),
+        body: t(
+          "Rasa perih muncul di {sakit} dari {n} sesi tanpa pelumas bulan ini, dan hampir tidak pernah di sesi yang memakai pelumas.",
+          { sakit: sore, n: dry.length },
+        ),
+        action: t("Pakai pelumas berbahan air untuk beberapa sesi berikutnya, lalu bandingkan catatannya."),
       });
     }
   }
@@ -239,9 +287,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "praktik-beban",
       kind: "praktik",
       strength: 0.4,
-      title: "Beban edging bulan ini tinggi",
-      body: `Akumulasi edgingmu bulan ini ada di angka ${Math.round(load)} dan sejauh ini tubuhmu masih menerimanya tanpa keluhan.`,
-      action: "Simpan saja sebagai catatan: kalau mulai muncul ngilu, angka inilah yang pertama diturunkan.",
+      title: t("Beban edging bulan ini tinggi"),
+      body: t(
+        "Akumulasi edgingmu bulan ini ada di angka {beban} dan sejauh ini tubuhmu masih menerimanya tanpa keluhan.",
+        { beban: Math.round(load) },
+      ),
+      action: t("Simpan saja sebagai catatan: kalau mulai muncul ngilu, angka inilah yang pertama diturunkan."),
     });
   }
 
@@ -252,9 +303,12 @@ export function readEntries(entries: Entry[], now = new Date(), mode: Mode = "pr
       id: "praktik-cepat",
       kind: "praktik",
       strength: 0.5,
-      title: "Sesimu hampir selalu singkat",
-      body: `Durasi tengahmu bulan ini sekitar ${mins(med)}. Cepat tidak selalu berarti buruk, tapi kalau yang kamu cari rasa lega, tempo seperti ini jarang sampai ke sana.`,
-      action: "Sekali minggu ini, tunda sepuluh menit sebelum mulai dan lihat apakah rasa sesudahnya berbeda.",
+      title: t("Sesimu hampir selalu singkat"),
+      body: t(
+        "Durasi tengahmu bulan ini sekitar {durasi}. Cepat tidak selalu berarti buruk, tapi kalau yang kamu cari rasa lega, tempo seperti ini jarang sampai ke sana.",
+        { durasi: mins(med, t) },
+      ),
+      action: t("Sekali minggu ini, tunda sepuluh menit sebelum mulai dan lihat apakah rasa sesudahnya berbeda."),
     });
   }
 
@@ -276,7 +330,7 @@ function sortReadings(out: Reading[]) {
  * muncul pada satu alat dan tidak pada yang lain, itu soal perangkat, bukan soal
  * kebiasaan — dan menjawabnya dengan saran perilaku akan salah alamat.
  */
-export function readDevices(entries: Entry[], now = new Date()): Reading[] {
+export function readDevices(entries: Entry[], now = new Date(), t: Terjemah = apaAdanya): Reading[] {
   const out: Reading[] = [];
   const d60 = lastDays(entries, 60, now).filter((e) => e.device);
   if (d60.length < 4) return out;
@@ -292,6 +346,10 @@ export function readDevices(entries: Entry[], now = new Date()): Reading[] {
     if (list.length < 3) continue;
     const meta = deviceMeta(key);
     if (!meta) continue;
+    // Nama alat ikut lewat kamus. Kalau belum ada terjemahannya, yang keluar
+    // tetap nama Indonesianya — bukan kunci mentah atau bagian kalimat kosong.
+    const nama = t(meta.label);
+    const namaKecil = nama.toLowerCase();
 
     const hurt = list.filter((e) => afterfeelMeta(e.afterfeel).medical).length;
     const others = d60.filter((e) => e.device !== key);
@@ -305,9 +363,12 @@ export function readDevices(entries: Entry[], now = new Date()): Reading[] {
         id: `alat-${key}`,
         kind: "praktik",
         strength: 0.75,
-        title: `${meta.label} lebih sering berujung keluhan`,
-        body: `Dari ${list.length} sesi dengan ${meta.label.toLowerCase()} dalam dua bulan terakhir, ${hurt} berakhir dengan ngilu, perih, nyeri, atau kebas. Alat lain yang kamu pakai tidak menunjukkan pola yang sama.`,
-        action: meta.care,
+        title: t("{alat} lebih sering berujung keluhan", { alat: nama }),
+        body: t(
+          "Dari {n} sesi dengan {alat} dalam dua bulan terakhir, {sakit} berakhir dengan ngilu, perih, nyeri, atau kebas. Alat lain yang kamu pakai tidak menunjukkan pola yang sama.",
+          { n: list.length, alat: namaKecil, sakit: hurt },
+        ),
+        action: t(meta.care),
       });
     }
 
@@ -317,9 +378,12 @@ export function readDevices(entries: Entry[], now = new Date()): Reading[] {
         id: `alat-dominan-${key}`,
         kind: "praktik",
         strength: 0.45,
-        title: `Hampir semuanya lewat ${meta.label.toLowerCase()}`,
-        body: `${Math.round((list.length / d60.length) * 100)}% sesi beralatmu memakai satu alat yang rangsangannya termasuk kuat. Tubuh menyesuaikan diri dengan rangsangan yang selalu sama, dan yang lebih lembut lama-lama terasa kurang.`,
-        action: "Selingi dengan cara yang lebih pelan beberapa kali, supaya rentang kepekaannya tidak menyempit ke satu titik.",
+        title: t("Hampir semuanya lewat {alat}", { alat: namaKecil }),
+        body: t(
+          "{bagian}% sesi beralatmu memakai satu alat yang rangsangannya termasuk kuat. Tubuh menyesuaikan diri dengan rangsangan yang selalu sama, dan yang lebih lembut lama-lama terasa kurang.",
+          { bagian: Math.round((list.length / d60.length) * 100) },
+        ),
+        action: t("Selingi dengan cara yang lebih pelan beberapa kali, supaya rentang kepekaannya tidak menyempit ke satu titik."),
       });
     }
 
@@ -329,9 +393,12 @@ export function readDevices(entries: Entry[], now = new Date()): Reading[] {
         id: `alat-pelumas-${key}`,
         kind: "praktik",
         strength: 0.6,
-        title: `${meta.label} tanpa pelumas`,
-        body: `Sebagian besar sesimu dengan alat ini tercatat tanpa pelumas, dan keluhan fisik muncul di ${Math.round(rate * 100)}% di antaranya.`,
-        action: "Pakai pelumas berbasis air. Bahan silikon dan minyak bisa merusak permukaan alat berbahan silikon atau TPE.",
+        title: t("{alat} tanpa pelumas", { alat: nama }),
+        body: t(
+          "Sebagian besar sesimu dengan alat ini tercatat tanpa pelumas, dan keluhan fisik muncul di {bagian}% di antaranya.",
+          { bagian: Math.round(rate * 100) },
+        ),
+        action: t("Pakai pelumas berbasis air. Bahan silikon dan minyak bisa merusak permukaan alat berbahan silikon atau TPE."),
       });
     }
   }
@@ -343,7 +410,12 @@ export function readDevices(entries: Entry[], now = new Date()): Reading[] {
  * Bacaan mode wanita. Tidak memakai angka 21 dan tidak memakai pita target —
  * yang dibaca adalah hubungan antara dorongan dan fase siklus.
  */
-export function readCycle(entries: Entry[], profile: Profile, now = new Date()): Reading[] {
+export function readCycle(
+  entries: Entry[],
+  profile: Profile,
+  now = new Date(),
+  t: Terjemah = apaAdanya,
+): Reading[] {
   const out: Reading[] = [];
   const cycle = profile.cycle;
 
@@ -352,9 +424,9 @@ export function readCycle(entries: Entry[], profile: Profile, now = new Date()):
       id: "siklus-belum-diisi",
       kind: "ritme",
       strength: 0.9,
-      title: "Siklusnya belum diketahui",
-      body: "Tanpa tanggal haid terakhir, catatanmu hanya bisa dibaca sebagai deret tanggal biasa. Dengan tanggal itu, pola yang berulang tiap bulan mulai kelihatan.",
-      action: "Isi tanggal hari pertama haid terakhir di halaman pengaturan. Satu isian, sekali saja.",
+      title: t("Siklusnya belum diketahui"),
+      body: t("Tanpa tanggal haid terakhir, catatanmu hanya bisa dibaca sebagai deret tanggal biasa. Dengan tanggal itu, pola yang berulang tiap bulan mulai kelihatan."),
+      action: t("Isi tanggal hari pertama haid terakhir di halaman pengaturan. Satu isian, sekali saja."),
     });
     return out;
   }
@@ -370,18 +442,25 @@ export function readCycle(entries: Entry[], profile: Profile, now = new Date()):
         id: "siklus-terikat",
         kind: "ritme",
         strength: 0.85,
-        title: `Doronganmu memuncak di fase ${peak}`,
-        body: `Keterikatan siklusmu ${coupling} dari 100, dan puncaknya jatuh di fase ${peak}. ${PHASE_NOTE[peak]}`,
-        action: "Kalau ada minggu yang bisa kamu atur sendiri, letakkan yang menuntut tenaga di luar fase ini.",
+        title: t("Doronganmu memuncak di fase {fase}", { fase: t(peak) }),
+        body: t("Keterikatan siklusmu {n} dari 100, dan puncaknya jatuh di fase {fase}. {catatan}", {
+          n: coupling,
+          fase: t(peak),
+          catatan: t(PHASE_NOTE[peak]),
+        }),
+        action: t("Kalau ada minggu yang bisa kamu atur sendiri, letakkan yang menuntut tenaga di luar fase ini."),
       });
     } else if (coupling <= 20 && d90.length >= 12) {
       out.push({
         id: "siklus-lepas",
         kind: "ritme",
         strength: 0.6,
-        title: "Polamu hampir tidak mengikuti siklus",
-        body: `Keterikatan siklusmu hanya ${coupling} dari 100 — sebarannya cukup rata di semua fase. Ini bukan kelainan; pada sebagian orang dorongan memang lebih ditentukan keadaan sehari-hari daripada hormon.`,
-        action: "Coba lihat pemicu yang kamu catat. Untuk pola seperti ini, itu biasanya lebih menjelaskan daripada tanggal.",
+        title: t("Polamu hampir tidak mengikuti siklus"),
+        body: t(
+          "Keterikatan siklusmu hanya {n} dari 100 — sebarannya cukup rata di semua fase. Ini bukan kelainan; pada sebagian orang dorongan memang lebih ditentukan keadaan sehari-hari daripada hormon.",
+          { n: coupling },
+        ),
+        action: t("Coba lihat pemicu yang kamu catat. Untuk pola seperti ini, itu biasanya lebih menjelaskan daripada tanggal."),
       });
     }
   }
@@ -397,9 +476,12 @@ export function readCycle(entries: Entry[], profile: Profile, now = new Date()):
         id: "siklus-luteal-datar",
         kind: "sinyal",
         strength: 0.7,
-        title: "Fase luteal terasa berbeda",
-        body: `Di minggu-minggu menjelang haid, hanya ${pct(pos)} catatanmu terasa lega atau nikmat, dibanding ${pct(rest)} di fase lain. Pergeseran suasana hati di fase ini lumrah, dan catatanmu menunjukkannya dengan jelas.`,
-        action: "Perlakukan minggu itu sebagai minggu yang butuh lebih banyak istirahat, bukan sebagai minggu yang gagal.",
+        title: t("Fase luteal terasa berbeda"),
+        body: t(
+          "Di minggu-minggu menjelang haid, hanya {luteal} catatanmu terasa lega atau nikmat, dibanding {lain} di fase lain. Pergeseran suasana hati di fase ini lumrah, dan catatanmu menunjukkannya dengan jelas.",
+          { luteal: pct(pos), lain: pct(rest) },
+        ),
+        action: t("Perlakukan minggu itu sebagai minggu yang butuh lebih banyak istirahat, bukan sebagai minggu yang gagal."),
       });
     }
   }
@@ -409,9 +491,12 @@ export function readCycle(entries: Entry[], profile: Profile, now = new Date()):
       id: "siklus-dekat-haid",
       kind: "ritme",
       strength: 0.3,
-      title: until <= 1 ? "Haid diperkirakan mulai besok" : `Perkiraan haid ${until} hari lagi`,
-      body: "Perkiraan ini dihitung dari panjang siklus yang kamu isi, bukan dari pengamatan tubuh. Meleset beberapa hari itu biasa.",
-      action: "Perbarui tanggal haid terakhir begitu mulai, supaya perkiraan berikutnya ikut membaik.",
+      title:
+        until <= 1
+          ? t("Haid diperkirakan mulai besok")
+          : t("Perkiraan haid {n} hari lagi", { n: until }),
+      body: t("Perkiraan ini dihitung dari panjang siklus yang kamu isi, bukan dari pengamatan tubuh. Meleset beberapa hari itu biasa."),
+      action: t("Perbarui tanggal haid terakhir begitu mulai, supaya perkiraan berikutnya ikut membaik."),
     });
   }
 
@@ -419,15 +504,23 @@ export function readCycle(entries: Entry[], profile: Profile, now = new Date()):
 }
 
 /** Satu pintu masuk untuk halaman bacaan. */
-export function readAll(entries: Entry[], profile: Profile, now = new Date()): Reading[] {
-  const base = profile.mode === "wanita" ? readCycleMode(entries, profile, now) : readEntries(entries, now);
-  return sortReadings([...base, ...readDevices(entries, now)]);
+export function readAll(
+  entries: Entry[],
+  profile: Profile,
+  now = new Date(),
+  t: Terjemah = apaAdanya,
+): Reading[] {
+  const base =
+    profile.mode === "wanita"
+      ? readCycleMode(entries, profile, now, t)
+      : readEntries(entries, now, "pria", t);
+  return sortReadings([...base, ...readDevices(entries, now, t)]);
 }
 
 /** Mode wanita memakai bacaan bersama, dikurangi yang bersandar pada pita 21. */
-function readCycleMode(entries: Entry[], profile: Profile, now: Date): Reading[] {
-  const shared = readEntries(entries, now, "wanita").filter(
+function readCycleMode(entries: Entry[], profile: Profile, now: Date, t: Terjemah): Reading[] {
+  const shared = readEntries(entries, now, "wanita", t).filter(
     (r) => !["ritme-sepi", "ritme-padat"].includes(r.id),
   );
-  return [...readCycle(entries, profile, now), ...shared];
+  return [...readCycle(entries, profile, now, t), ...shared];
 }

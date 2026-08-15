@@ -5,8 +5,16 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Portrait } from "./Portrait";
 import { Reveal } from "./Motion";
+import { useT } from "@/lib/i18n";
 
-type Review = { name: string; rating: number; body: string; at: string };
+type Review = {
+  name: string;
+  rating: number;
+  body: string;
+  at: string;
+  avatar?: string | null;
+  focus?: { x: number; y: number; zoom: number } | null;
+};
 
 /**
  * Ulasan yang tayang di halaman depan.
@@ -21,6 +29,7 @@ type Review = { name: string; rating: number; body: string; at: string };
  * belum ada, dan mengajak menulis yang pertama.
  */
 export function Reviews() {
+  const { t } = useT();
   const [data, setData] = useState<{ reviews: Review[]; count: number; average: number | null } | null>(
     null,
   );
@@ -46,20 +55,20 @@ export function Reviews() {
     return (
       <Reveal>
         <div className="surface rounded-panel p-8 sm:p-10">
-          <p className="display-sm text-xl text-sand-100">Belum ada ulasan</p>
+          <p className="display-sm text-xl text-sand-100">{t("Belum ada ulasan")}</p>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-sand-300">
-            Tidak ada yang ditulis di sini sampai ada pengguna sungguhan yang menulisnya. Halaman
-            yang memuat keberatan terhadap penelitiannya sendiri tidak bisa sekaligus mengarang
-            kalimat pujian.
+            {t(
+              "Tidak ada yang ditulis di sini sampai ada pengguna sungguhan yang menulisnya. Halaman yang memuat keberatan terhadap penelitiannya sendiri tidak bisa sekaligus mengarang kalimat pujian.",
+            )}
           </p>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-sand-500">
-            Kalau kamu sudah memakainya, tulis yang pertama — termasuk bagian yang tidak berhasil.
+            {t("Kalau kamu sudah memakainya, tulis yang pertama — termasuk bagian yang tidak berhasil.")}
           </p>
           <Link
             href="/pengaturan"
             className="mt-7 inline-block rounded-full border hairline px-6 py-3 text-sm text-sand-100 transition-colors hover:bg-ink-800"
           >
-            Tulis ulasan
+            {t("Tulis ulasan")}
           </Link>
         </div>
       </Reveal>
@@ -73,7 +82,7 @@ export function Reviews() {
           {data.reviews.map((r, i) => (
             <Reveal key={`${r.name}-${r.at}`} delay={i * 0.05}>
               <figure className="surface rounded-card p-7">
-                <div className="flex gap-1" aria-label={`${r.rating} dari 5`}>
+                <div className="flex gap-1" aria-label={t("{n} dari 5", { n: r.rating })}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <svg key={n} viewBox="0 0 24 24" width="14" height="14" aria-hidden>
                       <path
@@ -88,7 +97,7 @@ export function Reviews() {
                 </div>
                 <blockquote className="mt-4 leading-relaxed text-sand-100">{r.body}</blockquote>
                 <figcaption className="mt-5 flex items-center gap-3 border-t border-[rgba(207,198,184,0.08)] pt-4">
-                  <Portrait name={r.name} size={34} />
+                  <Portrait name={r.name} src={r.avatar} focus={r.focus ?? undefined} size={34} />
                   <span className="text-xs text-sand-500">{r.name}</span>
                 </figcaption>
               </figure>
@@ -99,7 +108,7 @@ export function Reviews() {
 
       <Reveal delay={0.08} className="lg:col-span-5">
         <div className="surface-sunken rounded-panel p-8">
-          <p className="eyebrow">Penilaian saat ini</p>
+          <p className="eyebrow">{t("Penilaian saat ini")}</p>
           <motion.p
             className="num mt-3 text-[3.5rem] leading-none text-teal-400"
             initial={{ opacity: 0, y: 8 }}
@@ -110,19 +119,19 @@ export function Reviews() {
             <span className="ml-2 text-base text-sand-500">/ 5</span>
           </motion.p>
           <p className="mt-1 text-xs text-sand-500">
-            dari {data.count} ulasan tertulis
+            {t("dari {n} ulasan tertulis", { n: data.count })}
           </p>
 
           <p className="mt-6 text-sm leading-relaxed text-sand-300">
-            Angka ini dihitung langsung dari ulasan yang masuk, dan tidak bisa diketik oleh siapa
-            pun — termasuk oleh kami. Naik dan turunnya mengikuti apa yang benar-benar ditulis
-            orang.
+            {t(
+              "Angka ini dihitung langsung dari ulasan yang masuk, dan tidak bisa diketik oleh siapa pun — termasuk oleh kami. Naik dan turunnya mengikuti apa yang benar-benar ditulis orang.",
+            )}
           </p>
           <Link
             href="/pengaturan"
             className="mt-7 inline-block rounded-full border hairline px-5 py-2.5 text-sm text-sand-100 transition-colors hover:bg-ink-800"
           >
-            Tulis ulasanmu
+            {t("Tulis ulasanmu")}
           </Link>
         </div>
       </Reveal>

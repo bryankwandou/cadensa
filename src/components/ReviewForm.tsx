@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Pressable } from "./Motion";
+import { useT } from "@/lib/i18n";
 
 /**
  * Formulir ulasan.
@@ -17,6 +18,7 @@ import { Pressable } from "./Motion";
  * buruk daripada memberitahunya sejak awal.
  */
 export function ReviewForm({ nama }: { nama: string }) {
+  const { t } = useT();
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [body, setBody] = useState("");
@@ -37,8 +39,8 @@ export function ReviewForm({ nama }: { nama: string }) {
       setDisplayName(review.name);
       setStatus(
         review.approved
-          ? { kind: "ok", text: "Ulasanmu tayang di halaman depan." }
-          : { kind: "menunggu", text: "Ulasanmu tersimpan dan sedang menunggu ditinjau." },
+          ? { kind: "ok", text: t("Ulasanmu tayang di halaman depan.") }
+          : { kind: "menunggu", text: t("Ulasanmu tersimpan dan sedang menunggu ditinjau.") },
       );
     })();
   }, []);
@@ -53,10 +55,10 @@ export function ReviewForm({ nama }: { nama: string }) {
         body: JSON.stringify({ rating, body, displayName }),
       });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Gagal mengirim.");
-      setStatus({ kind: "menunggu", text: "Terkirim. Ulasanmu tayang setelah ditinjau." });
+      if (!res.ok) throw new Error(data.error ?? t("Gagal mengirim."));
+      setStatus({ kind: "menunggu", text: t("Terkirim. Ulasanmu tayang setelah ditinjau.") });
     } catch (e) {
-      setStatus({ kind: "err", text: e instanceof Error ? e.message : "Gagal mengirim." });
+      setStatus({ kind: "err", text: e instanceof Error ? e.message : t("Gagal mengirim.") });
     } finally {
       setSedang(false);
     }
@@ -68,7 +70,7 @@ export function ReviewForm({ nama }: { nama: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="eyebrow mb-3">Penilaian</p>
+        <p className="eyebrow mb-3">{t("Penilaian")}</p>
         <div className="flex gap-1.5" onPointerLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((n) => {
             const on = n <= (hover || rating);
@@ -76,7 +78,7 @@ export function ReviewForm({ nama }: { nama: string }) {
               <motion.button
                 key={n}
                 type="button"
-                aria-label={`${n} dari 5`}
+                aria-label={t("{n} dari 5", { n })}
                 onPointerEnter={() => setHover(n)}
                 onClick={() => setRating(n)}
                 whileTap={{ scale: 0.88 }}
@@ -99,27 +101,29 @@ export function ReviewForm({ nama }: { nama: string }) {
       </div>
 
       <div>
-        <p className="eyebrow mb-3">Nama yang ditampilkan</p>
+        <p className="eyebrow mb-3">{t("Nama yang ditampilkan")}</p>
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           maxLength={40}
-          placeholder="Kosongkan untuk tampil sebagai pengguna anonim"
+          placeholder={t("Kosongkan untuk tampil sebagai pengguna anonim")}
           className="w-full max-w-xs rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none transition-colors placeholder:text-sand-500 focus:border-teal-600"
         />
       </div>
 
       <div>
-        <p className="eyebrow mb-3">Ulasanmu</p>
+        <p className="eyebrow mb-3">{t("Ulasanmu")}</p>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value.slice(0, 600))}
           rows={4}
-          placeholder="Apa yang berubah sejak kamu mulai mencatat? Sebutkan yang tidak berhasil juga."
+          placeholder={t("Apa yang berubah sejak kamu mulai mencatat? Sebutkan yang tidak berhasil juga.")}
           className="w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm leading-relaxed text-sand-100 outline-none transition-colors placeholder:text-sand-500 focus:border-teal-600"
         />
         <p className="num mt-2 text-[11px] text-sand-500">
-          {body.trim().length < 20 ? `${20 - body.trim().length} karakter lagi` : `${sisa} tersisa`}
+          {body.trim().length < 20
+            ? t("{n} karakter lagi", { n: 20 - body.trim().length })
+            : t("{n} tersisa", { n: sisa })}
         </p>
       </div>
 
@@ -129,7 +133,7 @@ export function ReviewForm({ nama }: { nama: string }) {
           disabled={!bisa}
           className="rounded-full bg-teal-500 px-6 py-2.5 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400 disabled:opacity-40"
         >
-          {sedang ? "Mengirim…" : "Kirim ulasan"}
+          {sedang ? t("Mengirim…") : t("Kirim ulasan")}
         </Pressable>
         {status && (
           <motion.p

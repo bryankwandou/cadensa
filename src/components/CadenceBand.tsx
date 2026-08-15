@@ -3,12 +3,14 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { TARGET_BAND } from "@/lib/metrics";
+import { useT } from "@/lib/i18n";
 
 /**
  * Peragaan langsung: dua bulan dengan jumlah sama bisa punya kadens sangat
  * berbeda. Geser sebarannya dan lihat indeksnya bergerak.
  */
 export function CadenceBand() {
+  const { t } = useT();
   const [count, setCount] = useState(21);
   const [spread, setSpread] = useState(85);
 
@@ -62,8 +64,9 @@ export function CadenceBand() {
           </div>
         </div>
         <p className="max-w-xs text-sm leading-relaxed text-sand-300">
-          Jumlah yang sama, sebaran berbeda. Yang berhubungan dengan kesehatan prostat adalah
-          keteraturannya, dan hanya angka ini yang menangkapnya.
+          {t(
+            "Jumlah yang sama, sebaran berbeda. Yang berhubungan dengan kesehatan prostat adalah keteraturannya, dan hanya angka ini yang menangkapnya.",
+          )}
         </p>
       </div>
 
@@ -87,7 +90,7 @@ export function CadenceBand() {
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <label className="block">
           <span className="flex justify-between text-sm text-sand-300">
-            Jumlah bulan ini
+            {t("Jumlah bulan ini")}
             <span className={`font-mono ${inBand ? "text-teal-500" : "text-amber-400"}`}>{count}</span>
           </span>
           <input
@@ -99,12 +102,12 @@ export function CadenceBand() {
             className="mt-2 w-full accent-[var(--color-teal-500)]"
           />
           <span className="mt-1 block text-xs text-sand-500">
-            {inBand ? "Di dalam pita 18–24" : "Di luar pita 18–24"}
+            {inBand ? t("Di dalam pita 18–24") : t("Di luar pita 18–24")}
           </span>
         </label>
         <label className="block">
           <span className="flex justify-between text-sm text-sand-300">
-            Kemerataan sebaran
+            {t("Kemerataan sebaran")}
             <span className="font-mono text-sand-100">{spread}%</span>
           </span>
           <input
@@ -116,7 +119,7 @@ export function CadenceBand() {
             className="mt-2 w-full accent-[var(--color-teal-500)]"
           />
           <span className="mt-1 block text-xs text-sand-500">
-            Turunkan sampai nol, jumlahnya tetap tapi indeksnya runtuh.
+            {t("Turunkan sampai nol, jumlahnya tetap tapi indeksnya runtuh.")}
           </span>
         </label>
       </div>

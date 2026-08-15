@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Nav } from "@/components/Nav";
 import { Stagger, StaggerItem, Pressable, Reveal } from "@/components/Motion";
 import { useVault } from "@/lib/vault";
+import { useT } from "@/lib/i18n";
 import { readAll, type Reading, type ReadingKind } from "@/lib/signals";
 import {
   cadenceIndex,
@@ -46,7 +47,10 @@ function bagian(rasio: number | null) {
 
 export default function InsightsPage() {
   const { entries, ready, seed, profile } = useVault();
-  const readings = useMemo(() => readAll(entries, profile), [entries, profile]);
+  const { t } = useT();
+  // `t` ikut masuk ke daftar ketergantungan: mengganti bahasa harus menyusun
+  // ulang bacaannya, bukan menyisakan kalimat bahasa lama sampai ada catatan baru.
+  const readings = useMemo(() => readAll(entries, profile, new Date(), t), [entries, profile, t]);
 
   /**
    * Ringkasan angka di kepala halaman.
@@ -58,22 +62,31 @@ export default function InsightsPage() {
    */
   const ringkas = useMemo(() => {
     const now = new Date();
-    const bulan = within(entries, startOfMonth(now), now).length;
+    /*
+      Jendelanya sampai akhir bulan, bukan sampai detik ini.
+      Batas `now` membuat catatan yang jamnya lebih malam daripada saat halaman
+      dibuka tidak terhitung di sini, padahal halaman ritme — yang memakai bulan
+      penuh — sudah menghitungnya. Dua halaman lalu memajang angka berbeda di
+      bawah label yang sama persis, dan yang salah adalah yang lebih sempit:
+      "bulan ini" berarti bulannya, bukan bagian bulan yang sudah lewat.
+    */
+    const akhirBulan = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const bulan = within(entries, startOfMonth(now), akhirBulan).length;
     if (profile.mode === "wanita") {
       return [
-        { l: "Keterikatan siklus", v: cycleCoupling(entries, profile.cycle) ?? "—", s: "/100" },
-        { l: "Fase puncak", v: peakPhase(entries, profile.cycle) ?? "—", s: "" },
-        { l: "Bulan ini", v: bulan, s: "catatan" },
-        { l: "Rasa positif", v: bagian(positiveShare(entries)), s: "%" },
+        { l: t("Keterikatan siklus"), v: cycleCoupling(entries, profile.cycle) ?? "—", s: "/100" },
+        { l: t("Fase puncak"), v: t(peakPhase(entries, profile.cycle) ?? "—"), s: "" },
+        { l: t("Bulan ini"), v: bulan, s: t("catatan") },
+        { l: t("Rasa positif"), v: bagian(positiveShare(entries)), s: "%" },
       ];
     }
     return [
       { l: "Cadence Index", v: cadenceIndex(lastDays(entries, 30, now)) ?? "—", s: "/100" },
-      { l: "Bulan ini", v: bulan, s: "catatan" },
-      { l: "Kekosongan terpanjang", v: Math.round(longestGapDays(entries, now)), s: "hari" },
-      { l: "Durasi tengah", v: menit(medianDurationSec(entries)), s: "" },
+      { l: t("Bulan ini"), v: bulan, s: t("catatan") },
+      { l: t("Kekosongan terpanjang"), v: Math.round(longestGapDays(entries, now)), s: t("hari") },
+      { l: t("Durasi tengah"), v: menit(medianDurationSec(entries)), s: "" },
     ];
-  }, [entries, profile]);
+  }, [entries, profile, t]);
 
   /**
    * Rangka, bukan layar kosong.
@@ -113,11 +126,12 @@ export default function InsightsPage() {
       <Nav />
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12">
         <Reveal>
-          <p className="eyebrow">Dihitung di perangkat ini</p>
-          <h1 className="display mt-2.5 text-[2.4rem] sm:text-[2.75rem]">Bacaan</h1>
+          <p className="eyebrow">{t("Dihitung di perangkat ini")}</p>
+          <h1 className="display mt-2.5 text-[2.4rem] sm:text-[2.75rem]">{t("Bacaan")}</h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-sand-500">
-            Semua di halaman ini dihitung dari catatan yang tersimpan di peramban ini. Tidak ada satu
-            pun permintaan jaringan yang membawa isinya keluar.
+            {t(
+              "Semua di halaman ini dihitung dari catatan yang tersimpan di peramban ini. Tidak ada satu pun permintaan jaringan yang membawa isinya keluar.",
+            )}
           </p>
         </Reveal>
 
@@ -146,22 +160,26 @@ export default function InsightsPage() {
             <div className="surface mt-9 rounded-panel p-8">
               <p className="leading-relaxed text-sand-300">
                 {entries.length < 3
-                  ? "Pola baru muncul setelah beberapa catatan. Tiga adalah batas paling awal di mana angka apa pun masih berarti sesuatu."
-                  : "Belum ada pola yang cukup jelas untuk dituliskan. Itu bukan kabar buruk — artinya tidak ada yang menonjol dari ritmemu belakangan ini."}
+                  ? t(
+                      "Pola baru muncul setelah beberapa catatan. Tiga adalah batas paling awal di mana angka apa pun masih berarti sesuatu.",
+                    )
+                  : t(
+                      "Belum ada pola yang cukup jelas untuk dituliskan. Itu bukan kabar buruk — artinya tidak ada yang menonjol dari ritmemu belakangan ini.",
+                    )}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/log"
                   className="rounded-full bg-teal-500 px-5 py-2.5 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400"
                 >
-                  Catat
+                  {t("Catat")}
                 </Link>
                 {entries.length === 0 && (
                   <Pressable
                     onClick={seed}
                     className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-100 hover:bg-ink-800"
                   >
-                    Muat data contoh
+                    {t("Muat data contoh")}
                   </Pressable>
                 )}
               </div>
@@ -177,7 +195,7 @@ export default function InsightsPage() {
                       {String(gi + 1).padStart(2, "0")}
                     </span>
                     <span className="h-px w-8 bg-sand-500/30" />
-                    {KIND_LABEL[g.kind]}
+                    {t(KIND_LABEL[g.kind])}
                   </p>
                 </Reveal>
 
@@ -194,8 +212,9 @@ export default function InsightsPage() {
         )}
 
         <p className="mt-14 border-t hairline pt-6 text-xs leading-relaxed text-sand-500">
-          Cadensa bukan alat diagnosis dan tidak menggantikan pemeriksaan. Kalau ada nyeri berulang,
-          darah, atau keluhan yang menetap, temui dokter.
+          {t(
+            "Cadensa bukan alat diagnosis dan tidak menggantikan pemeriksaan. Kalau ada nyeri berulang, darah, atau keluhan yang menetap, temui dokter.",
+          )}
         </p>
       </main>
     </div>
@@ -210,6 +229,7 @@ export default function InsightsPage() {
  * ekor mata, sedangkan cincin tipis hilang di antara kartu lain.
  */
 function Kartu({ r }: { r: Reading }) {
+  const { t } = useT();
   const medis = r.kind === "medis";
   return (
     <motion.article
@@ -223,12 +243,12 @@ function Kartu({ r }: { r: Reading }) {
           <span
             className={`inline-block rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${KIND_STYLE[r.kind]}`}
           >
-            {KIND_LABEL[r.kind]}
+            {t(KIND_LABEL[r.kind])}
           </span>
           <h2 className="display-sm mt-4 text-xl text-sand-100 sm:text-2xl">{r.title}</h2>
           <p className="mt-3.5 leading-relaxed text-sand-300">{r.body}</p>
           <div className="surface-sunken mt-6 rounded-card p-5">
-            <p className="eyebrow">Satu langkah</p>
+            <p className="eyebrow">{t("Satu langkah")}</p>
             <p className="mt-2.5 text-sm leading-relaxed text-sand-100">{r.action}</p>
           </div>
         </div>

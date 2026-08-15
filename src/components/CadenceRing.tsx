@@ -2,6 +2,7 @@
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { useMemo, useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
 
 /**
  * Cincin kadens.
@@ -42,6 +43,7 @@ export function CadenceRing({
   bandLow: number;
   bandHigh: number;
 }) {
+  const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [hover, setHover] = useState<RingDay | null>(null);
@@ -164,14 +166,14 @@ export function CadenceRing({
         {hover ? (
           <>
             <p className="num text-[2.4rem] leading-none text-sand-100">{hover.count}</p>
-            <p className="mt-1.5 text-xs text-sand-500">catatan di hari ke-{hover.day}</p>
+            <p className="mt-1.5 text-xs text-sand-500">{t("catatan di hari ke-{hari}", { hari: hover.day })}</p>
           </>
         ) : (
           <>
             <p className="eyebrow">Cadence Index</p>
             <p className="num mt-1.5 text-[2.6rem] leading-none text-teal-400">{index ?? "—"}</p>
             <p className={`num mt-2 text-xs ${inBand ? "text-teal-500" : "text-amber-400"}`}>
-              {total} bulan ini
+              {t("{n} bulan ini", { n: total })}
             </p>
           </>
         )}

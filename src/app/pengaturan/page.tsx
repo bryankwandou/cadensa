@@ -8,6 +8,7 @@ import { Pressable, Reveal } from "@/components/Motion";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewModeration } from "@/components/ReviewModeration";
 import { useVault } from "@/lib/vault";
+import { useT } from "@/lib/i18n";
 import { daysUntilNextPeriod } from "@/lib/cycle";
 import { ACCENTS, MOTION_LEVELS, type Mode } from "@/lib/types";
 
@@ -32,6 +33,7 @@ function Section({ title, note, children }: { title: string; note?: string; chil
  * ada sama sekali.
  */
 function ModerationSection() {
+  const { t } = useT();
   const [ada, setAda] = useState(false);
 
   useEffect(() => {
@@ -41,8 +43,10 @@ function ModerationSection() {
   if (!ada) return null;
   return (
     <Section
-      title="Tinjau ulasan"
-      note="Ulasan masuk dalam keadaan menunggu. Yang kamu tayangkan langsung ikut menghitung angka penilaian di halaman depan — jadi angka itu selalu bisa ditelusuri kembali ke barisnya."
+      title={t("Tinjau ulasan")}
+      note={t(
+        "Ulasan masuk dalam keadaan menunggu. Yang kamu tayangkan langsung ikut menghitung angka penilaian di halaman depan — jadi angka itu selalu bisa ditelusuri kembali ke barisnya.",
+      )}
     >
       <ReviewModeration />
     </Section>
@@ -62,6 +66,7 @@ export default function PengaturanPage() {
     changePassword,
     sync,
   } = useVault();
+  const { t } = useT();
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
@@ -75,40 +80,50 @@ export default function PengaturanPage() {
       <Nav />
       <main className="mx-auto max-w-3xl space-y-5 px-5 pb-24 pt-12">
         <Reveal>
-          <p className="eyebrow">Mode, cadangan, akun</p>
-          <h1 className="display mt-2.5 text-[3rem]">Pengaturan</h1>
+          <p className="eyebrow">{t("Mode, cadangan, akun")}</p>
+          <h1 className="display mt-2.5 text-[3rem]">{t("Pengaturan")}</h1>
           <p className="mt-6 max-w-xl leading-relaxed text-sand-300">
             {user
-              ? `Masuk sebagai ${user.username}. Catatanmu tersimpan di perangkat ini sekaligus tersalin terenkripsi ke server.`
-              : "Belum masuk. Catatanmu hanya ada di perangkat ini — kalau penyimpanan peramban dibersihkan, catatannya ikut hilang."}
+              ? t(
+                  "Masuk sebagai {nama}. Catatanmu tersimpan di perangkat ini sekaligus tersalin terenkripsi ke server.",
+                  { nama: user.username },
+                )
+              : t(
+                  "Belum masuk. Catatanmu hanya ada di perangkat ini — kalau penyimpanan peramban dibersihkan, catatannya ikut hilang.",
+                )}
           </p>
         </Reveal>
 
         {!user && (
           <Reveal delay={0.04}>
             <div className="rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-7">
-              <h2 className="display-sm text-xl text-amber-400">Catatanmu belum punya cadangan</h2>
+              <h2 className="display-sm text-xl text-amber-400">
+                {t("Catatanmu belum punya cadangan")}
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-sand-300">
-                Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, terutama saat ruang
-                penyimpanan menipis. Buat akun, atau unduh cadangan secara berkala.
+                {t(
+                  "Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, terutama saat ruang penyimpanan menipis. Buat akun, atau unduh cadangan secara berkala.",
+                )}
               </p>
               <Link
                 href="/masuk"
                 className="mt-4 inline-block rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-ink-950"
               >
-                Buat akun
+                {t("Buat akun")}
               </Link>
             </div>
           </Reveal>
         )}
 
         <Section
-          title="Milikmu sendiri"
-          note="Warna, nama panggilan, dan seberapa banyak yang bergerak. Semuanya ikut terenkripsi bersama catatan, jadi bahkan warna kesukaanmu pun tidak terbaca server."
+          title={t("Milikmu sendiri")}
+          note={t(
+            "Warna, nama panggilan, dan seberapa banyak yang bergerak. Semuanya ikut terenkripsi bersama catatan, jadi bahkan warna kesukaanmu pun tidak terbaca server.",
+          )}
         >
           <div className="space-y-7">
             <div>
-              <p className="eyebrow mb-3">Warna</p>
+              <p className="eyebrow mb-3">{t("Warna")}</p>
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
                 {ACCENTS.map((a) => {
                   const on = profile.accent === a.key;
@@ -130,7 +145,7 @@ export default function PengaturanPage() {
                         style={{ background: `linear-gradient(140deg, ${a.c400}, ${a.c700})` }}
                       />
                       <span className={`text-[11px] ${on ? "text-sand-100" : "text-sand-500"}`}>
-                        {a.label}
+                        {t(a.label)}
                       </span>
                     </motion.button>
                   );
@@ -139,22 +154,23 @@ export default function PengaturanPage() {
             </div>
 
             <div>
-              <p className="eyebrow mb-3">Nama panggilan</p>
+              <p className="eyebrow mb-3">{t("Nama panggilan")}</p>
               <input
                 className={`${input} max-w-xs`}
-                placeholder="Kosongkan kalau tidak mau disapa"
+                placeholder={t("Kosongkan kalau tidak mau disapa")}
                 maxLength={24}
                 value={profile.name}
                 onChange={(e) => setProfile({ name: e.target.value })}
               />
               <p className="mt-2.5 text-xs text-sand-500">
-                Dipakai hanya di halaman catat. Tidak pernah muncul di judul tab maupun notifikasi,
-                supaya layarmu tetap aman dilihat orang lain.
+                {t(
+                  "Dipakai hanya di halaman catat. Tidak pernah muncul di judul tab maupun notifikasi, supaya layarmu tetap aman dilihat orang lain.",
+                )}
               </p>
             </div>
 
             <div>
-              <p className="eyebrow mb-3">Gerakan</p>
+              <p className="eyebrow mb-3">{t("Gerakan")}</p>
               <div className="flex max-w-sm gap-2">
                 {MOTION_LEVELS.map((m) => (
                   <button
@@ -171,21 +187,24 @@ export default function PengaturanPage() {
                         transition={{ type: "spring", stiffness: 380, damping: 32 }}
                       />
                     )}
-                    <span className="relative">{m}</span>
+                    <span className="relative">{t(m)}</span>
                   </button>
                 ))}
               </div>
               <p className="mt-2.5 text-xs text-sand-500">
-                Mode tenang menghentikan semua gerakan yang berjalan terus. Umpan balik saat kamu
-                menyentuh sesuatu tetap ada, karena tanpa itu antarmuka terasa rusak, bukan tenang.
+                {t(
+                  "Mode tenang menghentikan semua gerakan yang berjalan terus. Umpan balik saat kamu menyentuh sesuatu tetap ada, karena tanpa itu antarmuka terasa rusak, bukan tenang.",
+                )}
               </p>
             </div>
           </div>
         </Section>
 
         <Section
-          title="Mode pencatatan"
-          note="Mode menentukan daftar alat yang ditawarkan dan cara catatanmu dibaca. Mode pria dibaca terhadap pita bulanan; mode wanita dibaca terhadap fase siklus, karena temuan yang mendasari pita itu berasal dari penelitian prostat dan tidak bisa dipindahkan begitu saja."
+          title={t("Mode pencatatan")}
+          note={t(
+            "Mode menentukan daftar alat yang ditawarkan dan cara catatanmu dibaca. Mode pria dibaca terhadap pita bulanan; mode wanita dibaca terhadap fase siklus, karena temuan yang mendasari pita itu berasal dari penelitian prostat dan tidak bisa dipindahkan begitu saja.",
+          )}
         >
           <div className="flex gap-2">
             {(["pria", "wanita"] as Mode[]).map((m) => (
@@ -203,7 +222,7 @@ export default function PengaturanPage() {
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
-                <span className="relative">{m}</span>
+                <span className="relative">{t(m)}</span>
               </button>
             ))}
           </div>
@@ -211,12 +230,14 @@ export default function PengaturanPage() {
 
         {profile.mode === "wanita" && (
           <Section
-            title="Siklus"
-            note="Tiga angka ini yang membuat catatanmu bisa dibaca sebagai pola berulang, bukan sekadar deret tanggal."
+            title={t("Siklus")}
+            note={t(
+              "Tiga angka ini yang membuat catatanmu bisa dibaca sebagai pola berulang, bukan sekadar deret tanggal.",
+            )}
           >
             <div className="grid gap-4 sm:grid-cols-3">
               <label className="block">
-                <span className="mb-2 block text-xs text-sand-500">Hari pertama haid terakhir</span>
+                <span className="mb-2 block text-xs text-sand-500">{t("Hari pertama haid terakhir")}</span>
                 <input
                   type="date"
                   className={input}
@@ -227,7 +248,7 @@ export default function PengaturanPage() {
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs text-sand-500">Panjang siklus (hari)</span>
+                <span className="mb-2 block text-xs text-sand-500">{t("Panjang siklus (hari)")}</span>
                 <input
                   type="number"
                   min={20}
@@ -240,7 +261,7 @@ export default function PengaturanPage() {
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs text-sand-500">Lama haid (hari)</span>
+                <span className="mb-2 block text-xs text-sand-500">{t("Lama haid (hari)")}</span>
                 <input
                   type="number"
                   min={1}
@@ -255,8 +276,11 @@ export default function PengaturanPage() {
             </div>
             {until != null && (
               <p className="mt-4 text-sm text-teal-500">
-                Perkiraan haid berikutnya {until <= 1 ? "besok" : `${until} hari lagi`}. Perkiraan,
-                bukan kepastian.
+                {until <= 1
+                  ? t("Perkiraan haid berikutnya besok. Perkiraan, bukan kepastian.")
+                  : t("Perkiraan haid berikutnya {n} hari lagi. Perkiraan, bukan kepastian.", {
+                      n: until,
+                    })}
               </p>
             )}
           </Section>
@@ -266,29 +290,33 @@ export default function PengaturanPage() {
 
         {user && (
           <Section
-            title="Tulis ulasan"
-            note="Satu akun satu ulasan, dan menulis lagi berarti mengganti yang lama. Ulasanmu ditinjau dulu sebelum tayang, dan angka penilaian di halaman depan dihitung langsung dari ulasan yang masuk — bukan ditulis tangan."
+            title={t("Tulis ulasan")}
+            note={t(
+              "Satu akun satu ulasan, dan menulis lagi berarti mengganti yang lama. Ulasanmu ditinjau dulu sebelum tayang, dan angka penilaian di halaman depan dihitung langsung dari ulasan yang masuk — bukan ditulis tangan.",
+            )}
           >
             <ReviewForm nama={profile.name || user.username} />
           </Section>
         )}
 
         <Section
-          title="Cadangan"
-          note="Berkas cadangan berisi catatanmu apa adanya, tanpa enkripsi, supaya bisa kamu buka sendiri kapan pun. Simpan di tempat yang kamu percaya."
+          title={t("Cadangan")}
+          note={t(
+            "Berkas cadangan berisi catatanmu apa adanya, tanpa enkripsi, supaya bisa kamu buka sendiri kapan pun. Simpan di tempat yang kamu percaya.",
+          )}
         >
           <div className="flex flex-wrap gap-3">
             <Pressable
               onClick={exportFile}
               className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-200"
             >
-              Unduh cadangan ({entries.length} catatan)
+              {t("Unduh cadangan ({n} catatan)", { n: entries.length })}
             </Pressable>
             <Pressable
               onClick={() => fileRef.current?.click()}
               className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-200"
             >
-              Pulihkan dari berkas
+              {t("Pulihkan dari berkas")}
             </Pressable>
             <input
               ref={fileRef}
@@ -302,41 +330,48 @@ export default function PengaturanPage() {
                   const added = await importFile(f);
                   setMsg({
                     kind: "ok",
-                    text: added ? `${added} catatan baru ditambahkan.` : "Semua catatan di berkas itu sudah ada.",
+                    text: added
+                      ? t("{n} catatan baru ditambahkan.", { n: added })
+                      : t("Semua catatan di berkas itu sudah ada."),
                   });
                 } catch (err) {
-                  setMsg({ kind: "err", text: err instanceof Error ? err.message : "Berkas tidak terbaca." });
+                  setMsg({ kind: "err", text: err instanceof Error ? err.message : t("Berkas tidak terbaca.") });
                 }
                 e.target.value = "";
               }}
             />
           </div>
           <p className="mt-3 text-xs text-sand-500">
-            Memulihkan menggabungkan, tidak menimpa. Catatan yang sudah ada tidak akan berganda.
+            {t("Memulihkan menggabungkan, tidak menimpa. Catatan yang sudah ada tidak akan berganda.")}
           </p>
         </Section>
 
         {user && (
-          <Section title="Kata sandi" note="Mengganti kata sandi hanya membungkus ulang kuncinya. Catatanmu tidak disentuh, jadi tidak ada risiko rusak di tengah jalan.">
+          <Section
+            title={t("Kata sandi")}
+            note={t(
+              "Mengganti kata sandi hanya membungkus ulang kuncinya. Catatanmu tidak disentuh, jadi tidak ada risiko rusak di tengah jalan.",
+            )}
+          >
             <div className="grid gap-3 sm:grid-cols-3">
               <input
                 className={input}
                 type="password"
-                placeholder="Kata sandi sekarang"
+                placeholder={t("Kata sandi sekarang")}
                 value={pw.current}
                 onChange={(e) => setPw({ ...pw, current: e.target.value })}
               />
               <input
                 className={input}
                 type="password"
-                placeholder="Kata sandi baru"
+                placeholder={t("Kata sandi baru")}
                 value={pw.next}
                 onChange={(e) => setPw({ ...pw, next: e.target.value })}
               />
               <input
                 className={input}
                 type="password"
-                placeholder="Ulangi yang baru"
+                placeholder={t("Ulangi yang baru")}
                 value={pw.confirm}
                 onChange={(e) => setPw({ ...pw, confirm: e.target.value })}
               />
@@ -344,23 +379,23 @@ export default function PengaturanPage() {
             <Pressable
               onClick={async () => {
                 try {
-                  if (pw.next.length < 10) throw new Error("Kata sandi baru minimal 10 karakter.");
-                  if (pw.next !== pw.confirm) throw new Error("Ulangannya belum sama.");
+                  if (pw.next.length < 10) throw new Error(t("Kata sandi baru minimal 10 karakter."));
+                  if (pw.next !== pw.confirm) throw new Error(t("Ulangannya belum sama."));
                   const r = await changePassword({ current: pw.current, next: pw.next });
                   setNewRecovery(r.recoveryKey);
                   setPw({ current: "", next: "", confirm: "" });
-                  setMsg({ kind: "ok", text: "Kata sandi diganti." });
+                  setMsg({ kind: "ok", text: t("Kata sandi diganti.") });
                 } catch (e) {
-                  setMsg({ kind: "err", text: e instanceof Error ? e.message : "Gagal." });
+                  setMsg({ kind: "err", text: e instanceof Error ? e.message : t("Gagal.") });
                 }
               }}
               className="mt-4 rounded-full border hairline px-5 py-2.5 text-sm text-sand-200"
             >
-              Ganti kata sandi
+              {t("Ganti kata sandi")}
             </Pressable>
             {newRecovery && (
               <div className="mt-4 rounded-card border border-amber-500/25 bg-amber-500/[0.04] p-4">
-                <p className="mb-2 text-xs text-amber-400">Kunci pemulihanmu tetap sama. Ini salinannya:</p>
+                <p className="mb-2 text-xs text-amber-400">{t("Kunci pemulihanmu tetap sama. Ini salinannya:")}</p>
                 <code className="block break-all font-mono text-xs text-amber-400">{newRecovery}</code>
               </div>
             )}
@@ -368,35 +403,43 @@ export default function PengaturanPage() {
         )}
 
         <Section
-          title="Menghapus"
-          note="Tidak ada masa tunggu dan tidak ada salinan yang tertinggal. Unduh cadangan dulu kalau masih ragu."
+          title={t("Menghapus")}
+          note={t(
+            "Tidak ada masa tunggu dan tidak ada salinan yang tertinggal. Unduh cadangan dulu kalau masih ragu.",
+          )}
         >
           <div className="flex flex-wrap gap-3">
             <Pressable
               onClick={() => {
-                if (confirm(`Hapus ${entries.length} catatan dari perangkat ini? Tidak bisa dibatalkan.`)) {
+                if (
+                  confirm(
+                    t("Hapus {n} catatan dari perangkat ini? Tidak bisa dibatalkan.", {
+                      n: entries.length,
+                    }),
+                  )
+                ) {
                   wipe();
-                  setMsg({ kind: "ok", text: "Catatan dihapus." });
+                  setMsg({ kind: "ok", text: t("Catatan dihapus.") });
                 }
               }}
               className="rounded-full border border-signal-500/40 px-5 py-2.5 text-sm text-signal-500"
             >
-              Hapus semua catatan
+              {t("Hapus semua catatan")}
             </Pressable>
             {user && (
               <Pressable
                 onClick={async () => {
-                  if (!confirm("Hapus akun berikut seluruh brankasnya? Ini permanen.")) return;
+                  if (!confirm(t("Hapus akun berikut seluruh brankasnya? Ini permanen."))) return;
                   try {
                     await deleteAccount();
-                    setMsg({ kind: "ok", text: "Akun dihapus sepenuhnya." });
+                    setMsg({ kind: "ok", text: t("Akun dihapus sepenuhnya.") });
                   } catch (e) {
-                    setMsg({ kind: "err", text: e instanceof Error ? e.message : "Gagal." });
+                    setMsg({ kind: "err", text: e instanceof Error ? e.message : t("Gagal.") });
                   }
                 }}
                 className="rounded-full border border-signal-500/40 px-5 py-2.5 text-sm text-signal-500"
               >
-                Hapus akun
+                {t("Hapus akun")}
               </Pressable>
             )}
           </div>
@@ -414,15 +457,17 @@ export default function PengaturanPage() {
 
         {sync.kind === "gagal" && (
           <p className="text-sm text-signal-500">
-            Sinkronisasi terakhir gagal: {sync.message}. Catatanmu tetap aman di perangkat ini.
+            {t("Sinkronisasi terakhir gagal: {pesan}. Catatanmu tetap aman di perangkat ini.", {
+              pesan: sync.message,
+            })}
           </p>
         )}
 
         <Reveal>
           <p className="pt-4 text-sm text-sand-500">
-            Cara kerja penyimpanannya dijelaskan penuh di{" "}
+            {t("Cara kerja penyimpanannya dijelaskan penuh di")}{" "}
             <Link href="/privacy" className="text-teal-500 underline underline-offset-4">
-              halaman privasi
+              {t("halaman privasi")}
             </Link>
             .
           </p>

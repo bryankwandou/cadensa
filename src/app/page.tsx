@@ -26,6 +26,7 @@ import { DeviceMarquee } from "@/components/DeviceMarquee";
 import { Glyph } from "@/components/Glyph";
 import { AFTERFEELS, DEVICES, METHODS, TRIGGERS } from "@/lib/types";
 import { Nav } from "@/components/Nav";
+import { useT } from "@/lib/i18n";
 
 const SIGNALS = [
   {
@@ -87,10 +88,17 @@ const CTA_GHOST =
   "inline-block rounded-full border hairline px-6 py-3 text-sm text-sand-100 transition-colors hover:bg-ink-800";
 
 export default function Home() {
+  const { t } = useT();
+  /*
+    Daftar samping menerima label yang sudah diterjemahkan, bukan kunci.
+    Komponennya cuma menggambar apa yang diberi, dan menaruh penerjemahan di
+    sini membuatnya tetap begitu.
+  */
+  const indeks = INDEX.map((x) => ({ ...x, label: t(x.label) }));
   return (
     <div className="aurora min-h-screen">
       <ScrollProgress />
-      <SectionIndex items={INDEX} />
+      <SectionIndex items={indeks} />
       <Nav />
 
       {/* Hero. Sengaja tidak rata tengah: teks bertumpu di kiri, produknya di kanan
@@ -105,23 +113,22 @@ export default function Home() {
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
-                Kesehatan reproduksi, dibaca dari ritme
+                {t("Kesehatan reproduksi, dibaca dari ritme")}
               </span>
             </Reveal>
 
             <Reveal delay={0.06}>
               <h1 className="display mt-7 text-[2.85rem] min-[420px]:text-[3.4rem] sm:text-[4.6rem]">
-                <RevealWords text="Ritme," className="block" />
-                <RevealWords text="bukan skor." className="block text-teal-400" delay={0.12} />
+                <RevealWords text={t("Ritme,")} className="block" />
+                <RevealWords text={t("bukan skor.")} className="block text-teal-400" delay={0.12} />
               </h1>
             </Reveal>
 
             <Reveal delay={0.12}>
               <p className="mt-7 max-w-xl text-[1.0625rem] leading-relaxed text-sand-300">
-                Pria yang berejakulasi sekitar dua puluh satu kali sebulan menunjukkan angka
-                kejadian kanker prostat yang lebih rendah dibanding yang hanya empat sampai tujuh
-                kali. Cadensa mengubah temuan itu menjadi kebiasaan yang bisa dilihat dan dijaga,
-                dan mengunci catatannya di perangkatmu sebelum apa pun terkirim.
+                {t(
+                  "Pria yang berejakulasi sekitar dua puluh satu kali sebulan menunjukkan angka kejadian kanker prostat yang lebih rendah dibanding yang hanya empat sampai tujuh kali. Cadensa mengubah temuan itu menjadi kebiasaan yang bisa dilihat dan dijaga, dan mengunci catatannya di perangkatmu sebelum apa pun terkirim.",
+                )}
               </p>
             </Reveal>
 
@@ -129,22 +136,23 @@ export default function Home() {
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Magnetic>
                   <Link href="/log" className={CTA}>
-                    Mulai mencatat
+                    {t("Mulai mencatat")}
                   </Link>
                 </Magnetic>
                 <Link
                   href="/masuk"
                   className="text-sm text-sand-300 underline decoration-sand-500/40 underline-offset-[6px] transition-colors hover:text-sand-100"
                 >
-                  Buat akun dan amankan
+                  {t("Buat akun dan amankan")}
                 </Link>
               </div>
             </Reveal>
 
             <Reveal delay={0.24}>
               <p className="mt-8 max-w-md border-l border-sand-500/20 pl-4 text-sm leading-relaxed text-sand-500">
-                Perlu disebut jujur: temuan itu korelasi, bukan sebab-akibat. Cadensa
-                memperlakukannya sebagai penanda ritme sehat, bukan sebagai janji.
+                {t(
+                  "Perlu disebut jujur: temuan itu korelasi, bukan sebab-akibat. Cadensa memperlakukannya sebagai penanda ritme sehat, bukan sebagai janji.",
+                )}
               </p>
             </Reveal>
           </div>
@@ -182,18 +190,18 @@ export default function Home() {
         <Reveal delay={0.1}>
           <div className="mt-20 grid gap-px overflow-hidden rounded-panel border hairline sm:grid-cols-3">
             {[
-              { n: 21, t: "kali sebulan, digambar sebagai wilayah bukan garis" },
-              { n: DEVICES.length, t: "jenis alat, tiap satu dengan catatan perawatannya" },
-              { n: 0, t: "baris terbaca yang tersimpan di server kami" },
+              { n: 21, label: "kali sebulan, digambar sebagai wilayah bukan garis" },
+              { n: DEVICES.length, label: "jenis alat, tiap satu dengan catatan perawatannya" },
+              { n: 0, label: "baris terbaca yang tersimpan di server kami" },
             ].map((x, i) => (
               <div
-                key={x.t}
+                key={x.label}
                 className={`surface px-7 py-8 ${i === 1 ? "sm:border-x sm:border-[rgba(207,198,184,0.085)]" : ""}`}
               >
                 <p className="num text-[2.75rem] leading-none text-teal-400">
                   <Counter to={x.n} />
                 </p>
-                <p className="mt-4 text-sm leading-relaxed text-sand-500">{x.t}</p>
+                <p className="mt-4 text-sm leading-relaxed text-sand-500">{t(x.label)}</p>
               </div>
             ))}
           </div>
@@ -209,9 +217,11 @@ export default function Home() {
       <section id="bukti" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="01"
-          eyebrow="Dasar bukti"
-          title="Angkanya bisa kamu periksa sendiri"
-          lead="Seluruh produk ini berdiri di atas satu penelitian, jadi penelitian itu ditampilkan apa adanya — lengkap dengan selang kepercayaannya, dan lengkap dengan bagian yang melemahkannya."
+          eyebrow={t("Dasar bukti")}
+          title={t("Angkanya bisa kamu periksa sendiri")}
+          lead={t(
+            "Seluruh produk ini berdiri di atas satu penelitian, jadi penelitian itu ditampilkan apa adanya — lengkap dengan selang kepercayaannya, dan lengkap dengan bagian yang melemahkannya.",
+          )}
         />
 
         <div className="mt-14 grid gap-10 lg:grid-cols-12">
@@ -220,16 +230,17 @@ export default function Home() {
           </Reveal>
 
           <Reveal delay={0.08} className="lg:col-span-5">
-            <p className="eyebrow">Keberatan terhadap angka ini</p>
+            <p className="eyebrow">{t("Keberatan terhadap angka ini")}</p>
             <p className="mt-4 text-sm leading-relaxed text-sand-300">
-              Ditulis sendiri, bukan menunggu orang lain menemukannya. Produk yang menyembunyikan
-              kelemahan buktinya tidak layak dipercaya soal hal lain.
+              {t(
+                "Ditulis sendiri, bukan menunggu orang lain menemukannya. Produk yang menyembunyikan kelemahan buktinya tidak layak dipercaya soal hal lain.",
+              )}
             </p>
             <dl className="mt-6 divide-y divide-[rgba(207,198,184,0.08)] border-y border-[rgba(207,198,184,0.08)]">
               {CAVEATS.map((c) => (
                 <div key={c.t} className="py-5">
-                  <dt className="text-sm font-medium text-amber-400">{c.t}</dt>
-                  <dd className="mt-2 text-sm leading-relaxed text-sand-500">{c.d}</dd>
+                  <dt className="text-sm font-medium text-amber-400">{t(c.t)}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-sand-500">{t(c.d)}</dd>
                 </div>
               ))}
             </dl>
@@ -241,25 +252,22 @@ export default function Home() {
       <section id="posisi" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="02"
-          eyebrow="Posisi"
-          title={
-            <>
-              Yang sudah ada berdiri
-              <br className="hidden sm:block" /> di premis sebaliknya
-            </>
-          }
+          eyebrow={t("Posisi")}
+          title={t("Yang sudah ada berdiri di premis sebaliknya")}
         />
 
         <div className="mt-14 grid gap-10 lg:grid-cols-12">
           <Reveal className="lg:col-span-5">
-            <p className="eyebrow">Aplikasi pantang</p>
+            <p className="eyebrow">{t("Aplikasi pantang")}</p>
             <p className="display-sm mt-4 text-2xl text-sand-300">
-              Menghitung hari menahan diri, memberi lencana, dan membangun rasa bersalah saat
-              hitungannya patah.
+              {t(
+                "Menghitung hari menahan diri, memberi lencana, dan membangun rasa bersalah saat hitungannya patah.",
+              )}
             </p>
             <p className="mt-5 text-sm leading-relaxed text-sand-500">
-              Hitungan yang patah membuat orang berhenti memakai aplikasinya. Di kategori ini
-              kepergiannya permanen, karena bercampur rasa malu.
+              {t(
+                "Hitungan yang patah membuat orang berhenti memakai aplikasinya. Di kategori ini kepergiannya permanen, karena bercampur rasa malu.",
+              )}
             </p>
           </Reveal>
 
@@ -270,12 +278,14 @@ export default function Home() {
           <Reveal delay={0.08} className="lg:col-span-6">
             <p className="eyebrow text-teal-500">Cadensa</p>
             <p className="display-sm mt-4 text-2xl text-sand-100">
-              Tidak menghitung hari pantang, dan tidak punya hitungan yang bisa patah. Yang
-              ditampilkan pita ritme yang melebar dan menyempit.
+              {t(
+                "Tidak menghitung hari pantang, dan tidak punya hitungan yang bisa patah. Yang ditampilkan pita ritme yang melebar dan menyempit.",
+              )}
             </p>
             <p className="mt-5 text-sm leading-relaxed text-sand-500">
-              Dua puluh satu digambar sebagai wilayah, bukan garis. Tidak ada papan peringkat, dan
-              tidak ada yang bisa gagal.
+              {t(
+                "Dua puluh satu digambar sebagai wilayah, bukan garis. Tidak ada papan peringkat, dan tidak ada yang bisa gagal.",
+              )}
             </p>
           </Reveal>
         </div>
@@ -285,9 +295,11 @@ export default function Home() {
       <section id="peragaan" className="mx-auto max-w-4xl px-5 py-20">
         <SectionHead
           n="03"
-          eyebrow="Peragaan"
-          title="Jumlah bukan ukuran yang tepat"
-          lead="Dua orang dengan dua puluh satu catatan bisa sangat berbeda: satu tersebar rata, satu menumpuk di minggu terakhir. Geser sendiri, dan lihat indeksnya runtuh sementara jumlahnya tidak berubah."
+          eyebrow={t("Peragaan")}
+          title={t("Jumlah bukan ukuran yang tepat")}
+          lead={t(
+            "Dua orang dengan dua puluh satu catatan bisa sangat berbeda: satu tersebar rata, satu menumpuk di minggu terakhir. Geser sendiri, dan lihat indeksnya runtuh sementara jumlahnya tidak berubah.",
+          )}
         />
         <Reveal delay={0.1} className="mt-10">
           <CadenceBand />
@@ -299,16 +311,12 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-5">
           <SectionHead
             n="04"
-            eyebrow="Katalog"
-            title="Alatnya disebut dengan nama yang tepat"
-            lead={
-              <>
-                {DEVICES.length} jenis, dikelompokkan, masing-masing dengan ikon dan catatan
-                perawatan. Rinciannya sejauh ini karena gesekan dan tekanan tiap jenis berbeda jauh,
-                dan itu satu-satunya cara menjelaskan kenapa keluhan fisik muncul pada sebagian
-                orang saja.
-              </>
-            }
+            eyebrow={t("Katalog")}
+            title={t("Alatnya disebut dengan nama yang tepat")}
+            lead={t(
+              "{n} jenis, dikelompokkan, masing-masing dengan ikon dan catatan perawatan. Rinciannya sejauh ini karena gesekan dan tekanan tiap jenis berbeda jauh, dan itu satu-satunya cara menjelaskan kenapa keluhan fisik muncul pada sebagian orang saja.",
+              { n: DEVICES.length },
+            )}
           />
         </div>
         <Reveal delay={0.08} className="mt-12">
@@ -317,10 +325,9 @@ export default function Home() {
         <div className="mx-auto mt-8 max-w-6xl px-5">
           <Reveal delay={0.12}>
             <p className="max-w-xl text-sm leading-relaxed text-sand-500">
-              Ikonnya digambar sebagai garis vektor, bukan berkas gambar. Tajam di layar mana pun
-              tanpa menambah unduhan, ikut warna tema, dan yang paling menentukan, tidak ada berkas
-              gambar yang singgah di riwayat unduhan. Bentuknya cukup untuk dikenali pemakainya,
-              tidak cukup untuk dipahami orang yang melirik dari samping.
+              {t(
+                "Ikonnya digambar sebagai garis vektor, bukan berkas gambar. Tajam di layar mana pun tanpa menambah unduhan, ikut warna tema, dan yang paling menentukan, tidak ada berkas gambar yang singgah di riwayat unduhan. Bentuknya cukup untuk dikenali pemakainya, tidak cukup untuk dipahami orang yang melirik dari samping.",
+              )}
             </p>
           </Reveal>
         </div>
@@ -330,31 +337,34 @@ export default function Home() {
       <section id="kosakata" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="05"
-          eyebrow="Kosakata"
-          title="Setiap pilihan punya rupanya sendiri"
-          lead="Alur catat punya anggaran dua belas detik, dan di layar sekecil ponsel bentuk terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya berupa teks."
+          eyebrow={t("Kosakata")}
+          title={t("Setiap pilihan punya rupanya sendiri")}
+          lead={t(
+            "Alur catat punya anggaran dua belas detik, dan di layar sekecil ponsel bentuk terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya berupa teks.",
+          )}
         />
 
         <div className="mt-12 space-y-9">
           {[
             {
-              t: "Rasanya sesudah",
+              judul: "Rasanya sesudah",
               set: "feel" as const,
               items: AFTERFEELS.map((a) => ({ n: a.key, medis: a.medical })),
             },
             {
-              t: "Cara",
+              judul: "Cara",
               set: "method" as const,
               items: METHODS.map((m) => ({ n: m, medis: false })),
             },
             {
-              t: "Yang memicu",
+              judul: "Yang memicu",
               set: "trigger" as const,
-              items: TRIGGERS.map((t) => ({ n: t, medis: false })),
+              // `pemicu`, bukan `t` — nama itu sudah dipakai penerjemah.
+              items: TRIGGERS.map((pemicu) => ({ n: pemicu, medis: false })),
             },
           ].map((row, ri) => (
-            <Reveal key={row.t} delay={ri * 0.06}>
-              <p className="eyebrow mb-4">{row.t}</p>
+            <Reveal key={row.judul} delay={ri * 0.06}>
+              <p className="eyebrow mb-4">{t(row.judul)}</p>
               <Stagger className="grid grid-cols-3 gap-2.5 min-[420px]:grid-cols-4 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
                 {row.items.map((it) => (
                   <StaggerItem key={it.n}>
@@ -369,7 +379,7 @@ export default function Home() {
                       <span className={it.medis ? "text-signal-500" : "text-teal-500"}>
                         <Glyph set={row.set} name={it.n} size={30} active />
                       </span>
-                      <span className="text-[11px] leading-tight text-sand-300">{it.n}</span>
+                      <span className="text-[11px] leading-tight text-sand-300">{t(it.n)}</span>
                     </motion.div>
                   </StaggerItem>
                 ))}
@@ -380,10 +390,9 @@ export default function Home() {
 
         <Reveal delay={0.1}>
           <p className="mt-9 max-w-xl text-sm leading-relaxed text-sand-500">
-            Empat rupa terakhir di baris pertama bertanda merah karena berhubungan dengan tubuh,
-            bukan suasana hati. Warna itu dicadangkan untuk satu makna saja di seluruh aplikasi, dan
-            memilih salah satunya membawa catatanmu ke jalur yang tidak pernah dijawab dengan saran
-            mengubah teknik.
+            {t(
+              "Empat rupa terakhir di baris pertama bertanda merah karena berhubungan dengan tubuh, bukan suasana hati. Warna itu dicadangkan untuk satu makna saja di seluruh aplikasi, dan memilih salah satunya membawa catatanmu ke jalur yang tidak pernah dijawab dengan saran mengubah teknik.",
+            )}
           </p>
         </Reveal>
       </section>
@@ -396,14 +405,11 @@ export default function Home() {
       <section id="sinyal" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="06"
-          eyebrow="Sinyal"
-          title={
-            <>
-              Catatan yang dibuat tanpa penonton
-              <br className="hidden sm:block" /> adalah data batin yang paling jujur
-            </>
-          }
-          lead="Empat pola terbaca tanpa Cadensa perlu bertanya apa pun. Semuanya disajikan sebagai yang tubuhmu tunjukkan minggu ini, bukan sebagai label klinis."
+          eyebrow={t("Sinyal")}
+          title={t("Catatan yang dibuat tanpa penonton adalah data batin yang paling jujur")}
+          lead={t(
+            "Empat pola terbaca tanpa Cadensa perlu bertanya apa pun. Semuanya disajikan sebagai yang tubuhmu tunjukkan minggu ini, bukan sebagai label klinis.",
+          )}
         />
 
         <div className="mt-14 divide-y divide-[rgba(207,198,184,0.08)] border-y border-[rgba(207,198,184,0.08)]">
@@ -412,12 +418,14 @@ export default function Home() {
               <div className="grid gap-4 py-8 lg:grid-cols-12 lg:gap-10">
                 <div className="lg:col-span-3">
                   <span className="num text-xs text-teal-600">{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="display-sm mt-2 text-xl text-sand-100">{s.name}</h3>
+                  <h3 className="display-sm mt-2 text-xl text-sand-100">{t(s.name)}</h3>
                 </div>
                 <p className="text-[0.9375rem] leading-relaxed text-teal-500/90 lg:col-span-4">
-                  {s.read}
+                  {t(s.read)}
                 </p>
-                <p className="text-[0.9375rem] leading-relaxed text-sand-500 lg:col-span-5">{s.why}</p>
+                <p className="text-[0.9375rem] leading-relaxed text-sand-500 lg:col-span-5">
+                  {t(s.why)}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -433,24 +441,24 @@ export default function Home() {
                 <p className="eyebrow flex items-center gap-3">
                   <span className="text-teal-600">07</span>
                   <span className="h-px w-8 bg-sand-500/30" />
-                  Mode perempuan
+                  {t("Mode perempuan")}
                 </p>
                 <h2 className="display mt-5 text-[2.1rem] sm:text-[2.6rem]">
-                  Bukan aplikasi yang sama dengan kata ganti yang diganti
+                  {t("Bukan aplikasi yang sama dengan kata ganti yang diganti")}
                 </h2>
                 <p className="mt-6 leading-relaxed text-sand-300">
-                  Angka dua puluh satu tidak dipindahkan ke sini. Dasarnya penelitian tentang
-                  prostat, organ yang tidak ada di tubuh perempuan, jadi memakai ulang angkanya akan
-                  jadi klaim kesehatan tanpa dasar. Produk yang mengarang satu angka kehilangan hak
-                  dipercaya soal angka lainnya.
+                  {t(
+                    "Angka dua puluh satu tidak dipindahkan ke sini. Dasarnya penelitian tentang prostat, organ yang tidak ada di tubuh perempuan, jadi memakai ulang angkanya akan jadi klaim kesehatan tanpa dasar. Produk yang mengarang satu angka kehilangan hak dipercaya soal angka lainnya.",
+                  )}
                 </p>
                 <p className="mt-4 leading-relaxed text-sand-500">
-                  Yang dipakai sebagai gantinya adalah pertanyaan yang memang punya jawaban: apakah
-                  dorongan naik dan turun mengikuti siklus, dan apakah polanya berulang.
+                  {t(
+                    "Yang dipakai sebagai gantinya adalah pertanyaan yang memang punya jawaban: apakah dorongan naik dan turun mengikuti siklus, dan apakah polanya berulang.",
+                  )}
                 </p>
                 <Magnetic className="mt-8 inline-block">
                   <Link href="/pengaturan" className={CTA_GHOST}>
-                    Ganti mode
+                    {t("Ganti mode")}
                   </Link>
                 </Magnetic>
               </div>
@@ -470,10 +478,10 @@ export default function Home() {
                       "Katalog sendiri",
                       "Daftar alat menyesuaikan mode: yang khusus muncul, yang tidak relevan hilang.",
                     ],
-                  ].map(([t, d]) => (
-                    <div key={t} className="px-8 py-7">
-                      <dt className="text-sm font-medium text-sand-100">{t}</dt>
-                      <dd className="mt-2 text-sm leading-relaxed text-sand-500">{d}</dd>
+                  ].map(([judul, d]) => (
+                    <div key={judul} className="px-8 py-7">
+                      <dt className="text-sm font-medium text-sand-100">{t(judul)}</dt>
+                      <dd className="mt-2 text-sm leading-relaxed text-sand-500">{t(d)}</dd>
                     </div>
                   ))}
                 </dl>
@@ -485,15 +493,19 @@ export default function Home() {
 
       {/* 07 Alur. Tiga langkah sebagai baris, bukan tiga kartu. */}
       <section id="alur" className="mx-auto max-w-4xl px-5 py-20">
-        <SectionHead n="08" eyebrow="Alur" title="Tiga langkah, dan tidak ada yang keempat" />
+        <SectionHead
+          n="08"
+          eyebrow={t("Alur")}
+          title={t("Tiga langkah, dan tidak ada yang keempat")}
+        />
         <div className="mt-12 space-y-1">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 0.06}>
               <div className="flex items-baseline gap-6 border-b border-[rgba(207,198,184,0.07)] py-7">
                 <span className="num shrink-0 text-sm text-teal-600">{s.n}</span>
                 <div>
-                  <h3 className="display-sm text-2xl text-sand-100">{s.t}</h3>
-                  <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-sand-500">{s.d}</p>
+                  <h3 className="display-sm text-2xl text-sand-100">{t(s.t)}</h3>
+                  <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-sand-500">{t(s.d)}</p>
                 </div>
               </div>
             </Reveal>
@@ -505,14 +517,11 @@ export default function Home() {
       <section id="penyimpanan" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="09"
-          eyebrow="Penyimpanan"
-          title={
-            <>
-              Catatanmu tidak akan hilang,
-              <br className="hidden sm:block" /> dan tetap tidak terbaca siapa pun
-            </>
-          }
-          lead="Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, dan catatan yang hilang begitu saja adalah cacat, bukan fitur. Karena itu ada akun. Tapi sebelum apa pun terkirim, catatanmu dikunci dulu di perangkat ini dengan AES-GCM, memakai kunci yang diturunkan dari kata sandimu di perambanmu sendiri."
+          eyebrow={t("Penyimpanan")}
+          title={t("Catatanmu tidak akan hilang, dan tetap tidak terbaca siapa pun")}
+          lead={t(
+            "Penyimpanan peramban bisa dibersihkan sistem tanpa memberi tahu, dan catatan yang hilang begitu saja adalah cacat, bukan fitur. Karena itu ada akun. Tapi sebelum apa pun terkirim, catatanmu dikunci dulu di perangkat ini dengan AES-GCM, memakai kunci yang diturunkan dari kata sandimu di perambanmu sendiri.",
+          )}
         />
 
         <div className="mt-14 grid gap-12 lg:grid-cols-12">
@@ -524,16 +533,16 @@ export default function Home() {
                 "Yang dikirim turunan PBKDF2-nya. Kata sandi aslinya tidak pernah keluar dari peramban.",
               ],
               ["Bocor pun tidak terbaca", "Kalau seluruh basis datanya dicuri, isinya tetap teks acak."],
-            ].map(([t, d], i) => (
-              <StaggerItem key={t}>
+            ].map(([judul, d], i) => (
+              <StaggerItem key={judul}>
                 <Tilt3D max={4} className="relative">
                   <div className="surface flex items-start gap-5 rounded-card px-7 py-6">
                     <span className="num mt-0.5 text-xs text-teal-600">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <p className="font-medium text-sand-100">{t}</p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-sand-500">{d}</p>
+                      <p className="font-medium text-sand-100">{t(judul)}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-sand-500">{t(d)}</p>
                     </div>
                   </div>
                 </Tilt3D>
@@ -543,27 +552,28 @@ export default function Home() {
 
           <Reveal delay={0.08} className="lg:col-span-5">
             <div className="border-l-2 border-amber-400/40 pl-6">
-              <p className="display-sm text-lg text-amber-400">Harga dari janji ini</p>
+              <p className="display-sm text-lg text-amber-400">{t("Harga dari janji ini")}</p>
               <p className="mt-4 text-sm leading-relaxed text-sand-300">
-                Karena kunci tidak pernah kami pegang, tidak ada tombol lupa kata sandi yang bisa
-                mengembalikan catatanmu. Yang ada kunci pemulihan sekali tampil, dan cadangan yang
-                bisa kamu unduh sendiri kapan saja.
+                {t(
+                  "Karena kunci tidak pernah kami pegang, tidak ada tombol lupa kata sandi yang bisa mengembalikan catatanmu. Yang ada kunci pemulihan sekali tampil, dan cadangan yang bisa kamu unduh sendiri kapan saja.",
+                )}
               </p>
               <p className="mt-4 text-sm leading-relaxed text-sand-500">
-                Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di
-                balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.
+                {t(
+                  "Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.",
+                )}
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-4">
                 <Magnetic>
                   <Link href="/masuk" className={CTA}>
-                    Buat akun
+                    {t("Buat akun")}
                   </Link>
                 </Magnetic>
                 <Link
                   href="/privacy"
                   className="text-sm text-sand-300 underline decoration-sand-500/40 underline-offset-[6px] hover:text-sand-100"
                 >
-                  Cara kerjanya
+                  {t("Cara kerjanya")}
                 </Link>
               </div>
             </div>
@@ -577,9 +587,11 @@ export default function Home() {
       <section id="suara" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
           n="10"
-          eyebrow="Suara pengguna"
-          title="Apa yang benar-benar ditulis orang"
-          lead="Isinya diambil langsung dari basis data, dan angka penilaiannya dihitung dari baris yang ada di sana. Tidak ada tempat di mana pun untuk mengetik angka itu sendiri."
+          eyebrow={t("Suara pengguna")}
+          title={t("Apa yang benar-benar ditulis orang")}
+          lead={t(
+            "Isinya diambil langsung dari basis data, dan angka penilaiannya dihitung dari baris yang ada di sana. Tidak ada tempat di mana pun untuk mengetik angka itu sendiri.",
+          )}
         />
 
         <div className="mt-14">
@@ -591,15 +603,16 @@ export default function Home() {
       <section className="mx-auto max-w-3xl px-5 pb-32 pt-16">
         <Reveal>
           <h2 className="display text-[2.6rem] sm:text-[3.4rem]">
-            <RevealWords text="Mulai dari satu catatan" />
+            <RevealWords text={t("Mulai dari satu catatan")} />
           </h2>
           <p className="mt-6 max-w-lg leading-relaxed text-sand-300">
-            Tidak perlu akun untuk mencoba. Cadensa berguna sebelum kamu mendaftar apa pun. Akun
-            hanya menjaga supaya yang sudah kamu catat tidak hilang.
+            {t(
+              "Tidak perlu akun untuk mencoba. Cadensa berguna sebelum kamu mendaftar apa pun. Akun hanya menjaga supaya yang sudah kamu catat tidak hilang.",
+            )}
           </p>
           <Magnetic className="mt-9 inline-block">
             <Link href="/log" className={`${CTA} px-8 py-4`}>
-              Buka pencatat
+              {t("Buka pencatat")}
             </Link>
           </Magnetic>
         </Reveal>
@@ -607,10 +620,11 @@ export default function Home() {
 
       <footer className="border-t hairline py-12">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 text-xs leading-relaxed text-sand-500 sm:flex-row sm:items-start sm:justify-between">
-          <p className="display-sm text-base text-sand-300">Cadensa, ritme bukan skor.</p>
+          <p className="display-sm text-base text-sand-300">{t("Cadensa, ritme bukan skor.")}</p>
           <p className="max-w-sm">
-            Bukan alat diagnosis. Kalau ada nyeri berulang, darah, atau keluhan yang menetap,
-            periksakan ke dokter.
+            {t(
+              "Bukan alat diagnosis. Kalau ada nyeri berulang, darah, atau keluhan yang menetap, periksakan ke dokter.",
+            )}
           </p>
         </div>
       </footer>

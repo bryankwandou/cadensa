@@ -2,6 +2,7 @@
 
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef } from "react";
+import { useT } from "@/lib/i18n";
 
 /**
  * Gambar bukti.
@@ -38,6 +39,7 @@ const SCALE_MAX = 1.15;
 const pos = (v: number) => ((v - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
 
 export function EvidenceChart() {
+  const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const reduce = useReducedMotion();
@@ -45,8 +47,10 @@ export function EvidenceChart() {
   return (
     <div ref={ref} className="surface rounded-panel p-7 sm:p-9">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <p className="eyebrow">Rasio hazard kanker prostat</p>
-        <p className="num text-[10px] text-sand-500">31.925 pria · tindak lanjut 18 tahun</p>
+        <p className="eyebrow">{t("Rasio hazard kanker prostat")}</p>
+        <p className="num text-[10px] text-sand-500">
+          {t("31.925 pria · tindak lanjut 18 tahun")}
+        </p>
       </div>
 
       <div className="mt-8 space-y-5">
@@ -56,9 +60,9 @@ export function EvidenceChart() {
               {/* Keterangan pendamping turun ke baris sendiri di ponsel; dipaksa
                   sebaris, ia mendorong angka rasionya keluar layar. */}
               <span className={`min-w-0 text-sm ${r.ref ? "text-sand-500" : "text-sand-100"}`}>
-                {r.label}
+                {t(r.label)}
                 {r.sub && (
-                  <span className="block text-xs text-sand-500 sm:ml-2 sm:inline">{r.sub}</span>
+                  <span className="block text-xs text-sand-500 sm:ml-2 sm:inline">{t(r.sub)}</span>
                 )}
               </span>
               <span
@@ -108,9 +112,9 @@ export function EvidenceChart() {
       </div>
 
       <div className="num mt-2 flex justify-between text-[10px] text-sand-500">
-        <span>0,60</span>
-        <span>1,00 — tanpa perbedaan</span>
-        <span>1,15</span>
+        <span>{t("0,60")}</span>
+        <span>{t("1,00 — tanpa perbedaan")}</span>
+        <span>{t("1,15")}</span>
       </div>
 
       <p className="mt-7 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs leading-relaxed text-sand-500">
@@ -119,8 +123,9 @@ export function EvidenceChart() {
           Ejaculation Frequency and Risk of Prostate Cancer: Updated Results with an Additional
           Decade of Follow-up.
         </span>{" "}
-        European Urology, 2016;70(6):974–982. Angka di atas adalah frekuensi pada usia 40–49 tahun.
-        Temuan awalnya terbit di JAMA 2004 dari kohort yang sama.
+        {t(
+          "European Urology, 2016;70(6):974–982. Angka di atas adalah frekuensi pada usia 40–49 tahun. Temuan awalnya terbit di JAMA 2004 dari kohort yang sama.",
+        )}
       </p>
     </div>
   );

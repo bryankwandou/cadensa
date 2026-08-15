@@ -1,6 +1,16 @@
+/*
+  Halaman ini dijadikan komponen klien supaya bisa ikut berganti bahasa.
+  Isinya memang tidak pernah menyentuh apa pun yang khusus server — tidak ada
+  cookie, tidak ada basis data, tidak ada rahasia — dan `Reveal` di dalamnya
+  sudah komponen klien sejak awal, jadi tidak ada yang berpindah dari server ke
+  peramban selain teks yang memang sudah terkirim.
+*/
+"use client";
+
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Reveal } from "@/components/Motion";
+import { useT } from "@/lib/i18n";
 
 const POINTS = [
   {
@@ -42,19 +52,18 @@ const POINTS = [
 ];
 
 export default function PrivacyPage() {
+  const { t } = useT();
   return (
     <div className="aurora min-h-screen">
       <Nav />
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12">
         <Reveal>
-          <p className="eyebrow">Yang disimpan, dan di mana</p>
-          <h1 className="display mt-2.5 text-[3rem]">Privasi</h1>
+          <p className="eyebrow">{t("Yang disimpan, dan di mana")}</p>
+          <h1 className="display mt-2.5 text-[3rem]">{t("Privasi")}</h1>
           <p className="mt-6 max-w-2xl leading-relaxed text-sand-300">
-            Data seperti ini termasuk yang paling sensitif yang bisa dimiliki seseorang. Satu
-            kebocoran berarti kematian merek yang permanen, dan itulah alasan kebanyakan orang
-            tidak mau membangun produk di kategori ini. Cadensa memikulnya dengan cara yang paling
-            bisa diperiksa: server memang menyimpan sesuatu, tapi yang disimpannya tidak bisa
-            dibaca oleh siapa pun yang menjalankannya.
+            {t(
+              "Data seperti ini termasuk yang paling sensitif yang bisa dimiliki seseorang. Satu kebocoran berarti kematian merek yang permanen, dan itulah alasan kebanyakan orang tidak mau membangun produk di kategori ini. Cadensa memikulnya dengan cara yang paling bisa diperiksa: server memang menyimpan sesuatu, tapi yang disimpannya tidak bisa dibaca oleh siapa pun yang menjalankannya.",
+            )}
           </p>
         </Reveal>
 
@@ -62,8 +71,8 @@ export default function PrivacyPage() {
           {POINTS.map((p, i) => (
             <Reveal key={p.t} delay={i * 0.04}>
               <div className="surface rounded-card p-7">
-                <h2 className="display-sm text-xl text-sand-100">{p.t}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-sand-300">{p.d}</p>
+                <h2 className="display-sm text-xl text-sand-100">{t(p.t)}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-sand-300">{t(p.d)}</p>
               </div>
             </Reveal>
           ))}
@@ -71,16 +80,17 @@ export default function PrivacyPage() {
 
         <Reveal delay={0.1}>
           <div className="mt-12 rounded-panel border border-amber-500/25 bg-amber-500/[0.04] p-8">
-            <h2 className="display-sm text-xl text-amber-400">Harga dari janji ini</h2>
+            <h2 className="display-sm text-xl text-amber-400">{t("Harga dari janji ini")}</h2>
             <p className="mt-3 text-sm leading-relaxed text-sand-300">
-              Karena kunci tidak pernah kami pegang, tidak ada tombol &ldquo;lupa kata sandi&rdquo;
-              yang bisa mengembalikan catatanmu. Yang ada adalah kunci pemulihan yang kami tunjukkan
-              sekali saat kamu mendaftar. Simpan kunci itu, dan unduh cadangan sesekali lewat{" "}
+              {t(
+                "Karena kunci tidak pernah kami pegang, tidak ada tombol “lupa kata sandi” yang bisa mengembalikan catatanmu. Yang ada adalah kunci pemulihan yang kami tunjukkan sekali saat kamu mendaftar. Simpan kunci itu, dan unduh cadangan sesekali lewat",
+              )}{" "}
               <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
-                halaman pengaturan
+                {t("halaman pengaturan")}
               </Link>
-              . Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di
-              balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.
+              {t(
+                ". Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.",
+              )}
             </p>
           </div>
         </Reveal>

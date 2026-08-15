@@ -8,6 +8,7 @@ import { Magnetic, Pressable, Reveal } from "@/components/Motion";
 import { DeviceIcon } from "@/components/DeviceIcon";
 import { OptionTile } from "@/components/OptionTile";
 import { useVault } from "@/lib/vault";
+import { useT } from "@/lib/i18n";
 import {
   AFTERFEELS,
   DEVICE_GROUPS,
@@ -44,6 +45,7 @@ function emptyDraft(mode: Mode): Draft {
 
 export default function LogPage() {
   const { add, entries, profile, ready } = useVault();
+  const { t } = useT();
   const [draft, setDraft] = useState<Draft>(() => emptyDraft("pria"));
   const [detail, setDetail] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -87,10 +89,12 @@ export default function LogPage() {
       <Nav />
       <main className="mx-auto max-w-2xl px-5 pb-24 pt-12">
         <Reveal>
-          {profile.name && <p className="eyebrow">Halo, {profile.name}</p>}
-          <h1 className={`display text-[2.75rem] ${profile.name ? "mt-2" : ""}`}>Catat</h1>
+          {profile.name && (
+            <p className="eyebrow">{t("Halo, {nama}", { nama: profile.name })}</p>
+          )}
+          <h1 className={`display text-[2.75rem] ${profile.name ? "mt-2" : ""}`}>{t("Catat")}</h1>
           <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-sand-300">
-            Dua pilihan sudah cukup. Sisanya hanya kalau kamu memang ingin tahu lebih banyak nanti.
+            {t("Dua pilihan sudah cukup. Sisanya hanya kalau kamu memang ingin tahu lebih banyak nanti.")}
           </p>
         </Reveal>
 
@@ -98,7 +102,7 @@ export default function LogPage() {
         <Reveal delay={0.05}>
           <div className="surface mt-9 flex items-center justify-between rounded-panel px-6 py-5">
             <div>
-              <p className="eyebrow">Durasi</p>
+              <p className="eyebrow">{t("Durasi")}</p>
               <p className="num mt-1.5 text-[1.75rem] text-sand-100">
                 {String(Math.floor(seconds / 60)).padStart(2, "0")}:
                 {String(seconds % 60).padStart(2, "0")}
@@ -109,7 +113,7 @@ export default function LogPage() {
                 onClick={() => setRunning((r) => !r)}
                 className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-200"
               >
-                {running ? "Jeda" : seconds ? "Lanjut" : "Mulai"}
+                {running ? t("Jeda") : seconds ? t("Lanjut") : t("Mulai")}
               </Pressable>
               {seconds > 0 && (
                 <Pressable
@@ -119,7 +123,7 @@ export default function LogPage() {
                   }}
                   className="rounded-full border hairline px-4 py-2.5 text-sm text-sand-500"
                 >
-                  Nol
+                  {t("Nol")}
                 </Pressable>
               )}
             </div>
@@ -129,7 +133,7 @@ export default function LogPage() {
         {/* Cara */}
         <Reveal delay={0.08}>
           <div className="mt-8">
-            <p className="eyebrow mb-3.5">Cara</p>
+            <p className="eyebrow mb-3.5">{t("Cara")}</p>
             {/* Dua kolom di ponsel: "hubungan seksual" tidak muat di seperempat
                 lebar layar 360px, dan label yang terpotong lebih buruk daripada
                 dua baris. */}
@@ -139,7 +143,7 @@ export default function LogPage() {
                   key={m}
                   set="method"
                   name={m}
-                  label={m}
+                  label={t(m)}
                   active={draft.method === m}
                   onClick={() => {
                     set("method", m as Method);
@@ -162,14 +166,14 @@ export default function LogPage() {
               className="overflow-hidden"
             >
               <div className="mt-8">
-                <p className="eyebrow mb-3.5">Alat</p>
+                <p className="eyebrow mb-3.5">{t("Alat")}</p>
                 <div className="space-y-5">
                   {DEVICE_GROUPS.map((g) => {
                     const items = devices.filter((d) => d.group === g.key);
                     if (!items.length) return null;
                     return (
                       <div key={g.key}>
-                        <p className="mb-2 text-xs text-sand-500">{g.label}</p>
+                        <p className="mb-2 text-xs text-sand-500">{t(g.label)}</p>
                         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                           {items.map((d) => {
                             const on = draft.device === d.key;
@@ -189,8 +193,8 @@ export default function LogPage() {
                                 <span className={on ? "text-teal-500" : "text-sand-500"}>
                                   <DeviceIcon device={d.key} size={38} animate={on} />
                                 </span>
-                                <span className="block text-sm leading-tight text-sand-100">{d.label}</span>
-                                <span className="block text-[11px] leading-snug text-sand-500">{d.hint}</span>
+                                <span className="block text-sm leading-tight text-sand-100">{t(d.label)}</span>
+                                <span className="block text-[11px] leading-snug text-sand-500">{t(d.hint)}</span>
                               </motion.button>
                             );
                           })}
@@ -208,8 +212,8 @@ export default function LogPage() {
                       exit={{ opacity: 0 }}
                       className="surface-sunken mt-4 rounded-card p-5"
                     >
-                      <p className="eyebrow">Perawatan</p>
-                      <p className="mt-1 text-sm leading-relaxed text-sand-300">{chosen.care}</p>
+                      <p className="eyebrow">{t("Perawatan")}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-sand-300">{t(chosen.care)}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -221,14 +225,14 @@ export default function LogPage() {
         {/* Rasa sesudah */}
         <Reveal delay={0.1}>
           <div className="mt-8">
-            <p className="eyebrow mb-3.5">Rasanya sesudah</p>
+            <p className="eyebrow mb-3.5">{t("Rasanya sesudah")}</p>
             <div className="grid grid-cols-3 gap-2 min-[420px]:grid-cols-4 sm:grid-cols-6">
               {AFTERFEELS.map((a) => (
                 <OptionTile
                   key={a.key}
                   set="feel"
                   name={a.key}
-                  label={a.key}
+                  label={t(a.key)}
                   size="sm"
                   tone={a.medical ? "signal" : "teal"}
                   active={draft.afterfeel === a.key}
@@ -237,8 +241,9 @@ export default function LogPage() {
               ))}
             </div>
             <p className="mt-3 text-xs text-sand-500">
-              Empat yang terakhir bertanda merah karena berhubungan dengan tubuh, bukan suasana
-              hati — dan dijawab lewat jalur yang berbeda.
+              {t(
+                "Empat yang terakhir bertanda merah karena berhubungan dengan tubuh, bukan suasana hati — dan dijawab lewat jalur yang berbeda.",
+              )}
             </p>
           </div>
         </Reveal>
@@ -249,7 +254,7 @@ export default function LogPage() {
             onClick={() => setDetail((v) => !v)}
             className="mt-8 text-sm text-sand-500 underline underline-offset-4 hover:text-sand-300"
           >
-            {detail ? "Sembunyikan detail" : "Tambah detail (opsional)"}
+            {detail ? t("Sembunyikan detail") : t("Tambah detail (opsional)")}
           </button>
         </Reveal>
 
@@ -264,14 +269,14 @@ export default function LogPage() {
             >
               <div className="mt-6 space-y-7">
                 <div>
-                  <p className="eyebrow mb-3.5">Pelumas</p>
+                  <p className="eyebrow mb-3.5">{t("Pelumas")}</p>
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {LUBES.map((l) => (
                       <OptionTile
                         key={l}
                         set="lube"
                         name={l}
-                        label={l}
+                        label={t(l)}
                         size="sm"
                         active={draft.lube === l}
                         onClick={() => set("lube", l as Lube)}
@@ -280,21 +285,22 @@ export default function LogPage() {
                   </div>
                   {draft.lube === "berbasis silikon" && chosen && (
                     <p className="mt-2 text-xs text-amber-400">
-                      Pelumas silikon bisa merusak permukaan alat berbahan silikon. Untuk alat, yang
-                      berbasis air lebih aman.
+                      {t(
+                        "Pelumas silikon bisa merusak permukaan alat berbahan silikon. Untuk alat, yang berbasis air lebih aman.",
+                      )}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <p className="eyebrow mb-3.5">Edging</p>
+                  <p className="eyebrow mb-3.5">{t("Edging")}</p>
                   <div className="grid grid-cols-3 gap-2">
                     {EDGING.map((e) => (
                       <OptionTile
                         key={e}
                         set="edge"
                         name={e}
-                        label={e}
+                        label={t(e)}
                         active={draft.edging === e}
                         onClick={() => set("edging", e as Edging)}
                       />
@@ -305,7 +311,7 @@ export default function LogPage() {
                       type="number"
                       min={1}
                       max={20}
-                      placeholder="Berapa siklus?"
+                      placeholder={t("Berapa siklus?")}
                       value={draft.edgeCycles ?? ""}
                       onChange={(e) => set("edgeCycles", e.target.value ? Number(e.target.value) : null)}
                       className="mt-3 w-40 rounded-field border hairline bg-ink-975/60 px-4 py-2.5 text-sm text-sand-100 outline-none focus:border-teal-600"
@@ -314,29 +320,32 @@ export default function LogPage() {
                 </div>
 
                 <div>
-                  <p className="eyebrow mb-3.5">Yang memicu</p>
+                  <p className="eyebrow mb-3.5">{t("Yang memicu")}</p>
                   <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
-                    {TRIGGERS.map((t) => (
+                    {/* `pemicu`, bukan `t`: nama itu sekarang milik penerjemah. */}
+                    {TRIGGERS.map((pemicu) => (
                       <OptionTile
-                        key={t}
+                        key={pemicu}
                         set="trigger"
-                        name={t}
-                        label={t}
+                        name={pemicu}
+                        label={t(pemicu)}
                         size="sm"
-                        active={draft.trigger === t}
-                        onClick={() => set("trigger", draft.trigger === t ? null : (t as Trigger))}
+                        active={draft.trigger === pemicu}
+                        onClick={() =>
+                          set("trigger", draft.trigger === pemicu ? null : (pemicu as Trigger))
+                        }
                       />
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <p className="eyebrow mb-3.5">Catatan</p>
+                  <p className="eyebrow mb-3.5">{t("Catatan")}</p>
                   <textarea
                     value={draft.note}
                     onChange={(e) => set("note", e.target.value)}
                     rows={3}
-                    placeholder="Apa pun yang ingin kamu ingat nanti."
+                    placeholder={t("Apa pun yang ingin kamu ingat nanti.")}
                     className="w-full rounded-field border hairline bg-ink-975/60 px-4 py-3 text-sm text-sand-100 outline-none placeholder:text-sand-500 focus:border-teal-600"
                   />
                 </div>
@@ -350,7 +359,7 @@ export default function LogPage() {
             onClick={save}
             className="rounded-full bg-teal-500 px-9 py-4 text-sm font-medium text-ink-975 transition-colors hover:bg-teal-400"
           >
-            Simpan
+            {t("Simpan")}
           </Pressable>
         </Magnetic>
 
@@ -362,9 +371,9 @@ export default function LogPage() {
               exit={{ opacity: 0, y: 10 }}
               className="surface-raised mt-6 flex items-center justify-between rounded-card px-5 py-4"
             >
-              <span className="text-sm text-sand-200">Tersimpan.</span>
+              <span className="text-sm text-sand-200">{t("Tersimpan.")}</span>
               <Link href="/rhythm" className="text-sm text-teal-500 underline underline-offset-4">
-                Lihat ritme
+                {t("Lihat ritme")}
               </Link>
             </motion.div>
           )}
@@ -372,9 +381,9 @@ export default function LogPage() {
 
         {ready && (
           <p className="mt-10 text-sm text-sand-500">
-            {entries.length} catatan tersimpan.{" "}
+            {t("{n} catatan tersimpan.", { n: entries.length })}{" "}
             <Link href="/pengaturan" className="text-teal-500 underline underline-offset-4">
-              Atur cadangan
+              {t("Atur cadangan")}
             </Link>
           </p>
         )}
