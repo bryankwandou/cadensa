@@ -75,6 +75,21 @@ export function ensureSchema(): Promise<void> {
         created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
         updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
+    /**
+     * Potret responden, ditambahkan belakangan.
+     *
+     * `ADD COLUMN IF NOT EXISTS` dipakai supaya tabel yang sudah berisi baris
+     * tidak perlu dibuang dan dibuat ulang. Keduanya boleh kosong: di kategori
+     * ini sebagian besar orang memang tidak akan pernah mau wajahnya dipasang,
+     * dan `Portrait` sudah menggambar cincin berhuruf saat `avatar_url` null.
+     *
+     * `avatar_focus` menyimpan titik wajah dan perbesaran, bukan hasil potongan.
+     * Foto yang dikirim orang hampir selalu foto badan, wajahnya kecil di
+     * sepertiga atas; menyimpan titiknya saja membuat pemotongan bisa diperbaiki
+     * kapan pun tanpa mengunggah ulang berkasnya.
+     */
+    await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS avatar_url   TEXT`;
+    await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS avatar_focus JSONB`;
   })();
   return ensured;
 }

@@ -5,7 +5,39 @@ import { currentUserId } from "@/lib/session";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Row = { display_name: string; rating: number; body: string; created_at: string };
+type Focus = { x: number; y: number; zoom: number };
+type Row = {
+  display_name: string;
+  rating: number;
+  body: string;
+  created_at: string;
+  avatar_url: string | null;
+  avatar_focus: Focus | null;
+};
+
+/**
+ * Hanya berkas milik sendiri di bawah `/ulasan/` yang boleh jadi potret.
+ *
+ * Ini penjagaan, bukan kerapian. Alamat potret yang bebas diisi berarti halaman
+ * depan memuat gambar dari server orang lain, dan server itu ikut menerima
+ * alamat IP serta jejak peramban setiap orang yang membuka halaman ini — di
+ * produk yang seluruh premisnya adalah server tidak bisa membaca apa pun,
+ * kebocoran itu justru datang dari tempat yang paling tidak dicurigai. Alamat
+ * yang tidak lolos diperlakukan sebagai tidak ada, dan `Portrait` menggambar
+ * cincin berhurufnya seperti biasa.
+ */
+const POTRET_SAH = /^\/ulasan\/[A-Za-z0-9._-]{1,64}\.(jpg|jpeg|png|webp|avif)$/;
+
+function potret(url: string | null): string | null {
+  return url && POTRET_SAH.test(url) ? url : null;
+}
+
+/** Angka di luar jangkauan wajar dibuang, supaya `transform: scale()` tidak bisa dipakai menutupi halaman. */
+function fokus(f: Focus | null): Focus | null {
+  if (!f || typeof f.x !== "number" || typeof f.y !== "number" || typeof f.zoom !== "number") return null;
+  const jepit = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+  return { x: jepit(f.x, 0, 100), y: jepit(f.y, 0, 100), zoom: jepit(f.zoom, 1, 3) };
+}
 
 /**
  * Ulasan yang sudah disetujui, berikut angka penilaiannya.
@@ -20,7 +52,7 @@ export async function GET() {
   try {
     await ensureSchema();
     const rows = (await sql`
-      SELECT display_name, rating, body, created_at
+      SELECT display_name, rating, body, created_at, avatar_url, avatar_focus
       FROM reviews
       WHERE approved = true
       ORDER BY created_at DESC
@@ -38,6 +70,8 @@ export async function GET() {
         rating: r.rating,
         body: r.body,
         at: r.created_at,
+        avatar: potret(r.avatar_url),
+        focus: fokus(r.avatar_focus),
       })),
       count: agg[0]?.n ?? 0,
       average: agg[0]?.n ? Math.round(agg[0].avg * 10) / 10 : null,
