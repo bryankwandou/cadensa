@@ -71,6 +71,26 @@ for (const [nama, berkas] of RANGKAIAN) {
   }
 }
 
+/*
+ * Uji unit dijalankan lebih dulu, dan kegagalannya menghentikan sisanya.
+ *
+ * Ia memeriksa fungsi yang memutuskan apakah catatan bertahan atau hilang, dan
+ * selesai dalam hitungan detik. Kalau `merge` sudah salah, menjalankan tujuh
+ * rangkaian peramban selama belasan menit hanya akan menghasilkan daftar
+ * kegagalan yang semuanya berakar pada satu hal — dan yang membacanya harus
+ * menebak yang mana penyebabnya.
+ */
+console.log(`\n${"─".repeat(64)}\nUji unit — merge, nisan, kadens, siklus\n${"─".repeat(64)}`);
+const unit = spawnSync(
+  process.execPath,
+  ["--import", join(DI_SINI, "daftar-resolver.mjs"), "--test", join(DI_SINI, "unit.test.mjs")],
+  { stdio: "inherit" },
+);
+if (unit.status !== 0) {
+  console.error("\nUji unit gagal. Rangkaian peramban tidak dijalankan.");
+  process.exit(1);
+}
+
 let gagal = 0;
 for (const [nama, berkas, keterangan] of RANGKAIAN) {
   console.log(`\n${"─".repeat(64)}\n${nama} — ${keterangan}\n${"─".repeat(64)}`);

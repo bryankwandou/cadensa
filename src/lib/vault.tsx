@@ -20,6 +20,8 @@ import {
   type MotionLevel,
 } from "./types";
 import { buildSample } from "./sample";
+// Penggabungan dan nisan tinggal di modul murni supaya bisa diuji tanpa React.
+import { gabungNisan, merge } from "./gabung";
 import {
   createVaultKeys,
   deriveAuthHash,
@@ -81,26 +83,6 @@ const EMPTY: VaultData = {
   dihapus: {},
 };
 
-/**
- * Nisan yang lebih tua dari ini dibuang.
- *
- * Tanpa batas, daftarnya tumbuh selamanya dan brankas membengkak oleh catatan
- * tentang hal-hal yang sudah lama tidak ada. Enam bulan jauh lebih panjang
- * daripada jeda paling lama antara dua perangkat yang sama-sama dipakai, jadi
- * satu-satunya cara nisan terbuang sebelum tugasnya selesai adalah perangkat
- * yang tidak pernah menyala selama setengah tahun.
- */
-const UMUR_NISAN_MS = 180 * 86_400_000;
-
-function pangkasNisan(d: Record<string, string>): Record<string, string> {
-  const batas = Date.now() - UMUR_NISAN_MS;
-  const out: Record<string, string> = {};
-  for (const [id, saat] of Object.entries(d)) {
-    if (+new Date(saat) >= batas) out[id] = saat;
-  }
-  return out;
-}
-
 function readLocal(): VaultData {
   if (typeof window === "undefined") return EMPTY;
   try {
@@ -137,33 +119,6 @@ function writeLocal(v: VaultData) {
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/**
- * Menggabung dua salinan berdasarkan id, lalu membuang yang bernisan.
- *
- * Urutannya menentukan: penggabungan dulu, penyaringan belakangan. Perangkat
- * yang lama menyala tetap tidak menimpa yang baru, tapi ia juga tidak bisa
- * menghidupkan kembali apa pun yang sudah dihapus di perangkat lain.
- */
-function merge(a: Entry[], b: Entry[], dihapus: Record<string, string>): Entry[] {
-  const map = new Map<string, Entry>();
-  for (const e of [...a, ...b]) map.set(e.id, e);
-  return [...map.values()]
-    .filter((e) => !(e.id in dihapus))
-    .sort((x, y) => +new Date(x.at) - +new Date(y.at));
-}
-
-/** Nisan dari dua salinan disatukan; yang lebih dulu tercatat dipertahankan. */
-function gabungNisan(
-  a: Record<string, string> = {},
-  b: Record<string, string> = {},
-): Record<string, string> {
-  const out: Record<string, string> = { ...a };
-  for (const [id, saat] of Object.entries(b)) {
-    if (!out[id] || +new Date(saat) < +new Date(out[id])) out[id] = saat;
-  }
-  return pangkasNisan(out);
 }
 
 type Ctx = {

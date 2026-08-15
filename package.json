@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "bahasa": "node scripts/bahasa.mjs",
-    "uji": "node scripts/uji/jalankan.mjs"
+    "uji": "node scripts/uji/jalankan.mjs",
+    "uji:unit": "node --import ./scripts/uji/daftar-resolver.mjs --test scripts/uji/unit.test.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
