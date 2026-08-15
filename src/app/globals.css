@@ -54,11 +54,76 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+
+  overflow-x: clip;
+}
+
+/*
+  Pemotongan mendatar dipasang di `html`, bukan hanya di `body`.
+
+  Beberapa hiasan memang sengaja melampaui tepi layar: kabut di belakang
+  pratinjau aplikasi memakai `-inset-6`, dan deretan ikon berjalan lebih lebar
+  daripada layarnya. Tanpa pemotongan, halaman bisa digeser 20px ke samping dan
+  yang terlihat di sana cuma ruang kosong — halaman terasa goyah.
+
+  Dua keputusan di sini, keduanya punya alasan yang tidak kelihatan:
+
+  1. `clip`, bukan `hidden`. `hidden` menjadikan elemennya wadah gulir, dan
+     wadah gulir mematikan `position: sticky` di dalamnya — persis kerusakan
+     yang baru saja diperbaiki pada bilah navigasi. `clip` memotong tanpa
+     membuat wadah gulir, jadi keduanya bisa benar sekaligus.
+
+  2. Di `html`, bukan cukup di `body`. Nilai `overflow` pada `body` diteruskan
+     ke viewport hanya kalau nilainya `hidden`, `scroll`, atau `auto`; `clip`
+     tidak ikut diteruskan. Memasangnya hanya di `body` membuat pemotongannya
+     berlaku untuk `body` sendiri sementara halamannya tetap bisa digeser —
+     terukur: 20px di lebar 390 dan 768, nol di 1920. Itu sebabnya bug ini
+     sempat terlihat sudah beres padahal belum.
+*/
+html {
+  overflow-x: clip;
 }
 
 ::selection {
   background: var(--color-teal-700);
   color: var(--color-sand-100);
+}
+
+/*
+  Label kendali tidak boleh ikut terseleksi seperti paragraf.
+
+  Ini bukan kerapian, melainkan perbaikan bug yang nyata dan sulit ditemukan.
+  Menekan tombol sambil menggeser jari beberapa piksel membuat peramban membaca
+  gerakan itu sebagai seleksi teks, bukan sebagai klik. Akibatnya berlapis:
+  tulisan di dalam tombol tersorot warna seleksi — sehingga tombol tosca tampak
+  biru pucat dan terlihat seperti mati — lalu Edge, Safari, dan Chrome Android
+  memunculkan bilah menu seleksinya melayang tepat di atas formulir. Bilah itu
+  menelan ketukan berikutnya, dan tombolnya benar-benar berhenti bisa ditekan.
+
+  Bagi orang yang mengalaminya, gejalanya persis seperti tombol rusak, dan tidak
+  ada apa pun di Console yang menandainya.
+
+  `touch-action: manipulation` menyertainya untuk membuang jeda 300 ms dan
+  zoom-ketuk-ganda di ponsel. Kolom isian sengaja tidak disentuh: teks yang
+  sudah diketik tetap harus bisa dipilih dan disalin.
+*/
+button,
+[role="button"],
+label,
+a {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select,
+code,
+pre {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Display serif. Sumbu optik Fraunces dinaikkan supaya judul besar terasa
@@ -107,18 +172,37 @@ body {
 
 /* Butir halus. Menghapus kesan "gradasi CSS bersih" yang membuat halaman gelap
    terlihat seperti cetakan pertama dari generator mana pun. */
+/*
+  `z-index: -1` di sini menggantikan aturan `.aurora > * { position: relative }`
+  yang dulu berdiri di bawahnya, dan penggantian itu memperbaiki bug yang tidak
+  kelihatan sebagai bug.
+
+  Lapisan butir ini menutupi seluruh area, jadi isinya harus tergambar di
+  atasnya. Cara lama menempuhnya dengan memaksa setiap anak langsung `.aurora`
+  menjadi `position: relative`. Hasil gambarnya benar, tapi akibat sampingnya
+  merusak: aturan itu ditulis di luar `@layer`, sedangkan seluruh kelas Tailwind
+  hidup di dalam `@layer utilities` — dan CSS tanpa lapisan selalu mengalahkan
+  CSS berlapis, berapa pun spesifisitasnya. Akibatnya setiap `fixed`, `sticky`,
+  dan `absolute` pada anak langsung `.aurora` dibatalkan diam-diam.
+
+  Yang rusak karenanya: bilah navigasi berhenti menempel saat digulir, dan
+  penanda bagian di halaman depan tergambar sebagai blok selebar layar di luar
+  tepi atas — sekaligus mendorong halaman meluber 32px ke samping, yang muncul
+  sebagai batang gulir mendatar di layar lebar.
+
+  Dengan lapisan butir didorong ke belakang isi, tidak ada lagi yang perlu
+  dipaksa. Ia tetap tergambar di atas gradasi `.aurora` sendiri, karena
+  `.aurora` sudah `position: relative` dan menjadi konteks penumpukannya.
+*/
 .aurora::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: -1;
   pointer-events: none;
   opacity: 0.5;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
-}
-
-.aurora > * {
-  position: relative;
 }
 
 /* Tiga tingkat permukaan. Perbedaannya latar, bukan bayangan. */
