@@ -81,6 +81,65 @@ for (const [nama, viewport] of LEBAR) {
   await ctx.close();
 }
 
+/* Bulan lampau: satu kartu tidak boleh memuat dua rentang waktu */
+{
+  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
+  const p = await ctx.newPage();
+  p.on("pageerror", (e) => galat.push(`[bulan lampau] ${e.message}`));
+
+  const { PRIA } = await import("./akun.mjs");
+  await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+  await p.fill('input[autocomplete="username"]', PRIA.nama);
+  await p.fill('input[autocomplete="current-password"]', PRIA.sandi);
+  await p.locator('button[type="submit"]').click();
+  await p.waitForURL("**/rhythm", { timeout: 45000 });
+  await p.waitForTimeout(2500);
+
+  /*
+    Indeks kadens dulu selalu dihitung dari tiga puluh hari terakhir sejak hari
+    ini, apa pun bulan yang sedang dibuka — sementara judul dan jumlah catatan
+    mengikuti bulan itu. Hasilnya "Juni 2026 · 28 catatan" bersebelahan dengan
+    indeks 0 yang berasal dari rentang yang sama sekali lain.
+
+    Yang diuji: dengan catatan sebanyak itu tersebar di dalam bulannya, indeksnya
+    tidak mungkin nol. Nol di sini berarti jendelanya salah lagi.
+  */
+  const baca = () =>
+    p.evaluate(() => {
+      const teks = document.body.innerText;
+      const jumlah = teks.match(/(\d+)\s+catatan/i);
+      const cincin = document.querySelector(".num.text-\\[2\\.6rem\\]");
+      return {
+        jumlah: jumlah ? Number(jumlah[1]) : null,
+        indeks: cincin ? cincin.textContent.trim() : null,
+      };
+    });
+
+  // mundur sampai menemukan bulan yang isinya banyak
+  let lampau = null;
+  for (let i = 0; i < 6; i++) {
+    await p.getByText("Sebelumnya", { exact: true }).click();
+    await p.waitForTimeout(1800);
+    const d = await baca();
+    if (d.jumlah && d.jumlah >= 10) {
+      lampau = d;
+      break;
+    }
+  }
+
+  if (lampau) {
+    const n = Number(lampau.indeks);
+    lapor(
+      Number.isFinite(n) && n > 0,
+      "indeks kadens bulan lampau dihitung dari bulan itu, bukan dari hari ini",
+      `${lampau.jumlah} catatan, indeks ${lampau.indeks}`,
+    );
+  } else {
+    lapor(false, "tidak menemukan bulan lampau berisi cukup catatan untuk diuji");
+  }
+  await ctx.close();
+}
+
 /* Ponsel sungguhan, bukan hanya lebar jendela yang dikecilkan */
 {
   const ctx = await b.newContext({ ...devices["iPhone 13"] });

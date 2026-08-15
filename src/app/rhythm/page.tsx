@@ -85,8 +85,30 @@ export default function RhythmPage() {
   const days = useMemo(() => densityByDay(entries, anchor), [entries, anchor]);
   const isThisMonth = offset === 0;
   const proj = monthProjection(entries, now);
-  const ci = cadenceIndex(lastDays(entries, 30, now));
-  const gap = longestGapDays(lastDays(entries, 30, now), now);
+
+  /*
+    Indeks kadens dan kekosongan terpanjang mengikuti bulan yang sedang dilihat,
+    bukan selalu tiga puluh hari terakhir.
+
+    Sebelumnya keduanya dihitung dari `lastDays(entries, 30, now)` apa pun bulan
+    yang dibuka, sementara judul, jumlah catatan, cincin, batang harian, rasa
+    positif, dan beban edging semuanya mengikuti `anchor`. Menekan "Sebelumnya"
+    lalu memajang "Juni 2026 · 28 catatan" bersebelahan dengan indeks yang
+    berasal dari pertengahan Juli sampai Agustus membuat satu kartu memuat dua
+    rentang waktu berbeda — dan tidak ada apa pun di layar yang memberi tahu.
+    Angkanya bukan sekadar membingungkan, ia salah untuk bulan yang tertulis di
+    atasnya.
+
+    Ujung jendelanya ikut bergeser. `longestGapDays` menghitung juga jarak dari
+    catatan terakhir sampai titik acuan; memakai hari ini sebagai acuan untuk
+    bulan yang sudah lewat akan melaporkan kekosongan sepanjang jarak ke hari
+    ini, bukan kekosongan di dalam bulan itu.
+  */
+  const akhirAnchor = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1);
+  const jendela = isThisMonth ? lastDays(entries, 30, now) : monthEntries;
+  const ujungJendela = isThisMonth ? now : akhirAnchor;
+  const ci = cadenceIndex(jendela);
+  const gap = longestGapDays(jendela, ujungJendela);
   const pos = positiveShare(monthEntries);
   const load = edgingLoad(monthEntries);
   const band = bandState(isThisMonth ? proj.projected : monthEntries.length);
@@ -290,7 +312,11 @@ export default function RhythmPage() {
           <Stat
             label="Cadence Index"
             value={ci == null ? "—" : String(ci)}
-            hint={t("Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah.")}
+            hint={
+              isThisMonth
+                ? t("Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah.")
+                : t("Kemerataan jarak antar kejadian di bulan ini. Bukan jumlah.")
+            }
             tone={ci == null ? "netral" : ci >= 60 ? "baik" : "perhatian"}
           />
           {isWoman ? (
@@ -320,7 +346,11 @@ export default function RhythmPage() {
           <Stat
             label={t("Kekosongan terpanjang")}
             value={t("{n} hari", { n: Math.round(gap) })}
-            hint={t("Rentang terpanjang tanpa catatan dalam sebulan terakhir.")}
+            hint={
+              isThisMonth
+                ? t("Rentang terpanjang tanpa catatan dalam sebulan terakhir.")
+                : t("Rentang terpanjang tanpa catatan di bulan ini.")
+            }
             tone={gap >= 9 ? "perhatian" : "netral"}
           />
           <Stat

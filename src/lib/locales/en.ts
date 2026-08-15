@@ -275,6 +275,10 @@ export const EN: Record<string, string> = {
   "{n} hari": "{n} days",
   "Kemerataan jarak antar kejadian 30 hari terakhir. Bukan jumlah.":
     "How evenly spaced the last 30 days are. Not the count.",
+  "Kemerataan jarak antar kejadian di bulan ini. Bukan jumlah.":
+    "How evenly spaced this month's entries are. Not the count.",
+  "Rentang terpanjang tanpa catatan di bulan ini.":
+    "The longest stretch without an entry in this month.",
   "Butuh tanggal haid terakhir dan minimal delapan catatan.":
     "Needs a last period date and at least eight entries.",
   "Seberapa terpusat doronganmu di satu fase. Puncaknya di fase {fase}.":
