@@ -44,7 +44,26 @@ export type Profile = {
   accent: AccentKey;
   motion: MotionLevel;
 };
-export type VaultData = { entries: Entry[]; profile: Profile; rev: number };
+/**
+ * `dihapus` adalah nisan: id catatan beserta waktu penghapusannya.
+ *
+ * Tanpa ini, penghapusan tidak punya cara diwakili saat dua perangkat
+ * disatukan. `merge` menggabungkan dua salinan sebagai gabungan id, jadi
+ * perangkat yang belum tahu masih memegang catatan yang sudah dihapus, dan
+ * mendorongnya kembali ke server pada sinkron berikutnya — catatan yang
+ * dihapus hidup lagi. Di aplikasi yang seluruh premisnya kerahasiaan, itu
+ * kegagalan yang paling mahal: orang menghapus sesuatu justru karena tidak
+ * ingin ada lagi.
+ *
+ * Nisannya ikut terenkripsi seperti isi lainnya. Yang tersimpan hanya id acak
+ * dan cap waktu, jadi ia tidak memberi tahu apa pun tentang isi yang dihapus.
+ */
+export type VaultData = {
+  entries: Entry[];
+  profile: Profile;
+  rev: number;
+  dihapus?: Record<string, string>;
+};
 export type User = { id: string; username: string; email: string; mode: Mode };
 
 export type SyncState =
@@ -59,7 +78,28 @@ const EMPTY: VaultData = {
   entries: [],
   profile: { mode: "pria", cycle: DEFAULT_CYCLE, name: "", accent: "teal", motion: "penuh" },
   rev: 0,
+  dihapus: {},
 };
+
+/**
+ * Nisan yang lebih tua dari ini dibuang.
+ *
+ * Tanpa batas, daftarnya tumbuh selamanya dan brankas membengkak oleh catatan
+ * tentang hal-hal yang sudah lama tidak ada. Enam bulan jauh lebih panjang
+ * daripada jeda paling lama antara dua perangkat yang sama-sama dipakai, jadi
+ * satu-satunya cara nisan terbuang sebelum tugasnya selesai adalah perangkat
+ * yang tidak pernah menyala selama setengah tahun.
+ */
+const UMUR_NISAN_MS = 180 * 86_400_000;
+
+function pangkasNisan(d: Record<string, string>): Record<string, string> {
+  const batas = Date.now() - UMUR_NISAN_MS;
+  const out: Record<string, string> = {};
+  for (const [id, saat] of Object.entries(d)) {
+    if (+new Date(saat) >= batas) out[id] = saat;
+  }
+  return out;
+}
 
 function readLocal(): VaultData {
   if (typeof window === "undefined") return EMPTY;
@@ -71,6 +111,8 @@ function readLocal(): VaultData {
         entries: Array.isArray(p.entries) ? p.entries : [],
         profile: { ...EMPTY.profile, ...(p.profile ?? {}) },
         rev: p.rev ?? 0,
+        // Brankas dari versi sebelum nisan ada tidak punya kolom ini.
+        dihapus: p.dihapus ?? {},
       };
     }
     // Pindahan dari versi pertama yang hanya menyimpan larik entri.
@@ -97,11 +139,31 @@ function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Menggabung dua salinan berdasarkan id. Perangkat yang lama menyala tidak menimpa yang baru. */
-function merge(a: Entry[], b: Entry[]): Entry[] {
+/**
+ * Menggabung dua salinan berdasarkan id, lalu membuang yang bernisan.
+ *
+ * Urutannya menentukan: penggabungan dulu, penyaringan belakangan. Perangkat
+ * yang lama menyala tetap tidak menimpa yang baru, tapi ia juga tidak bisa
+ * menghidupkan kembali apa pun yang sudah dihapus di perangkat lain.
+ */
+function merge(a: Entry[], b: Entry[], dihapus: Record<string, string>): Entry[] {
   const map = new Map<string, Entry>();
   for (const e of [...a, ...b]) map.set(e.id, e);
-  return [...map.values()].sort((x, y) => +new Date(x.at) - +new Date(y.at));
+  return [...map.values()]
+    .filter((e) => !(e.id in dihapus))
+    .sort((x, y) => +new Date(x.at) - +new Date(y.at));
+}
+
+/** Nisan dari dua salinan disatukan; yang lebih dulu tercatat dipertahankan. */
+function gabungNisan(
+  a: Record<string, string> = {},
+  b: Record<string, string> = {},
+): Record<string, string> {
+  const out: Record<string, string> = { ...a };
+  for (const [id, saat] of Object.entries(b)) {
+    if (!out[id] || +new Date(saat) < +new Date(out[id])) out[id] = saat;
+  }
+  return pangkasNisan(out);
 }
 
 type Ctx = {
@@ -159,20 +221,91 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     pushTimer.current = setTimeout(() => void push(), 900);
   }, []);
 
+  /**
+   * Mendorong brankas ke server, setelah menggabungkannya dengan yang sudah ada
+   * di sana.
+   *
+   * Bacaan sebelum tulisan bukan kehati-hatian berlebih. Tanpa itu, `PUT`
+   * mengganti seluruh isi brankas dengan salinan perangkat ini — dan perangkat
+   * ini tidak tahu apa yang baru saja ditulis perangkat lain. Dua ponsel yang
+   * mencatat dalam menit yang sama membuat yang mendorong belakangan menghapus
+   * tulisan yang lebih dulu. Catatannya memang masih ada di perangkat asalnya,
+   * jadi belum hilang selamanya; tapi kalau perangkat itu tidak pernah
+   * tersambung lagi, tulisan tersebut lenyap dari server untuk selamanya, dan
+   * tidak ada satu pun pesan galat yang muncul.
+   *
+   * Terukur: dua tulisan bersamaan, lalu perangkat pertama berhenti di satu
+   * tambahan dan tidak pernah naik lagi berapa kali pun ditarik.
+   *
+   * Ongkosnya satu permintaan `GET` tambahan tiap simpan. Untuk aplikasi yang
+   * memegang satu-satunya salinan catatan seseorang, itu murah.
+   *
+   * Kalau bacaannya sendiri gagal — jaringan putus di antara dua langkah —
+   * dorongannya dibatalkan, bukan diteruskan. Menulis tanpa tahu apa yang ada
+   * di sana persis keadaan yang hendak dihindari.
+   *
+   * Membaca lebih dulu menutup sebagian besar tabrakan, tapi tidak semuanya:
+   * kalau dua perangkat sama-sama membaca sebelum salah satunya menulis, yang
+   * belakangan tetap menimpa. Karena itu tulisannya membawa `baseRevision`, dan
+   * server menolak apa pun yang berpijak pada revisi usang. Penolakan itu bukan
+   * kegagalan — ia tanda bahwa ada yang perlu digabung lagi, jadi putarannya
+   * mengulang dari membaca.
+   *
+   * Tiga percobaan sudah lebih dari cukup: satu putaran hanya kalah kalau ada
+   * perangkat lain yang menulis persis di sela bacaan dan tulisan ini, dan
+   * peluang itu mengecil tajam tiap kali.
+   */
   const push = useCallback(async () => {
     if (!dek.current) return;
-    try {
-      const ciphertext = await sealVault(dek.current, latest.current);
-      const res = await fetch("/api/vault", {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ciphertext, revision: latest.current.rev }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Gagal menyimpan.");
-      setSync({ kind: "tersimpan", at: Date.now() });
-    } catch (e) {
-      setSync({ kind: "gagal", message: e instanceof Error ? e.message : "Gagal menyimpan." });
+    for (let percobaan = 0; percobaan < 3; percobaan++) {
+      try {
+        const sebelum = await fetch("/api/vault");
+        if (!sebelum.ok) throw new Error("Brankas di server tidak bisa dibaca.");
+        const { ciphertext: adaDiSana, revision: revServer } = (await sebelum.json()) as {
+          ciphertext: string | null;
+          revision?: number;
+        };
+
+        let kirim = latest.current;
+        if (adaDiSana) {
+          const diSana = await openVault<VaultData>(dek.current, adaDiSana);
+          const dihapus = gabungNisan(latest.current.dihapus, diSana.dihapus);
+          kirim = {
+            entries: merge(latest.current.entries, diSana.entries ?? [], dihapus),
+            profile: latest.current.profile,
+            rev: Math.max(latest.current.rev, diSana.rev ?? 0),
+            dihapus,
+          };
+          // Hasil gabungan juga menjadi keadaan perangkat ini, supaya layar tidak
+          // memperlihatkan lebih sedikit daripada yang baru saja dikirim.
+          latest.current = kirim;
+          setData(kirim);
+          writeLocal(kirim);
+        }
+
+        const ciphertext = await sealVault(dek.current, kirim);
+        const res = await fetch("/api/vault", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ ciphertext, baseRevision: revServer ?? 0 }),
+        });
+
+        // Perangkat lain menulis di sela bacaan dan tulisan tadi. Ulangi dari
+        // membaca; putaran berikutnya akan ikut menggabung tulisannya.
+        if (res.status === 409) continue;
+
+        if (!res.ok) throw new Error((await res.json()).error ?? "Gagal menyimpan.");
+        setSync({ kind: "tersimpan", at: Date.now() });
+        return;
+      } catch (e) {
+        setSync({ kind: "gagal", message: e instanceof Error ? e.message : "Gagal menyimpan." });
+        return;
+      }
     }
+    setSync({
+      kind: "gagal",
+      message: "Brankas terus berubah di perangkat lain. Coba lagi sebentar.",
+    });
   }, []);
 
   const pull = useCallback(async (key: CryptoKey) => {
@@ -185,10 +318,12 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     let next = local;
     if (ciphertext) {
       const remote = await openVault<VaultData>(key, ciphertext);
+      const dihapus = gabungNisan(local.dihapus, remote.dihapus);
       next = {
-        entries: merge(local.entries, remote.entries ?? []),
+        entries: merge(local.entries, remote.entries ?? [], dihapus),
         profile: { ...remote.profile, ...(local.rev > (remote.rev ?? 0) ? local.profile : {}) },
         rev: Math.max(local.rev, remote.rev ?? 0),
+        dihapus,
       };
     }
     latest.current = next;
@@ -244,11 +379,21 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   );
 
   const remove = useCallback(
-    (id: string) => commit({ ...latest.current, entries: latest.current.entries.filter((e) => e.id !== id) }),
+    (id: string) =>
+      commit({
+        ...latest.current,
+        entries: latest.current.entries.filter((e) => e.id !== id),
+        dihapus: { ...latest.current.dihapus, [id]: new Date().toISOString() },
+      }),
     [commit],
   );
 
-  const wipe = useCallback(() => commit({ ...latest.current, entries: [] }), [commit]);
+  const wipe = useCallback(() => {
+    const saat = new Date().toISOString();
+    const dihapus = { ...latest.current.dihapus };
+    for (const e of latest.current.entries) dihapus[e.id] = saat;
+    commit({ ...latest.current, entries: [], dihapus });
+  }, [commit]);
 
   const seed = useCallback(
     () => commit({ ...latest.current, entries: buildSample(new Date(), latest.current.profile.mode) }),
@@ -393,10 +538,21 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       const incoming = Array.isArray(parsed.entries) ? parsed.entries : [];
       if (!incoming.length) throw new Error("Berkas itu tidak berisi catatan.");
       const before = latest.current.entries.length;
-      const merged = merge(latest.current.entries, incoming);
+      /*
+        Impor mengalahkan nisan.
+
+        Kalau seseorang sengaja memilih berkas cadangan dan memulihkannya, ia
+        memang meminta isinya kembali — termasuk yang dulu dihapus. Membiarkan
+        nisan menyaringnya akan membuat pemulihan diam-diam tidak lengkap, dan
+        itu jenis kegagalan yang baru ketahuan berbulan-bulan kemudian.
+      */
+      const dihapus = { ...latest.current.dihapus };
+      for (const e of incoming) delete dihapus[e.id];
+      const merged = merge(latest.current.entries, incoming, dihapus);
       commit({
         ...latest.current,
         entries: merged,
+        dihapus,
         profile: { ...latest.current.profile, ...(parsed.profile ?? {}) },
       });
       return merged.length - before;

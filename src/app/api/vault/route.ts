@@ -26,7 +26,10 @@ export async function PUT(req: Request) {
   const id = await currentUserId();
   if (!id) return NextResponse.json({ error: "Belum masuk." }, { status: 401 });
 
-  const { ciphertext, revision } = (await req.json()) as { ciphertext?: string; revision?: number };
+  const { ciphertext, baseRevision } = (await req.json()) as {
+    ciphertext?: string;
+    baseRevision?: number;
+  };
   if (typeof ciphertext !== "string" || !ciphertext.includes(".")) {
     return NextResponse.json({ error: "Isi brankas tidak berbentuk terenkripsi." }, { status: 400 });
   }
@@ -35,17 +38,61 @@ export async function PUT(req: Request) {
   }
 
   await ensureSchema();
-  const next = (revision ?? 0) + 1;
-  await sql`
-    INSERT INTO vaults (user_id, ciphertext, revision, updated_at)
-    VALUES (${id}, ${ciphertext}, ${next}, now())
-    ON CONFLICT (user_id) DO UPDATE
-      SET ciphertext = EXCLUDED.ciphertext,
-          revision   = GREATEST(vaults.revision + 1, EXCLUDED.revision),
-          updated_at = now()
-    `;
-  const rows = (await sql`SELECT revision FROM vaults WHERE user_id = ${id}`) as { revision: number }[];
-  return NextResponse.json({ ok: true, revision: rows[0]?.revision ?? next });
+
+  /**
+   * Tulisan hanya diterima kalau ia berpijak pada revisi yang masih berlaku.
+   *
+   * Klien sudah membaca-lalu-menggabung sebelum menulis, dan itu menutup
+   * sebagian besar tabrakan. Yang tersisa adalah jendela sempit di antara
+   * bacaan dan tulisan: kalau dua perangkat sama-sama membaca lebih dulu, lalu
+   * keduanya menulis, yang belakangan menimpa hasil gabungan yang pertama.
+   * Catatan yang hilang dari server itu memang masih ada di perangkat asalnya —
+   * tapi kalau perangkat itu tidak pernah tersambung lagi, ia hilang untuk
+   * selamanya, dan tidak ada satu pun galat yang muncul.
+   *
+   * `WHERE revision = baseRevision` membuat tabrakan itu mustahil lolos diam-
+   * diam: basis data sendiri yang menolaknya. Klien menerima 409 berikut revisi
+   * terbaru, membaca ulang, menggabung ulang, lalu mencoba lagi.
+   *
+   * Perbandingan dan penulisan terjadi dalam satu pernyataan, bukan dua. Membaca
+   * revisi lebih dulu lalu menulis di pernyataan terpisah hanya memindahkan
+   * jendela balapannya ke tempat lain, tidak menutupnya.
+   */
+  const ada = (await sql`SELECT revision FROM vaults WHERE user_id = ${id}`) as { revision: number }[];
+
+  if (!ada.length) {
+    // Brankas pertama. `ON CONFLICT DO NOTHING` menjaga dua permintaan pertama
+    // yang tiba bersamaan tidak saling menimpa — yang kalah akan dapat 409.
+    const dibuat = (await sql`
+      INSERT INTO vaults (user_id, ciphertext, revision, updated_at)
+      VALUES (${id}, ${ciphertext}, 1, now())
+      ON CONFLICT (user_id) DO NOTHING
+      RETURNING revision`) as { revision: number }[];
+    if (dibuat.length) return NextResponse.json({ ok: true, revision: dibuat[0].revision });
+    const kini = (await sql`SELECT revision FROM vaults WHERE user_id = ${id}`) as { revision: number }[];
+    return NextResponse.json(
+      { error: "Brankas sudah berubah.", revision: kini[0]?.revision ?? 0 },
+      { status: 409 },
+    );
+  }
+
+  const dasar = typeof baseRevision === "number" ? baseRevision : -1;
+  const berikut = ada[0].revision + 1;
+  const ditulis = (await sql`
+    UPDATE vaults
+       SET ciphertext = ${ciphertext}, revision = ${berikut}, updated_at = now()
+     WHERE user_id = ${id} AND revision = ${dasar}
+    RETURNING revision`) as { revision: number }[];
+
+  if (!ditulis.length) {
+    const kini = (await sql`SELECT revision FROM vaults WHERE user_id = ${id}`) as { revision: number }[];
+    return NextResponse.json(
+      { error: "Brankas sudah berubah di perangkat lain.", revision: kini[0]?.revision ?? 0 },
+      { status: 409 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, revision: ditulis[0].revision });
 }
 
 /** Menghapus akun berikut brankasnya, tanpa masa tunggu. */
