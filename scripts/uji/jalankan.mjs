@@ -28,6 +28,7 @@ import { dirname, join } from "node:path";
 const DI_SINI = dirname(fileURLToPath(import.meta.url));
 
 const RANGKAIAN = [
+  ["Akun baru", "akun-baru.mjs", "akun baru benar-benar kosong, tidak ada penyemaian diam-diam"],
   ["Alur utama", "alur-utama.mjs", "mencatat, sinkron dua perangkat, ekspor–impor"],
   ["Alur akun", "alur-akun.mjs", "daftar, kunci pemulihan, ganti kata sandi, hapus akun"],
   ["Otorisasi", "otorisasi.mjs", "akses tanpa sesi, cookie palsu, kebocoran data publik"],
