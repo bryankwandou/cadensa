@@ -23,8 +23,7 @@ import { Reviews } from "@/components/Reviews";
 import { ScrollRibbon, SectionIndex } from "@/components/Ribbon";
 import { SectionHead } from "@/components/Section";
 import { DeviceMarquee } from "@/components/DeviceMarquee";
-import { Glyph } from "@/components/Glyph";
-import { AFTERFEELS, DEVICES, METHODS, TRIGGERS } from "@/lib/types";
+import { DEVICES } from "@/lib/types";
 import { Nav } from "@/components/Nav";
 import { useT } from "@/lib/i18n";
 
@@ -51,35 +50,16 @@ const SIGNALS = [
   },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    t: "Catat",
-    d: "Dua ketukan untuk yang wajib, sisanya opsional. Targetnya di bawah dua belas detik, dan itu angka mati.",
-  },
-  {
-    n: "02",
-    t: "Lihat ritmemu",
-    d: "Kalender yang tidak terlihat seperti kalender. Kepadatan menunjukkan frekuensi, ketinggian menunjukkan rasa.",
-  },
-  {
-    n: "03",
-    t: "Baca",
-    d: "Satu pengamatan, satu saran. Tidak pernah tiga, tidak pernah menghakimi.",
-  },
-];
 
 const INDEX = [
   { id: "bukti", n: "01", label: "Dasar bukti" },
   { id: "posisi", n: "02", label: "Posisi" },
   { id: "peragaan", n: "03", label: "Peragaan" },
   { id: "katalog", n: "04", label: "Katalog" },
-  { id: "kosakata", n: "05", label: "Kosakata" },
-  { id: "sinyal", n: "06", label: "Sinyal" },
-  { id: "perempuan", n: "07", label: "Mode perempuan" },
-  { id: "alur", n: "08", label: "Alur" },
-  { id: "penyimpanan", n: "09", label: "Penyimpanan" },
-  { id: "suara", n: "10", label: "Suara pengguna" },
+  { id: "sinyal", n: "05", label: "Sinyal" },
+  { id: "perempuan", n: "06", label: "Mode perempuan" },
+  { id: "penyimpanan", n: "07", label: "Penyimpanan" },
+  { id: "suara", n: "08", label: "Suara pengguna" },
 ];
 
 const CTA =
@@ -333,78 +313,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 04 Kosakata rupa */}
-      <section id="kosakata" className="mx-auto max-w-6xl px-5 py-24">
-        <SectionHead
-          n="05"
-          eyebrow={t("Kosakata")}
-          title={t("Setiap pilihan punya rupanya sendiri")}
-          lead={t(
-            "Alur catat punya anggaran dua belas detik, dan di layar sekecil ponsel bentuk terbaca lebih cepat daripada kata. Karena itu tidak ada satu pun pilihan yang hanya berupa teks.",
-          )}
-        />
-
-        <div className="mt-12 space-y-9">
-          {[
-            {
-              judul: "Rasanya sesudah",
-              set: "feel" as const,
-              items: AFTERFEELS.map((a) => ({ n: a.key, medis: a.medical })),
-            },
-            {
-              judul: "Cara",
-              set: "method" as const,
-              items: METHODS.map((m) => ({ n: m, medis: false })),
-            },
-            {
-              judul: "Yang memicu",
-              set: "trigger" as const,
-              // `pemicu`, bukan `t` — nama itu sudah dipakai penerjemah.
-              items: TRIGGERS.map((pemicu) => ({ n: pemicu, medis: false })),
-            },
-          ].map((row, ri) => (
-            <Reveal key={row.judul} delay={ri * 0.06}>
-              <p className="eyebrow mb-4">{t(row.judul)}</p>
-              <Stagger className="grid grid-cols-3 gap-2.5 min-[420px]:grid-cols-4 sm:grid-cols-6 lg:grid-cols-8" gap={0.035}>
-                {row.items.map((it) => (
-                  <StaggerItem key={it.n}>
-                    <motion.div
-                      whileHover={{ y: -5, rotateX: 12, rotateY: -8 }}
-                      transition={{ type: "spring", stiffness: 340, damping: 20 }}
-                      style={{ transformStyle: "preserve-3d", perspective: 600 }}
-                      className={`surface-sunken flex h-full flex-col items-center gap-2.5 rounded-field p-3.5 text-center ${
-                        it.medis ? "border-signal-500/25" : ""
-                      }`}
-                    >
-                      <span className={it.medis ? "text-signal-500" : "text-teal-500"}>
-                        <Glyph set={row.set} name={it.n} size={30} active />
-                      </span>
-                      <span className="text-[11px] leading-tight text-sand-300">{t(it.n)}</span>
-                    </motion.div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={0.1}>
-          <p className="mt-9 max-w-xl text-sm leading-relaxed text-sand-500">
-            {t(
-              "Empat rupa terakhir di baris pertama bertanda merah karena berhubungan dengan tubuh, bukan suasana hati. Warna itu dicadangkan untuk satu makna saja di seluruh aplikasi, dan memilih salah satunya membawa catatanmu ke jalur yang tidak pernah dijawab dengan saran mengubah teknik.",
-            )}
-          </p>
-        </Reveal>
-      </section>
-
-      <div className="mx-auto max-w-6xl px-5">
-        <hr className="rule" />
-      </div>
 
       {/* 05 Sinyal. Daftar bernomor, bukan grid kartu. */}
       <section id="sinyal" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="06"
+          n="05"
           eyebrow={t("Sinyal")}
           title={t("Catatan yang dibuat tanpa penonton adalah data batin yang paling jujur")}
           lead={t(
@@ -439,7 +352,7 @@ export default function Home() {
             <div className="grid lg:grid-cols-12">
               <div className="p-8 sm:p-12 lg:col-span-7">
                 <p className="eyebrow flex items-center gap-3">
-                  <span className="text-teal-600">07</span>
+                  <span className="text-teal-600">06</span>
                   <span className="h-px w-8 bg-sand-500/30" />
                   {t("Mode perempuan")}
                 </p>
@@ -492,31 +405,11 @@ export default function Home() {
       </section>
 
       {/* 07 Alur. Tiga langkah sebagai baris, bukan tiga kartu. */}
-      <section id="alur" className="mx-auto max-w-4xl px-5 py-20">
-        <SectionHead
-          n="08"
-          eyebrow={t("Alur")}
-          title={t("Tiga langkah, dan tidak ada yang keempat")}
-        />
-        <div className="mt-12 space-y-1">
-          {STEPS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 0.06}>
-              <div className="flex items-baseline gap-6 border-b border-[rgba(207,198,184,0.07)] py-7">
-                <span className="num shrink-0 text-sm text-teal-600">{s.n}</span>
-                <div>
-                  <h3 className="display-sm text-2xl text-sand-100">{t(s.t)}</h3>
-                  <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-sand-500">{t(s.d)}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
 
       {/* 08 Penyimpanan */}
       <section id="penyimpanan" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="09"
+          n="07"
           eyebrow={t("Penyimpanan")}
           title={t("Catatanmu tidak akan hilang, dan tetap tidak terbaca siapa pun")}
           lead={t(
@@ -552,18 +445,11 @@ export default function Home() {
 
           <Reveal delay={0.08} className="lg:col-span-5">
             <div className="border-l-2 border-amber-400/40 pl-6">
-              <p className="display-sm text-lg text-amber-400">{t("Harga dari janji ini")}</p>
-              <p className="mt-4 text-sm leading-relaxed text-sand-300">
-                {t(
-                  "Karena kunci tidak pernah kami pegang, tidak ada tombol lupa kata sandi yang bisa mengembalikan catatanmu. Yang ada kunci pemulihan sekali tampil, dan cadangan yang bisa kamu unduh sendiri kapan saja.",
-                )}
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-sand-500">
-                {t(
-                  "Kami memilih menyebut kelemahan ini terang-terangan daripada menyembunyikannya di balik alur pemulihan yang sebenarnya berarti kami bisa membaca isinya.",
-                )}
+              <p className="text-sm leading-relaxed text-sand-300">
+                {t("Karena kunci tidak pernah kami pegang, tidak ada tombol lupa kata sandi yang bisa mengembalikan catatanmu. Yang ada kunci pemulihan sekali tampil, dan cadangan yang bisa kamu unduh sendiri kapan saja.")}
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-4">
+
                 <Magnetic>
                   <Link href="/masuk" className={CTA}>
                     {t("Buat akun")}
@@ -586,7 +472,7 @@ export default function Home() {
              membuat seluruh halaman ini kehilangan hak untuk dipercaya. */}
       <section id="suara" className="mx-auto max-w-6xl px-5 py-24">
         <SectionHead
-          n="10"
+          n="08"
           eyebrow={t("Suara pengguna")}
           title={t("Apa yang benar-benar ditulis orang")}
           lead={t(
