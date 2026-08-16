@@ -7,7 +7,7 @@
  * yang akan dilakukan orang yang berniat lain.
  */
 import { chromium } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -23,7 +23,7 @@ const p = await ctx.newPage();
 
 // Permintaan harus berangkat dari asal yang sama; halaman kosong bawaan
 // Playwright bukan bagian dari domain ini, jadi fetch-nya akan ditolak CORS.
-await p.goto(`${BASE}/privacy`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/privacy`);
 
 /* Tanpa sesi sama sekali */
 const tanpaSesi = await p.evaluate(async (BASE) => {
@@ -69,7 +69,7 @@ lapor(salt.tiada === salt.tiada2, "salt semu tetap sama tiap kali ditanya");
 lapor(salt.tiada !== salt.ada, "salt semu berbeda dari salt asli");
 
 /* Masuk sebagai akun A, lalu coba jangkau brankas akun B */
-await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/masuk`);
 await p.fill('input[autocomplete="username"]', PRIA.nama);
 await p.fill('input[autocomplete="current-password"]', PRIA.sandi);
 await p.locator('button[type="submit"]').click();

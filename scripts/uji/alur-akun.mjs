@@ -7,7 +7,7 @@
  * dokumentasi yang beredar jadi salah tanpa ada yang tahu.
  */
 import { chromium } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
 const b = await chromium.launch();
@@ -45,7 +45,7 @@ const ctx = await konteks(b);
 const p = await ctx.newPage();
 pasang(p, "daftar");
 
-await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/rhythm`);
 await p.waitForTimeout(1500);
 const tombolContoh = p.getByText("Muat data contoh", { exact: true }).first();
 if (await tombolContoh.isVisible().catch(() => false)) await tombolContoh.click();
@@ -54,7 +54,7 @@ await p.waitForTimeout(2000);
 const sebelumDaftar = await jumlah(p);
 lapor(sebelumDaftar > 0, "data contoh termuat sebelum mendaftar", `${sebelumDaftar} catatan`);
 
-await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/masuk`);
 await p.getByRole("button", { name: "daftar", exact: true }).click();
 await p.waitForTimeout(800);
 await p.fill('input[autocomplete="username"]', U);
@@ -80,13 +80,13 @@ lapor(setelahDaftar === sebelumDaftar, "catatan lama ikut ke akun baru", `${sebe
 
 /* 2. Brankas terkunci begitu kunci sesi hilang */
 await p.evaluate(() => sessionStorage.removeItem("cadensa.dek.session"));
-await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/rhythm`);
 await p.waitForTimeout(3000);
 const teksTerkunci = await p.evaluate(() => document.body.innerText);
 lapor(/Buka brankas|Unlock vault/.test(teksTerkunci), "brankas terkunci setelah kunci sesi hilang");
 
 /* 3. Buka dengan kunci pemulihan */
-await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/masuk`);
 await p.waitForTimeout(1500);
 await p.getByRole("button", { name: "pemulihan", exact: true }).click();
 await p.waitForTimeout(800);
@@ -102,7 +102,7 @@ lapor(isiPulih === sebelumDaftar, "isi brankas utuh setelah pemulihan", `${isiPu
 const ctxSalah = await konteks(b);
 const pSalah = await ctxSalah.newPage();
 pasang(pSalah, "pemulihanSalah");
-await pSalah.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(pSalah, `${BASE}/masuk`);
 await pSalah.waitForTimeout(1200);
 await pSalah.getByRole("button", { name: "pemulihan", exact: true }).click();
 await pSalah.waitForTimeout(700);
@@ -115,7 +115,7 @@ await ctxSalah.close();
 
 /* Setelah pemulihan, sesinya sudah aktif — `/masuk` benar-benar menampilkan
    "Kamu sudah masuk", bukan formulir. Jadi tidak ada yang perlu diisi lagi. */
-await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/masuk`);
 await p.waitForTimeout(2000);
 lapor(
   (await p.evaluate(() => document.body.innerText)).includes("Kamu sudah masuk"),
@@ -123,7 +123,7 @@ lapor(
 );
 
 /* 4. Ganti kata sandi */
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(2000);
 const kolom = p.locator('input[type="password"]');
 await kolom.nth(0).fill(PW1);
@@ -137,7 +137,7 @@ lapor((await p.evaluate(() => document.body.innerText)).includes("Kata sandi dig
 const ctx2 = await konteks(b);
 const p2 = await ctx2.newPage();
 pasang(p2, "sandiBaru");
-await p2.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p2, `${BASE}/masuk`);
 await p2.fill('input[autocomplete="username"]', U);
 await p2.fill('input[autocomplete="current-password"]', PW1);
 await p2.locator('button[type="submit"]').click();
@@ -154,7 +154,7 @@ lapor(isiSetelahGanti === sebelumDaftar, "brankas tetap terbaca setelah ganti ka
 
 /* 5. Hapus akun */
 p2.on("dialog", (d) => d.accept());
-await p2.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p2, `${BASE}/pengaturan`);
 await p2.waitForTimeout(2000);
 await p2.getByText("Hapus akun", { exact: true }).click();
 await p2.waitForTimeout(6000);
@@ -162,7 +162,7 @@ lapor((await p2.evaluate(() => document.body.innerText)).includes("Akun dihapus"
 
 const ctx3 = await konteks(b);
 const p3 = await ctx3.newPage();
-await p3.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p3, `${BASE}/masuk`);
 await p3.fill('input[autocomplete="username"]', U);
 await p3.fill('input[autocomplete="current-password"]', PW2);
 await p3.locator('button[type="submit"]').click();

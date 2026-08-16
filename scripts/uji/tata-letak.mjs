@@ -18,7 +18,7 @@
  *     atas, sekaligus mendorong halaman meluber ke samping.
  */
 import { chromium, devices } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
 const b = await chromium.launch();
@@ -45,14 +45,14 @@ for (const [nama, viewport] of LEBAR) {
   p.on("pageerror", (e) => galat.push(`[${nama}] ${e.message}`));
 
   for (const rute of HALAMAN) {
-    await p.goto(BASE + rute, { waitUntil: "networkidle" });
+    await buka(p, BASE + rute);
     await p.waitForTimeout(2000);
     const meluber = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     lapor(meluber <= 0, `${nama} ${rute}: tidak meluber ke samping`, `${meluber}px`);
   }
 
   // Bilah navigasi harus tetap di tepi atas setelah digulir jauh
-  await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/`);
   await p.waitForTimeout(1500);
   const posisi = await p.evaluate(() => getComputedStyle(document.querySelector("header")).position);
   await p.evaluate(() => window.scrollTo(0, 4000));
@@ -89,7 +89,7 @@ for (const [nama, viewport] of LEBAR) {
   p.on("pageerror", (e) => galat.push(`[bulan lampau] ${e.message}`));
 
   const { PRIA } = await import("./akun.mjs");
-  await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/masuk`);
   await p.fill('input[autocomplete="username"]', PRIA.nama);
   await p.fill('input[autocomplete="current-password"]', PRIA.sandi);
   await p.locator('button[type="submit"]').click();
@@ -146,7 +146,7 @@ for (const [nama, viewport] of LEBAR) {
   const ctx = await konteks(b, { ...devices["iPhone 13"] });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[iPhone] ${e.message}`));
-  await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/`);
   await p.waitForTimeout(2500);
   const meluber = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   lapor(meluber <= 0, "iPhone 13: tidak meluber ke samping", `${meluber}px`);

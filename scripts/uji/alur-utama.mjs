@@ -7,7 +7,7 @@
  * sendiri — jadi penghapusannya sekaligus jadi uji.
  */
 import { chromium, devices } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 import { PRIA, WANITA } from "./akun.mjs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -33,7 +33,7 @@ function pasang(p, label) {
 }
 
 async function masuk(p, u, pw) {
-  await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/masuk`);
   await p.fill('input[autocomplete="username"]', u);
   await p.fill('input[autocomplete="current-password"]', pw);
   await p.locator('button[type="submit"]').click();
@@ -55,7 +55,7 @@ const jumlahCatatan = (p) =>
   await masuk(p, PRIA.nama, PRIA.sandi);
   const sebelum = await jumlahCatatan(p);
 
-  await p.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/log`);
   await p.waitForTimeout(1200);
 
   // pilih cara "alat bantu" supaya panel alat ikut terbuka
@@ -128,7 +128,7 @@ const jumlahCatatan = (p) =>
   lapor(sinkron.ok && sinkron.panjang > 1000, "brankas terkirim ke server", `rev ${sinkron.revisi}, ${sinkron.panjang} char`);
 
   // muncul di /rhythm
-  await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/rhythm`);
   await p.waitForTimeout(1500);
   const adaDiRitme = await p.evaluate(() => document.body.innerText.includes("ngilu"));
   lapor(adaDiRitme, "catatan baru tampil di riwayat /rhythm");
@@ -164,7 +164,7 @@ const jumlahCatatan = (p) =>
   const awalB = await jumlahCatatan(pB);
 
   // perangkat A menulis
-  await pA.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+  await buka(pA, `${BASE}/log`);
   await pA.waitForTimeout(1000);
   await pA.getByText("tenang", { exact: true }).first().click();
   await pA.getByText("Simpan", { exact: true }).click();
@@ -178,7 +178,7 @@ const jumlahCatatan = (p) =>
 
   // Dihapus dari perangkat A, lalu perangkat B harus ikut menyusut — sekaligus
   // membuktikan penghapusan ikut tersinkron, bukan hanya penambahan.
-  await pA.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(pA, `${BASE}/rhythm`);
   await pA.waitForTimeout(1500);
   await pA.locator('button:has-text("hapus")').first().click();
   await pA.waitForTimeout(3500);
@@ -196,7 +196,7 @@ const jumlahCatatan = (p) =>
   const p = await ctx.newPage();
   pasang(p, "cadangan");
   await masuk(p, PRIA.nama, PRIA.sandi);
-  await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/pengaturan`);
   await p.waitForTimeout(1500);
 
   const [unduhan] = await Promise.all([

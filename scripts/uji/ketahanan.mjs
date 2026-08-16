@@ -9,7 +9,7 @@
  * langka; itu hari Selasa.
  */
 import { chromium } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 import { PRIA, WANITA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -28,7 +28,7 @@ const jumlah = (p) =>
   });
 
 async function masuk(p, akun) {
-  await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/masuk`);
   await p.fill('input[autocomplete="username"]', akun.nama);
   await p.fill('input[autocomplete="current-password"]', akun.sandi);
   await p.locator('button[type="submit"]').click();
@@ -37,7 +37,7 @@ async function masuk(p, akun) {
 }
 
 async function catat(p, rasa) {
-  await p.goto(`${BASE}/log`, { waitUntil: "networkidle" }).catch(() => {});
+  await buka(p, `${BASE}/log`).catch(() => {});
   await p.waitForTimeout(1200);
   await p.getByText(rasa, { exact: true }).first().click();
   await p.getByText("Simpan", { exact: true }).click();
@@ -52,7 +52,7 @@ async function catat(p, rasa) {
   await masuk(p, PRIA);
   const awal = await jumlah(p);
 
-  await p.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/log`);
   await p.waitForTimeout(1200);
   await ctx.setOffline(true);
 
@@ -86,7 +86,7 @@ async function catat(p, rasa) {
   lapor(typeof diServer === "number" && diServer > 0, "brankas server ikut terbarui", `rev ${diServer}`);
 
   // bersihkan dua catatan uji
-  await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/rhythm`);
   await p.waitForTimeout(1500);
   for (let i = 0; i < 2; i++) {
     await p.locator('button:has-text("hapus")').first().click();
@@ -111,8 +111,8 @@ async function catat(p, rasa) {
   const awal = await jumlah(pA);
 
   // keduanya membuka /log, lalu menyimpan hampir bersamaan
-  await pA.goto(`${BASE}/log`, { waitUntil: "networkidle" });
-  await pB.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+  await buka(pA, `${BASE}/log`);
+  await buka(pB, `${BASE}/log`);
   await pA.waitForTimeout(1200);
   await pB.waitForTimeout(1200);
 
@@ -181,7 +181,7 @@ async function catat(p, rasa) {
   lapor(diServer.panjang > 1000, "brankas server memuat hasil gabungan", `rev ${diServer.rev}`);
 
   // bersihkan — sebanyak yang benar-benar bertambah, bukan selalu dua
-  await pA.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(pA, `${BASE}/rhythm`);
   await pA.waitForTimeout(1500);
   const lebih = (await jumlah(pA)) - awal;
   for (let i = 0; i < lebih; i++) {
@@ -217,13 +217,13 @@ async function catat(p, rasa) {
       .then(() => true)
       .catch(() => false);
 
-  await p.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+  await buka(p, `${BASE}/`);
   const depanTampil = await tunggu(p, 3000);
   const teks = await p.evaluate(() => document.body.innerText);
   lapor(depanTampil, "halaman depan tetap tampil saat API mati", `${teks.length} char`);
   lapor(/Ritme|Rhythm/.test(teks), "judul utama tetap tergambar");
 
-  await p.goto(`${BASE}/rhythm`, { waitUntil: "domcontentloaded" });
+  await buka(p, `${BASE}/rhythm`);
   const ritmeTampil = await tunggu(p, 200);
   const ritme = await p.evaluate(() => document.body.innerText);
   lapor(ritmeTampil, "halaman ritme tidak kosong saat API mati", `${ritme.length} char`);

@@ -15,7 +15,7 @@
  *   node scripts/uji/akun-baru.mjs
  */
 import { chromium } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
 const b = await chromium.launch();
@@ -41,12 +41,12 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   p.on("pageerror", (e) => galat.push(`[pengunjung] ${e.message}`));
 
   for (const rute of ["/rhythm", "/insights", "/log"]) {
-    await p.goto(BASE + rute, { waitUntil: "networkidle" });
+    await buka(p, BASE + rute);
     await p.waitForTimeout(2500);
     lapor((await jumlah(p)) === 0, `pengunjung baru: ${rute} tidak menanam catatan apa pun`);
   }
 
-  await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/rhythm`);
   await p.waitForTimeout(2000);
   lapor(kosong(await p.evaluate(() => document.body.innerText)), "pengunjung baru melihat keadaan kosong");
 
@@ -57,7 +57,7 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   */
   for (let i = 0; i < 3; i++) {
     for (const rute of ["/", "/rhythm", "/insights", "/log", "/pengaturan"]) {
-      await p.goto(BASE + rute, { waitUntil: "domcontentloaded" });
+      await buka(p, BASE + rute);
       await p.waitForTimeout(600);
     }
   }
@@ -79,7 +79,7 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   const U = `bukti${sufiks}`;
   const SANDI = `sandiBukti${sufiks}`;
 
-  await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/masuk`);
   await p.getByRole("button", { name: "daftar", exact: true }).click();
   await p.waitForTimeout(900);
   await p.fill('input[autocomplete="username"]', U);
@@ -108,7 +108,7 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   if (adaKunci) await p.getByText("Sudah saya simpan", { exact: true }).click();
   await p.waitForTimeout(4000);
 
-  await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/rhythm`);
   await p.waitForTimeout(4000);
   const n = await jumlah(p);
   lapor(n === 0, "akun baru berisi nol catatan", `${n} catatan`);
@@ -134,7 +134,7 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   );
 
   // Bacaan juga tidak boleh mengarang apa pun dari ketiadaan
-  await p.goto(`${BASE}/insights`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/insights`);
   await p.waitForTimeout(3000);
   const bacaan = await p.evaluate(() => document.body.innerText);
   lapor(
@@ -144,7 +144,7 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
 
   /* Bereskan: akun bukti dihapus lewat alur hapus akun aplikasi sendiri */
   p.on("dialog", (d) => d.accept());
-  await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+  await buka(p, `${BASE}/pengaturan`);
   await p.waitForTimeout(2500);
   await p.getByText("Hapus akun", { exact: true }).click();
   await p.waitForTimeout(6000);

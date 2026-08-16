@@ -8,7 +8,7 @@
  * kegagalan yang muncul jadi tidak bisa ditelusuri.
  */
 import { chromium } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -33,7 +33,7 @@ const profil = () =>
     return raw ? JSON.parse(raw).profile : null;
   });
 
-await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/masuk`);
 await p.fill('input[autocomplete="username"]', PRIA.nama);
 await p.fill('input[autocomplete="current-password"]', PRIA.sandi);
 await p.locator('button[type="submit"]').click();
@@ -43,7 +43,7 @@ const semula = await profil();
 lapor(semula?.mode === "pria", "akun demo bermode pria di awal", `nama "${semula?.name}", aksen ${semula?.accent}`);
 
 /* ── Katalog alat mengikuti mode ────────────────────────────────────────── */
-await p.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/log`);
 await p.waitForTimeout(1500);
 await p.getByText("alat bantu", { exact: true }).first().click();
 await p.waitForTimeout(900);
@@ -52,7 +52,7 @@ lapor(/Onahole|Pemijat prostat/.test(alatPria), "katalog mode pria memuat alat k
 lapor(!/Rabbit|Bola kegel/.test(alatPria), "katalog mode pria tidak menawarkan alat khusus wanita");
 
 /* ── Ganti mode ke wanita ───────────────────────────────────────────────── */
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(1800);
 await p.getByRole("button", { name: "wanita", exact: true }).click();
 await p.waitForTimeout(2500);
@@ -75,7 +75,7 @@ lapor(await p.getByText(/Perkiraan haid berikutnya/).isVisible().catch(() => fal
   "prakiraan haid berikutnya tampil");
 
 /* ── Katalog dan bacaan ikut berubah ────────────────────────────────────── */
-await p.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/log`);
 await p.waitForTimeout(1500);
 await p.getByText("alat bantu", { exact: true }).first().click();
 await p.waitForTimeout(900);
@@ -83,7 +83,7 @@ const alatWanita = await p.evaluate(() => document.body.innerText);
 lapor(/Rabbit|Bola kegel|Vibrator klitoris/.test(alatWanita), "katalog mode wanita memuat alat khusus wanita");
 lapor(!/Pemijat prostat|Pompa vakum/.test(alatWanita), "katalog mode wanita tidak menawarkan alat khusus pria");
 
-await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/rhythm`);
 /*
   Ditunggu sampai kartu siklusnya benar-benar tergambar. Jeda tetap 2,5 detik
   cukup hampir selalu — dan "hampir" itulah yang membuat rangkaian ini
@@ -102,13 +102,13 @@ lapor(!/prostat/i.test(ritmeWanita), "halaman ritme tidak menyebut prostat di mo
 */
 lapor(/keterikatan siklus|sebaran per fase/i.test(ritmeWanita), "kartu siklus menggantikan pita bulanan");
 
-await p.goto(`${BASE}/insights`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/insights`);
 await p.waitForTimeout(2800);
 const bacaanWanita = await p.evaluate(() => document.body.innerText);
 lapor(!/prostat/i.test(bacaanWanita), "bacaan tidak menyebut prostat di mode wanita");
 
 /* ── Personalisasi: warna, nama panggilan, gerakan ──────────────────────── */
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(1800);
 await p.getByRole("button", { name: "Bara" }).click();
 await p.waitForTimeout(1500);
@@ -126,13 +126,13 @@ await p.getByRole("button", { name: "tenang", exact: true }).click();
 await p.waitForTimeout(1500);
 lapor((await profil())?.motion === "tenang", "tingkat gerakan berganti ke tenang");
 
-await p.goto(`${BASE}/log`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/log`);
 await p.waitForTimeout(1500);
 lapor(/halo, bryan/i.test(await p.evaluate(() => document.body.innerText)),
   "nama panggilan dipakai menyapa di halaman catat");
 
 /* ── Menulis ulasan ─────────────────────────────────────────────────────── */
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(1800);
 const bintang = p.locator('button[aria-label$="dari 5"], button[aria-label$="out of 5"]');
 await bintang.nth(3).click();
@@ -160,7 +160,7 @@ lapor(terhapus, "ulasan uji dihapus kembali");
   tanpa sengaja lewat penggabungan cabang, dan tidak ada yang akan menyadarinya
   sampai ada catatan seseorang yang hilang.
 */
-await p.goto(`${BASE}/rhythm`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/rhythm`);
 await p.waitForTimeout(2500);
 const kakiRitme = await p.evaluate(() => document.body.innerText);
 lapor(!/Ganti dengan data contoh|Replace with sample data/i.test(kakiRitme),
@@ -169,14 +169,14 @@ lapor(!/Hapus semua|Delete all/i.test(kakiRitme),
   "tombol hapus semua sudah tidak ada di halaman ritme");
 
 // Kemampuannya tidak hilang, hanya pindah ke tempat yang tepat.
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(2000);
 const setelan = await p.evaluate(() => document.body.innerText);
 lapor(/Hapus semua catatan|Delete all entries/i.test(setelan),
   "menghapus seluruh catatan tetap tersedia di halaman pengaturan");
 
 /* ── Kembalikan akun demo ke keadaan semula ─────────────────────────────── */
-await p.goto(`${BASE}/pengaturan`, { waitUntil: "networkidle" });
+await buka(p, `${BASE}/pengaturan`);
 await p.waitForTimeout(1800);
 await p.getByRole("button", { name: "pria", exact: true }).click();
 await p.waitForTimeout(1200);

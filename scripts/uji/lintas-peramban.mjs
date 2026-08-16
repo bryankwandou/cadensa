@@ -20,7 +20,7 @@
  * kelihatan, bukan diam-diam.
  */
 import { chromium, firefox, webkit } from "playwright";
-import { konteks } from "./peramban.mjs";
+import { buka, konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -52,7 +52,7 @@ for (const [nama, mesin] of MESIN) {
 
   try {
     // Enkripsi tersedia sama sekali?
-    await p.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
+    await buka(p, `${BASE}/masuk`);
     const adaSubtle = await p.evaluate(() => !!(window.crypto && window.crypto.subtle));
     lapor(adaSubtle, `${nama}: crypto.subtle tersedia`);
 
@@ -131,7 +131,7 @@ for (const [nama, mesin] of MESIN) {
       // `commit` dan batas waktu yang lebih longgar: Firefox di mesin ini
       // kadang butuh lebih dari 30 detik hanya untuk menuntaskan navigasinya,
       // dan itu bukan sesuatu yang aplikasinya bisa perbaiki.
-      await p.goto(`${BASE}/insights`, { waitUntil: "commit", timeout: 90000 });
+      await buka(p, `${BASE}/insights`);
       await p
         .waitForFunction(() => document.body.innerText.length > 600, undefined, { timeout: 25000 })
         .catch(() => {});

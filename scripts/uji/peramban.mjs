@@ -22,17 +22,48 @@ export async function konteks(browser, opsi = {}) {
 }
 
 /**
- * Navigasi yang mencoba sekali lagi sebelum menyerah.
+ * Galat yang datang dari mesin dan jaringannya, bukan dari aplikasi.
  *
- * `networkidle` menunggu jaringan benar-benar sepi, dan di halaman yang punya
- * animasi berjalan serta pemuatan fon, kesepian itu kadang tidak pernah datang
- * pada percobaan pertama. Percobaan kedua memakai `domcontentloaded`, yang
- * cukup untuk semua yang diperiksa rangkaian ini.
+ * Selama menyusun rangkaian ini, tiga kali laporan kegagalan ternyata berakar di
+ * sini: jaringan mesin tertidur di tengah jalan, atau satu navigasi kehabisan
+ * waktu karena tiga peramban berjalan berbarengan. Setiap kali, yang tercetak
+ * adalah "rangkaian gagal" — kalimat yang sama persis dengan yang tercetak
+ * ketika aplikasinya benar-benar rusak.
+ *
+ * Uji yang tidak bisa membedakan keduanya lebih merugikan daripada tidak ada
+ * uji: yang membacanya berhenti mempercayai kegagalan, lalu berhenti membaca
+ * keberhasilan juga.
+ */
+const GALAT_JARINGAN =
+  /NETWORK_IO_SUSPENDED|INTERNET_DISCONNECTED|NETWORK_CHANGED|CONNECTION_RESET|CONNECTION_CLOSED|EMPTY_RESPONSE|NAME_NOT_RESOLVED|Failed to fetch|Timeout .* exceeded|net::ERR_/i;
+
+export const galatJaringan = (e) => GALAT_JARINGAN.test(String(e?.message ?? e));
+
+/**
+ * Navigasi yang bertahan terhadap jaringan yang tersendat.
+ *
+ * Tiga percobaan dengan jeda menaik. Percobaan pertama menunggu `networkidle`,
+ * yang paling menjamin halamannya benar-benar siap; sisanya turun ke
+ * `domcontentloaded`, yang cukup untuk semua yang diperiksa rangkaian ini —
+ * karena setiap asersi setelahnya sudah menunggu isinya sendiri.
+ *
+ * Galat yang bukan galat jaringan dilempar apa adanya pada percobaan pertama.
+ * Mengulang kesalahan yang berasal dari aplikasi hanya menunda laporannya.
  */
 export async function buka(p, url, opsi = {}) {
-  try {
-    return await p.goto(url, { waitUntil: "networkidle", timeout: 60_000, ...opsi });
-  } catch {
-    return p.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  let terakhir;
+  for (let percobaan = 0; percobaan < 3; percobaan++) {
+    try {
+      return await p.goto(url, {
+        waitUntil: percobaan === 0 ? "networkidle" : "domcontentloaded",
+        timeout: 60_000,
+        ...opsi,
+      });
+    } catch (e) {
+      terakhir = e;
+      if (!galatJaringan(e)) throw e;
+      await p.waitForTimeout(2000 * (percobaan + 1));
+    }
   }
+  throw terakhir;
 }
