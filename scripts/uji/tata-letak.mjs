@@ -18,6 +18,7 @@
  *     atas, sekaligus mendorong halaman meluber ke samping.
  */
 import { chromium, devices } from "playwright";
+import { konteks } from "./peramban.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
 const b = await chromium.launch();
@@ -39,7 +40,7 @@ const LEBAR = [
 const HALAMAN = ["/", "/masuk", "/privacy"];
 
 for (const [nama, viewport] of LEBAR) {
-  const ctx = await b.newContext({ viewport });
+  const ctx = await konteks(b, { viewport });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[${nama}] ${e.message}`));
 
@@ -83,7 +84,7 @@ for (const [nama, viewport] of LEBAR) {
 
 /* Bulan lampau: satu kartu tidak boleh memuat dua rentang waktu */
 {
-  const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
+  const ctx = await konteks(b, { viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[bulan lampau] ${e.message}`));
 
@@ -142,7 +143,7 @@ for (const [nama, viewport] of LEBAR) {
 
 /* Ponsel sungguhan, bukan hanya lebar jendela yang dikecilkan */
 {
-  const ctx = await b.newContext({ ...devices["iPhone 13"] });
+  const ctx = await konteks(b, { ...devices["iPhone 13"] });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[iPhone] ${e.message}`));
   await p.goto(`${BASE}/`, { waitUntil: "networkidle" });

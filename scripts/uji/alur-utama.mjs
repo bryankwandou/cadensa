@@ -7,6 +7,7 @@
  * sendiri — jadi penghapusannya sekaligus jadi uji.
  */
 import { chromium, devices } from "playwright";
+import { konteks } from "./peramban.mjs";
 import { PRIA, WANITA } from "./akun.mjs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -48,7 +49,7 @@ const jumlahCatatan = (p) =>
 
 /* ══ 1. Menulis catatan baru lewat /log ══════════════════════════════════ */
 {
-  const ctx = await b.newContext();
+  const ctx = await konteks(b);
   const p = await ctx.newPage();
   pasang(p, "log");
   await masuk(p, PRIA.nama, PRIA.sandi);
@@ -152,8 +153,8 @@ const jumlahCatatan = (p) =>
 
 /* ══ 2. Sinkronisasi dua perangkat ═══════════════════════════════════════ */
 {
-  const ctxA = await b.newContext();
-  const ctxB = await b.newContext({ ...devices["iPhone 13"] });
+  const ctxA = await konteks(b);
+  const ctxB = await konteks(b, { ...devices["iPhone 13"] });
   const pA = await ctxA.newPage();
   const pB = await ctxB.newPage();
   pasang(pA, "sinkA"); pasang(pB, "sinkB");
@@ -191,7 +192,7 @@ const jumlahCatatan = (p) =>
 
 /* ══ 3. Ekspor lalu impor ════════════════════════════════════════════════ */
 {
-  const ctx = await b.newContext({ acceptDownloads: true });
+  const ctx = await konteks(b, { acceptDownloads: true });
   const p = await ctx.newPage();
   pasang(p, "cadangan");
   await masuk(p, PRIA.nama, PRIA.sandi);

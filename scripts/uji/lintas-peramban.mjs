@@ -20,6 +20,7 @@
  * kelihatan, bukan diam-diam.
  */
 import { chromium, firefox, webkit } from "playwright";
+import { konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -45,7 +46,7 @@ for (const [nama, mesin] of MESIN) {
   }
 
   const galat = [];
-  const ctx = await b.newContext();
+  const ctx = await konteks(b);
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(e.message));
 

@@ -225,6 +225,57 @@ describe("cadenceIndex", () => {
     const acak = [...urut].reverse();
     assert.equal(cadenceIndex(acak), cadenceIndex(urut));
   });
+
+  /*
+    Sifat yang paling menentukan, dan yang dulu tidak dipenuhi.
+
+    Indeks dihitung dari jarak antar hari yang berisi, bukan antar catatan. Dua
+    catatan di malam yang sama adalah satu kejadian sejauh menyangkut ritme;
+    memperlakukannya sebagai dua titik berjarak sepuluh menit menghasilkan jarak
+    nyaris nol yang menarik rerata turun sekaligus meledakkan simpangan.
+
+    Terukur pada data sungguhan sebelum diperbaiki: 23 catatan di 14 hari
+    memberi indeks 16, karena lima di antaranya berjarak beberapa menit. Orang
+    yang mencatat dua kali dalam satu malam — hal yang wajar — melihat indeksnya
+    hancur tanpa alasan yang bisa ia mengerti.
+  */
+  it("mencatat dua kali dalam semalam tidak menjatuhkan indeks", () => {
+    const sekali = setiap(8, 3);
+    const duaKali = [
+      ...sekali,
+      // satu malam tambahan, sepuluh menit setelah catatan ketiga
+      catatan("kembar", new Date(Date.UTC(2026, 0, 1) + 6 * HARI + 600_000).toISOString()),
+    ];
+    assert.equal(
+      cadenceIndex(duaKali),
+      cadenceIndex(sekali),
+      "catatan kedua di hari yang sudah berisi tidak boleh mengubah indeks",
+    );
+  });
+
+  it("hari yang sama dihitung sekali walau berisi lima catatan", () => {
+    const jarang = [
+      catatan("a", "2026-01-01T09:00:00"),
+      catatan("b", "2026-01-04T09:00:00"),
+      catatan("c", "2026-01-07T09:00:00"),
+      catatan("d", "2026-01-10T09:00:00"),
+    ];
+    const menumpuk = [
+      ...jarang,
+      ...Array.from({ length: 4 }, (_, i) =>
+        catatan(`tumpuk${i}`, `2026-01-07T${String(10 + i).padStart(2, "0")}:00:00`),
+      ),
+    ];
+    assert.equal(cadenceIndex(menumpuk), cadenceIndex(jarang));
+    assert.equal(cadenceIndex(jarang), 100, "empat hari berjarak tiga hari itu sempurna merata");
+  });
+
+  it("butuh empat hari berisi, bukan sekadar empat catatan", () => {
+    const satuHari = Array.from({ length: 9 }, (_, i) =>
+      catatan(`s${i}`, `2026-01-01T${String(8 + i).padStart(2, "0")}:00:00`),
+    );
+    assert.equal(cadenceIndex(satuHari), null, "sembilan catatan dalam sehari bukan sebuah ritme");
+  });
 });
 
 /* ══════════════════════════════════════════════════════════════════════════

@@ -50,13 +50,51 @@ export function gapsInDays(entries: Entry[]) {
 }
 
 /**
+ * Jarak antar hari yang berisi, bukan antar catatan.
+ *
+ * Dua catatan di malam yang sama adalah satu kejadian sejauh menyangkut ritme,
+ * dan memperlakukannya sebagai dua titik yang berjarak sepuluh menit merusak
+ * ukuran kemerataan sampai tidak berarti lagi: jarak nyaris nol menarik rerata
+ * turun sekaligus meledakkan simpangan, jadi satu malam dengan dua catatan bisa
+ * menjatuhkan indeks puluhan angka.
+ *
+ * Terukur pada data sungguhan: 23 catatan tersebar di 14 hari sepanjang sebulan
+ * memberi indeks 16 kalau dihitung antar catatan — lima di antaranya berjarak
+ * beberapa menit — dan 49 kalau dihitung antar hari. Angka kedua yang
+ * menggambarkan bulan itu; yang pertama menggambarkan satu sore yang sibuk.
+ *
+ * Harinya hari kalender setempat, bukan UTC. Catatan pukul satu dini hari milik
+ * hari itu bagi orang yang menulisnya, dan pergeseran zona waktu akan memecah
+ * satu malam jadi dua hari.
+ */
+export function activeDayGaps(entries: Entry[]) {
+  const hari = [
+    ...new Set(
+      entries.map((e) => {
+        const d = new Date(e.at);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      }),
+    ),
+  ].sort((a, b) => a - b);
+
+  const gaps: number[] = [];
+  for (let i = 1; i < hari.length; i++) gaps.push((hari[i] - hari[i - 1]) / DAY_MS);
+  return gaps;
+}
+
+/**
  * Cadence Index — seberapa merata jarak antar kejadian, 0..100.
+ *
  * Sengaja tidak menghitung jumlah: dua orang dengan jumlah sama bisa punya
  * indeks sangat berbeda kalau yang satu menumpuk di akhir bulan.
  * Dihitung dari koefisien variasi jarak; CV 0 berarti sempurna merata.
+ *
+ * Jaraknya antar hari yang berisi, bukan antar catatan — lihat `activeDayGaps`.
+ * Menghitung antar catatan membuat satu malam dengan dua catatan menjatuhkan
+ * indeks puluhan angka, padahal bagi ritme itu satu kejadian.
  */
 export function cadenceIndex(entries: Entry[]): number | null {
-  const gaps = gapsInDays(entries);
+  const gaps = activeDayGaps(entries);
   if (gaps.length < 3) return null;
   const m = mean(gaps);
   if (m <= 0) return null;

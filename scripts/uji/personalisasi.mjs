@@ -8,6 +8,7 @@
  * kegagalan yang muncul jadi tidak bisa ditelusuri.
  */
 import { chromium } from "playwright";
+import { konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -19,7 +20,7 @@ const lapor = (ok, nama, catatan = "") => {
   console.log(`${ok ? "✓" : "✗"} ${nama}${catatan ? " · " + catatan : ""}`);
 };
 
-const ctx = await b.newContext();
+const ctx = await konteks(b);
 const p = await ctx.newPage();
 p.on("pageerror", (e) => galat.push(e.message));
 p.on("response", (r) => {

@@ -22,7 +22,7 @@
  * ini tidak membutuhkannya untuk dibangun maupun dijalankan.
  */
 import { spawn, spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const DI_SINI = dirname(fileURLToPath(import.meta.url));
@@ -83,7 +83,20 @@ for (const [nama, berkas] of RANGKAIAN) {
 console.log(`\n${"─".repeat(64)}\nUji unit — merge, nisan, kadens, siklus\n${"─".repeat(64)}`);
 const unit = spawnSync(
   process.execPath,
-  ["--import", join(DI_SINI, "daftar-resolver.mjs"), "--test", join(DI_SINI, "unit.test.mjs")],
+  [
+    /*
+      `--import` menuntut URL, bukan jalur berkas.
+
+      Di Windows, jalur mutlak seperti `E:\\...` dibaca sebagai protokol `e:` dan
+      ditolak dengan ERR_UNSUPPORTED_ESM_URL_SCHEME. Menjalankannya lewat
+      `npm run uji:unit` tidak pernah menampakkan ini, karena di sana jalurnya
+      relatif.
+    */
+    "--import",
+    pathToFileURL(join(DI_SINI, "daftar-resolver.mjs")).href,
+    "--test",
+    join(DI_SINI, "unit.test.mjs"),
+  ],
   { stdio: "inherit" },
 );
 if (unit.status !== 0) {

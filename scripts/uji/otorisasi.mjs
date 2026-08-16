@@ -7,6 +7,7 @@
  * yang akan dilakukan orang yang berniat lain.
  */
 import { chromium } from "playwright";
+import { konteks } from "./peramban.mjs";
 import { PRIA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -17,7 +18,7 @@ const lapor = (ok, nama, catatan = "") => {
   console.log(`${ok ? "✓" : "✗"} ${nama}${catatan ? " · " + catatan : ""}`);
 };
 
-const ctx = await b.newContext();
+const ctx = await konteks(b);
 const p = await ctx.newPage();
 
 // Permintaan harus berangkat dari asal yang sama; halaman kosong bawaan

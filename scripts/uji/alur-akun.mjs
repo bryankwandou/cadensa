@@ -7,6 +7,7 @@
  * dokumentasi yang beredar jadi salah tanpa ada yang tahu.
  */
 import { chromium } from "playwright";
+import { konteks } from "./peramban.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
 const b = await chromium.launch();
@@ -40,7 +41,7 @@ const jumlah = (p) =>
 let kunciPemulihan = null;
 
 /* 1. Daftar, dengan catatan lokal yang harus ikut terangkat */
-const ctx = await b.newContext();
+const ctx = await konteks(b);
 const p = await ctx.newPage();
 pasang(p, "daftar");
 
@@ -98,7 +99,7 @@ const isiPulih = await jumlah(p);
 lapor(isiPulih === sebelumDaftar, "isi brankas utuh setelah pemulihan", `${isiPulih} catatan`);
 
 /* Kunci pemulihan cacat harus ditolak, bukan membuka brankas kosong */
-const ctxSalah = await b.newContext();
+const ctxSalah = await konteks(b);
 const pSalah = await ctxSalah.newPage();
 pasang(pSalah, "pemulihanSalah");
 await pSalah.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
@@ -133,7 +134,7 @@ await p.waitForTimeout(6000);
 lapor((await p.evaluate(() => document.body.innerText)).includes("Kata sandi diganti"), "kata sandi berhasil diganti");
 
 /* Kata sandi lama harus gagal, yang baru harus berhasil, brankas tetap terbaca */
-const ctx2 = await b.newContext();
+const ctx2 = await konteks(b);
 const p2 = await ctx2.newPage();
 pasang(p2, "sandiBaru");
 await p2.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
@@ -159,7 +160,7 @@ await p2.getByText("Hapus akun", { exact: true }).click();
 await p2.waitForTimeout(6000);
 lapor((await p2.evaluate(() => document.body.innerText)).includes("Akun dihapus"), "akun terhapus");
 
-const ctx3 = await b.newContext();
+const ctx3 = await konteks(b);
 const p3 = await ctx3.newPage();
 await p3.goto(`${BASE}/masuk`, { waitUntil: "networkidle" });
 await p3.fill('input[autocomplete="username"]', U);

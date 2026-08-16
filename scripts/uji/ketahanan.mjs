@@ -9,6 +9,7 @@
  * langka; itu hari Selasa.
  */
 import { chromium } from "playwright";
+import { konteks } from "./peramban.mjs";
 import { PRIA, WANITA } from "./akun.mjs";
 
 const BASE = process.env.BASE ?? "https://cadensa.vercel.app";
@@ -45,7 +46,7 @@ async function catat(p, rasa) {
 
 /* ══ 1. Mencatat saat jaringan mati ══════════════════════════════════════ */
 {
-  const ctx = await b.newContext();
+  const ctx = await konteks(b);
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[luring] ${e.message}`));
   await masuk(p, PRIA);
@@ -98,8 +99,8 @@ async function catat(p, rasa) {
 
 /* ══ 2. Dua perangkat menulis pada saat yang sama ════════════════════════ */
 {
-  const ctxA = await b.newContext();
-  const ctxB = await b.newContext();
+  const ctxA = await konteks(b);
+  const ctxB = await konteks(b);
   const pA = await ctxA.newPage();
   const pB = await ctxB.newPage();
   pA.on("pageerror", (e) => galat.push(`[serentakA] ${e.message}`));
@@ -196,7 +197,7 @@ async function catat(p, rasa) {
 
 /* ══ 3. Halaman tetap tampil saat API tidak menjawab ═════════════════════ */
 {
-  const ctx = await b.newContext();
+  const ctx = await konteks(b);
   const p = await ctx.newPage();
   p.on("pageerror", (e) => galat.push(`[apiMati] ${e.message}`));
   // Semua rute API dijatuhkan; halaman depan tetap harus tampil utuh.
