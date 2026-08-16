@@ -65,6 +65,20 @@ export type VaultData = {
   profile: Profile;
   rev: number;
   dihapus?: Record<string, string>;
+  /**
+   * Id pemilik salinan lokal ini, atau null kalau dibuat tanpa akun.
+   *
+   * Tanpa penanda ini, tidak ada cara membedakan "catatan saya yang dibuat
+   * sebelum masuk" dari "catatan orang lain yang masih tertinggal di perangkat
+   * ini". Keduanya terlihat sama persis di `localStorage`, dan `pull`
+   * menggabungkan apa pun yang ditemukannya dengan brankas di server — jadi
+   * yang kedua akan menyelundupkan catatan orang lain ke dalam akun yang baru
+   * saja masuk, lalu mendorongnya ke server sebagai miliknya.
+   *
+   * Dengan penanda ini, penggabungan hanya terjadi kalau salinan lokalnya
+   * memang milik orang yang sedang masuk, atau memang belum bertuan.
+   */
+  pemilik?: string | null;
 };
 export type User = { id: string; username: string; email: string; mode: Mode };
 
@@ -81,6 +95,7 @@ const EMPTY: VaultData = {
   profile: { mode: "pria", cycle: DEFAULT_CYCLE, name: "", accent: "teal", motion: "penuh" },
   rev: 0,
   dihapus: {},
+  pemilik: null,
 };
 
 function readLocal(): VaultData {
@@ -95,6 +110,7 @@ function readLocal(): VaultData {
         rev: p.rev ?? 0,
         // Brankas dari versi sebelum nisan ada tidak punya kolom ini.
         dihapus: p.dihapus ?? {},
+        pemilik: p.pemilik ?? null,
       };
     }
     // Pindahan dari versi pertama yang hanya menyimpan larik entri.
@@ -107,6 +123,37 @@ function readLocal(): VaultData {
     /* penyimpanan rusak diperlakukan sebagai kosong, bukan sebagai galat fatal */
   }
   return EMPTY;
+}
+
+/**
+ * Menghapus seluruh jejak brankas dari perangkat ini.
+ *
+ * Dipakai saat keluar, dan itu bukan kerapian melainkan penutup kebocoran yang
+ * sungguh terjadi: sebelum ini, keluar hanya membuang cookie sesi dan kunci di
+ * `sessionStorage`, sementara catatannya sendiri tetap tersimpan di
+ * `localStorage` dalam bentuk terbaca. Layarnya bahkan masih memajangnya.
+ *
+ * Akibatnya berantai. Alur pendaftaran memang sengaja menawarkan mengangkat
+ * catatan yang sudah ada di perangkat ke akun baru — perilaku yang benar bagi
+ * orang yang mencoba aplikasi ini dulu tanpa akun. Tapi setelah seseorang
+ * keluar, yang tersisa di perangkat itu bukan catatan milik orang berikutnya.
+ * Terukur: keluar, lalu mendaftar, dan akun baru itu berisi 88 catatan orang
+ * sebelumnya — 29.713 karakter — beserta nama panggilannya.
+ *
+ * Di ponsel yang dipinjam, komputer kantor, atau warnet, itu berarti catatan
+ * kesehatan paling pribadi seseorang berpindah tangan tanpa ada yang menyadari.
+ *
+ * Aman dilakukan karena keluar hanya mungkin ketika ada akun, dan isi akun itu
+ * sudah tersimpan terenkripsi di server. Yang dihapus di sini salinan lokalnya,
+ * bukan satu-satunya salinan.
+ */
+function lupakanLokal() {
+  try {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* penyimpanan ditolak peramban — tidak ada yang bisa dilakukan dari sini */
+  }
 }
 
 function writeLocal(v: VaultData) {
@@ -263,13 +310,32 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const pull = useCallback(async (key: CryptoKey) => {
+  const pull = useCallback(async (key: CryptoKey, idPengguna?: string) => {
     setSync({ kind: "menyiapkan" });
     const res = await fetch("/api/vault");
     if (!res.ok) throw new Error("Brankas tidak bisa diambil.");
     const { ciphertext } = (await res.json()) as { ciphertext: string | null };
 
-    const local = latest.current;
+    /*
+      Salinan lokal milik orang lain dibuang sebelum apa pun digabungkan.
+
+      `merge` tidak punya cara mengetahui asal-usul; ia hanya menyatukan dua
+      daftar. Kalau perangkat ini menyimpan catatan orang sebelumnya — sesi yang
+      kedaluwarsa tanpa sempat menekan Keluar, misalnya — penggabungan itu akan
+      memasukkannya ke brankas orang yang baru masuk, lalu mendorongnya ke server
+      sebagai miliknya. Terukur: 88 catatan berpindah tangan tanpa satu pun tanda
+      di layar.
+
+      Yang belum bertuan (`null`) tetap diangkat: itu catatan yang dibuat orang
+      ini sendiri sebelum ia punya akun, dan halaman daftar memang menjanjikannya.
+    */
+    let local = latest.current;
+    if (idPengguna && local.pemilik && local.pemilik !== idPengguna) {
+      lupakanLokal();
+      local = EMPTY;
+      latest.current = EMPTY;
+      setData(EMPTY);
+    }
     let next = local;
     if (ciphertext) {
       const remote = await openVault<VaultData>(key, ciphertext);
@@ -281,6 +347,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         dihapus,
       };
     }
+    next = { ...next, pemilik: idPengguna ?? next.pemilik ?? null };
     latest.current = next;
     setData(next);
     writeLocal(next);
@@ -302,7 +369,10 @@ export function VaultProvider({ children }: { children: ReactNode }) {
           const key = await recallDek();
           if (key) {
             dek.current = key;
-            await pull(key);
+            // Id penggunanya ikut dioper di sini juga: pemulihan sesi adalah
+            // jalan masuk yang paling sering dilalui, dan tanpa id itu
+            // salinan lokal milik orang lain akan lolos ke penggabungan.
+            await pull(key, j.user.id);
           } else {
             setNeedsUnlock(true);
             setSync({ kind: "terkunci" });
@@ -393,7 +463,13 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       setUser(j.user);
       setNeedsUnlock(false);
       // Catatan yang sudah ada di perangkat ikut terangkat, tidak ditinggalkan.
-      const next = { ...latest.current, profile: { ...latest.current.profile, mode } };
+      // Sejak keluar membersihkan penyimpanan lokal, yang tersisa di sini hanya
+      // catatan yang memang dibuat orang ini sendiri sebelum ia punya akun.
+      const next = {
+        ...latest.current,
+        profile: { ...latest.current.profile, mode },
+        pemilik: j.user?.id ?? null,
+      };
       latest.current = next;
       setData(next);
       await push();
@@ -421,7 +497,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       await stashDek(key);
       setUser(j.user);
       setNeedsUnlock(false);
-      await pull(key);
+      await pull(key, j.user?.id);
     },
     [pull],
   );
@@ -438,9 +514,35 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    /*
+      Dorongan yang sedang menunggu dibatalkan lebih dulu.
+
+      `commit` menjadwalkan dorongan 900 ms setelah perubahan terakhir. Kalau
+      seseorang menekan Keluar di dalam jendela itu, dorongannya akan menyala
+      setelah kunci dibuang dan brankas lokal dikosongkan — dan yang terkirim ke
+      server adalah brankas kosong itu.
+    */
+    if (pushTimer.current) {
+      clearTimeout(pushTimer.current);
+      pushTimer.current = null;
+    }
+
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     forgetDek();
     dek.current = null;
+
+    /*
+      Catatannya ikut ditinggalkan, bukan hanya kuncinya.
+
+      Membuang cookie dan kunci sesi saja menyisakan seluruh isi brankas di
+      `localStorage` dalam bentuk terbaca, dan orang berikutnya yang memakai
+      perangkat ini akan mewarisinya — lengkap dengan nama panggilan pemilik
+      sebelumnya. Lihat `lupakanLokal`.
+    */
+    lupakanLokal();
+    latest.current = EMPTY;
+    setData(EMPTY);
+
     setUser(null);
     setNeedsUnlock(false);
     setSync({ kind: "lokal" });

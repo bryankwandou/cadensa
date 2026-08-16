@@ -156,6 +156,99 @@ const kosong = (teks) => /Belum ada apa-apa di sini|Nothing here yet/.test(teks)
   await ctx.close();
 }
 
+/* ══ 3. Perangkat bersama: keluar lalu orang lain mendaftar ══════════════ */
+{
+  /*
+    Skenario yang paling merugikan, dan yang paling lama tidak terlihat.
+
+    Semua uji lain memakai peramban bersih, jadi tidak satu pun bisa menangkap
+    ini: keluar dulu hanya membuang cookie sesi dan kunci di sessionStorage,
+    sementara catatannya sendiri tetap tertinggal di localStorage dalam bentuk
+    terbaca. Orang berikutnya yang mendaftar di perangkat itu ditawari — dan
+    otomatis mewarisi — seluruh catatan orang sebelumnya.
+
+    Terukur sebelum diperbaiki: 88 catatan, 29.713 karakter, berpindah tangan
+    tanpa satu pun tanda di layar. Ponsel yang dipinjam sebentar sudah cukup.
+  */
+  const { PRIA } = await import("./akun.mjs");
+  const ctx = await konteks(b);
+  const p = await ctx.newPage();
+  p.on("pageerror", (e) => galat.push(`[bersama] ${e.message}`));
+
+  await buka(p, `${BASE}/masuk`);
+  await p.fill('input[autocomplete="username"]', PRIA.nama);
+  await p.fill('input[autocomplete="current-password"]', PRIA.sandi);
+  await p.locator('button[type="submit"]').click();
+  await p.waitForURL("**/rhythm", { timeout: 60000 });
+  await p.waitForTimeout(4000);
+  const punyaOrangPertama = await jumlah(p);
+  lapor(punyaOrangPertama > 50, "orang pertama masuk dan brankasnya terbuka", `${punyaOrangPertama} catatan`);
+
+  await p.locator('button[aria-label="Menu akun"]').click();
+  await p.waitForTimeout(800);
+  await p.getByText("Keluar", { exact: true }).click();
+  await p.waitForTimeout(4000);
+
+  const sisa = await jumlah(p);
+  lapor(sisa === 0, "keluar menghapus catatan dari perangkat, bukan hanya kuncinya", `${sisa} tersisa`);
+
+  const masihTerbaca = await p.evaluate(() => localStorage.getItem("cadensa.vault.v2"));
+  lapor(!masihTerbaca, "tidak ada sisa brankas terbaca di penyimpanan peramban");
+
+  // Nama panggilan pemilik sebelumnya juga tidak boleh tertinggal
+  await buka(p, `${BASE}/log`);
+  await p.waitForTimeout(2500);
+  const teksLog = await p.evaluate(() => document.body.innerText);
+  lapor(!/Halo,\s*\S/i.test(teksLog), "nama panggilan pemilik sebelumnya ikut hilang");
+
+  // Orang kedua mendaftar di perangkat yang sama
+  await buka(p, `${BASE}/masuk`);
+  await p.waitForTimeout(1500);
+  await p.getByRole("button", { name: "daftar", exact: true }).click();
+  await p.waitForTimeout(900);
+  const ditawari = await p
+    .getByText(/catatan yang sudah ada di perangkat ini|entries already on this device/)
+    .isVisible()
+    .catch(() => false);
+  lapor(!ditawari, "orang kedua tidak ditawari mewarisi catatan orang pertama");
+
+  const sufiks = Date.now().toString(36).slice(-7);
+  const U = `bersama${sufiks}`;
+  await p.fill('input[autocomplete="username"]', U);
+  await p.fill('input[autocomplete="email"]', `${U}@contoh.invalid`);
+  const sandi = p.locator('input[autocomplete="new-password"]');
+  await sandi.nth(0).fill(`sandiBersama${sufiks}`);
+  await sandi.nth(1).fill(`sandiBersama${sufiks}`);
+  await p.locator('button[type="submit"]').click();
+  await p.waitForTimeout(9000);
+  const adaKunci = await p.getByText("Sudah saya simpan", { exact: true }).isVisible().catch(() => false);
+  if (adaKunci) await p.getByText("Sudah saya simpan", { exact: true }).click();
+  await p.waitForTimeout(4000);
+
+  await buka(p, `${BASE}/rhythm`);
+  await p.waitForTimeout(4000);
+  const punyaOrangKedua = await jumlah(p);
+  lapor(punyaOrangKedua === 0, "akun orang kedua tetap kosong", `${punyaOrangKedua} catatan`);
+
+  const brankasKedua = await p.evaluate(async () => {
+    const r = await fetch("/api/vault");
+    return ((await r.json()).ciphertext || "").length;
+  });
+  lapor(
+    brankasKedua < 1500,
+    "brankas orang kedua di server tetap berukuran brankas kosong",
+    `${brankasKedua} karakter`,
+  );
+
+  p.on("dialog", (d) => d.accept());
+  await buka(p, `${BASE}/pengaturan`);
+  await p.waitForTimeout(2500);
+  await p.getByText("Hapus akun", { exact: true }).click();
+  await p.waitForTimeout(6000);
+
+  await ctx.close();
+}
+
 await b.close();
 const gagal = hasil.filter((h) => !h.ok);
 console.log(`\n== ${hasil.length - gagal.length}/${hasil.length} lolos ==`);
