@@ -239,19 +239,38 @@ export default function RhythmPage() {
                   { alasan: alasanKemerataan(profile.mode, t) },
                 )}
               </p>
-              <dl className="mt-6 space-y-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs">
+              {/*
+                Daftar biasa, bukan daftar definisi.
+
+                Sebelumnya ini `<dl>` berisi `<dt>` tanpa satu pun `<dd>`, dan
+                itu bukan sekadar tidak rapi: `<dl>` menjanjikan pasangan istilah
+                dan penjelasannya, jadi pembaca layar mengumumkan daftar
+                definisi yang setengahnya hilang. Di sini tidak ada istilah yang
+                dijelaskan — cuma empat warna dan artinya, yang memang sebuah
+                daftar biasa.
+
+                Ditemukan axe-core.
+              */}
+              <ul className="mt-6 space-y-3 border-t border-[rgba(207,198,184,0.08)] pt-5 text-xs">
                 {[
                   ["var(--color-teal-400)", "Terasa lega atau nikmat"],
                   ["var(--color-sand-500)", "Netral"],
                   ["var(--color-amber-400)", "Hampa, menyesal, atau lelah"],
                   ["rgba(207,198,184,0.13)", "Tidak ada catatan"],
                 ].map(([c, label]) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <span className="h-1 w-6 shrink-0 rounded-full" style={{ background: c }} />
-                    <dt className="text-sand-500">{t(label)}</dt>
-                  </div>
+                  <li key={label} className="flex items-center gap-3">
+                    {/* Warnanya sendiri tidak membawa makna bagi yang tidak
+                        melihatnya; tulisannya yang membawa. Jadi petaknya
+                        disembunyikan dari pembaca layar. */}
+                    <span
+                      aria-hidden
+                      className="h-1 w-6 shrink-0 rounded-full"
+                      style={{ background: c }}
+                    />
+                    <span className="text-sand-500">{t(label)}</span>
+                  </li>
                 ))}
-              </dl>
+              </ul>
               <p className="num mt-5 text-[11px] text-sand-500">
                 {t("pita")} {TARGET_BAND.low}–{TARGET_BAND.high} · {t("arahkan kursor ke satu jari-jari")}
               </p>

@@ -36,6 +36,7 @@ const RANGKAIAN = [
   ["Ketahanan", "ketahanan.mjs", "luring, tulis serentak, API mati"],
   ["Lintas peramban", "lintas-peramban.mjs", "Chromium, Firefox, WebKit"],
   ["Tata letak", "tata-letak.mjs", "meluber, bilah menempel, penanda bagian, 5 lebar layar"],
+  ["Aksesibilitas", "akses.mjs", "axe-core WCAG 2.1 AA, papan ketik, penanda fokus"],
 ];
 
 try {

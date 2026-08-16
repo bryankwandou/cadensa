@@ -82,7 +82,18 @@ export function Reviews() {
           {data.reviews.map((r, i) => (
             <Reveal key={`${r.name}-${r.at}`} delay={i * 0.05}>
               <figure className="surface rounded-card p-7">
-                <div className="flex gap-1" aria-label={t("{n} dari 5", { n: r.rating })}>
+                {/*
+                  `role="img"` bukan hiasan.
+
+                  `aria-label` pada `<div>` polos dilarang spesifikasi ARIA, dan
+                  pembaca layar memang mengabaikannya — jadi penilaian bintang
+                  ini terbaca sebagai kekosongan, atau sebagai lima gambar tanpa
+                  arti. Dengan perannya dinyatakan, kelima bintang dibacakan
+                  sebagai satu hal: "4 dari 5".
+
+                  Ditemukan axe-core; sepuluh contoh di halaman depan.
+                */}
+                <div className="flex gap-1" role="img" aria-label={t("{n} dari 5", { n: r.rating })}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <svg key={n} viewBox="0 0 24 24" width="14" height="14" aria-hidden>
                       <path
