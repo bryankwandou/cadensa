@@ -114,3 +114,16 @@ await b.close();
 const gagal = hasil.filter((h) => !h.ok);
 console.log(`\n== ${hasil.length - gagal.length}/${hasil.length} lolos ==`);
 for (const g of gagal) console.log("  GAGAL:", g.nama);
+
+/*
+  Kode keluar harus mencerminkan hasilnya.
+
+  Tanpa baris ini, rangkaian yang gagal tetap keluar dengan kode 0, dan
+  `jalankan.mjs` — yang menilai dari kode keluar — melaporkannya sebagai lolos.
+  Tanda ✗ tetap tercetak di layar, tapi ringkasan di bawahnya mengatakan
+  sebaliknya, dan yang dibaca orang adalah ringkasannya.
+
+  Tiga rangkaian sempat begini sekaligus. Setiap laporan "semua rangkaian lolos"
+  selama itu bernilai lebih kecil daripada bunyinya.
+*/
+process.exit(gagal.length ? 1 : 0);

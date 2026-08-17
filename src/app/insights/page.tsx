@@ -46,7 +46,7 @@ function bagian(rasio: number | null) {
 }
 
 export default function InsightsPage() {
-  const { entries, ready, seed, profile } = useVault();
+  const { entries, ready, profile } = useVault();
   const { t } = useT();
   // `t` ikut masuk ke daftar ketergantungan: mengganti bahasa harus menyusun
   // ulang bacaannya, bukan menyisakan kalimat bahasa lama sampai ada catatan baru.
@@ -174,14 +174,6 @@ export default function InsightsPage() {
                 >
                   {t("Catat")}
                 </Link>
-                {entries.length === 0 && (
-                  <Pressable
-                    onClick={seed}
-                    className="rounded-full border hairline px-5 py-2.5 text-sm text-sand-100 hover:bg-ink-800"
-                  >
-                    {t("Muat data contoh")}
-                  </Pressable>
-                )}
               </div>
             </div>
           </Reveal>

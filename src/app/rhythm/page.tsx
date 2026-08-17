@@ -61,7 +61,7 @@ export default function RhythmPage() {
   // `wipe` tidak lagi diambil di sini: menghapus seluruh catatan sekarang hanya
   // ada di halaman pengaturan. `seed` tetap dipakai, tapi hanya oleh keadaan
   // kosong di bawah — saat belum ada apa pun yang bisa hilang.
-  const { entries, ready, seed, remove, profile } = useVault();
+  const { entries, ready, remove, profile } = useVault();
   const { t } = useT();
   const [offset, setOffset] = useState(0);
   const isWoman = profile.mode === "wanita";
@@ -145,9 +145,16 @@ export default function RhythmPage() {
         <Nav />
         <main className="mx-auto max-w-2xl px-5 pt-24 text-center">
           <h1 className="display text-[2.6rem]">{t("Belum ada apa-apa di sini")}</h1>
+          {/*
+            Kalimat lamanya menawarkan memuat data contoh. Tawaran itu dicabut
+            bersama fiturnya: aplikasi ini menghitung bacaan kesehatan dari
+            catatan, dan begitu angka karangan masuk ke sebuah akun, tidak ada
+            lagi cara membedakannya dari catatan sungguhan — termasuk oleh
+            pemiliknya sendiri.
+          */}
           <p className="mx-auto mt-5 max-w-md leading-relaxed text-sand-300">
             {t(
-              "Ritme baru terbaca setelah beberapa catatan. Kalau ingin melihat bentuk halaman ini lebih dulu, muat data contoh — semuanya tetap tinggal di perangkat ini dan bisa dihapus kapan saja.",
+              "Ritme baru terbaca setelah beberapa catatan. Tiga sudah cukup untuk memunculkan bentuk pertamanya.",
             )}
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
@@ -157,12 +164,6 @@ export default function RhythmPage() {
             >
               {t("Catat yang pertama")}
             </Link>
-            <Pressable
-              onClick={seed}
-              className="rounded-full border hairline px-6 py-3 text-sm text-sand-100 hover:bg-ink-800"
-            >
-              {t("Muat data contoh")}
-            </Pressable>
           </div>
         </main>
       </div>

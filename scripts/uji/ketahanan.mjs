@@ -224,7 +224,23 @@ async function catat(p, rasa) {
   lapor(/Ritme|Rhythm/.test(teks), "judul utama tetap tergambar");
 
   await buka(p, `${BASE}/rhythm`);
-  const ritmeTampil = await tunggu(p, 200);
+  /*
+    Ditunggu sampai kalimat keadaan kosongnya muncul, bukan sampai panjang teks
+    melewati suatu angka.
+
+    Ambangnya pernah 200 karakter, dan mulai gagal begitu salinan layar kosong
+    itu dipendekkan — pada halaman yang berperilaku persis benar. Uji yang
+    terikat pada panjang kalimat patah setiap kali seseorang menyunting kata,
+    dan patahannya menuduh hal yang salah.
+  */
+  const ritmeTampil = await p
+    .waitForFunction(
+      () => /Belum ada apa-apa di sini|Nothing here yet/.test(document.body.innerText),
+      undefined,
+      { timeout: 25000 },
+    )
+    .then(() => true)
+    .catch(() => false);
   const ritme = await p.evaluate(() => document.body.innerText);
   lapor(ritmeTampil, "halaman ritme tidak kosong saat API mati", `${ritme.length} char`);
   lapor(

@@ -108,7 +108,6 @@ export const EN: Record<string, string> = {
     "Patterns only appear after a few entries. Three is the earliest point at which any number still means anything.",
   "Belum ada pola yang cukup jelas untuk dituliskan. Itu bukan kabar buruk — artinya tidak ada yang menonjol dari ritmemu belakangan ini.":
     "No pattern is clear enough to write down yet. That is not bad news — it means nothing stands out in your rhythm lately.",
-  "Muat data contoh": "Load sample data",
   "Cadensa bukan alat diagnosis dan tidak menggantikan pemeriksaan. Kalau ada nyeri berulang, darah, atau keluhan yang menetap, temui dokter.":
     "Cadensa is not a diagnostic tool and does not replace an examination. If there is recurring pain, blood, or a complaint that persists, see a doctor.",
 
@@ -266,8 +265,8 @@ export const EN: Record<string, string> = {
   "{n} bulan ini": "{n} this month",
   "catatan di hari ke-{hari}": "entries on day {hari}",
   "Belum ada apa-apa di sini": "Nothing here yet",
-  "Ritme baru terbaca setelah beberapa catatan. Kalau ingin melihat bentuk halaman ini lebih dulu, muat data contoh — semuanya tetap tinggal di perangkat ini dan bisa dihapus kapan saja.":
-    "A rhythm only becomes readable after a few entries. If you want to see the shape of this page first, load the sample data — all of it stays on this device and can be deleted at any time.",
+  "Ritme baru terbaca setelah beberapa catatan. Tiga sudah cukup untuk memunculkan bentuk pertamanya.":
+    "A rhythm becomes readable after a few entries. Three is enough for its first shape to appear.",
   "Catat yang pertama": "Log your first",
   pita: "band",
   "arahkan kursor ke satu jari-jari": "hover a spoke",
@@ -308,9 +307,6 @@ export const EN: Record<string, string> = {
   edging: "edging",
   "Hapus catatan ini": "Delete this entry",
   hapus: "delete",
-  "Ganti dengan data contoh": "Replace with sample data",
-  "Ganti {n} catatanmu dengan data contoh? Catatan aslinya tidak bisa dikembalikan.":
-    "Replace your {n} entries with sample data? The originals cannot be brought back.",
   "Hapus semua catatan di perangkat ini? Tidak ada salinan lain.":
     "Delete every entry on this device? There is no other copy.",
   "Hapus semua": "Delete all",

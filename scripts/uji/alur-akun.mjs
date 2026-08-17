@@ -45,14 +45,22 @@ const ctx = await konteks(b);
 const p = await ctx.newPage();
 pasang(p, "daftar");
 
-await buka(p, `${BASE}/rhythm`);
-await p.waitForTimeout(1500);
-const tombolContoh = p.getByText("Muat data contoh", { exact: true }).first();
-if (await tombolContoh.isVisible().catch(() => false)) await tombolContoh.click();
-else await p.getByText("Ganti dengan data contoh", { exact: true }).click();
-await p.waitForTimeout(2000);
+/*
+  Catatan lokalnya dibuat dengan mencatat sungguhan, bukan dengan memuat data
+  contoh — fitur itu sudah dicabut. Jalur yang diuji di sini justru jadi lebih
+  mewakili keadaan sebenarnya: orang mencoba aplikasi ini beberapa kali tanpa
+  akun, lalu memutuskan mendaftar, dan catatan yang sudah dibuatnya harus ikut
+  terangkat.
+*/
+for (const rasa of ["lega", "tenang", "netral"]) {
+  await buka(p, `${BASE}/log`);
+  await p.waitForTimeout(1500);
+  await p.getByText(rasa, { exact: true }).first().click();
+  await p.getByText("Simpan", { exact: true }).click();
+  await p.waitForTimeout(1500);
+}
 const sebelumDaftar = await jumlah(p);
-lapor(sebelumDaftar > 0, "data contoh termuat sebelum mendaftar", `${sebelumDaftar} catatan`);
+lapor(sebelumDaftar === 3, "catatan dibuat tanpa akun sebelum mendaftar", `${sebelumDaftar} catatan`);
 
 await buka(p, `${BASE}/masuk`);
 await p.getByRole("button", { name: "daftar", exact: true }).click();
@@ -176,3 +184,16 @@ console.log(`\n== ${hasil.length - gagal.length}/${hasil.length} lolos ==`);
 for (const g of gagal) console.log("  GAGAL:", g.nama);
 console.log(`\ngalat: ${galat.length}`);
 for (const g of new Set(galat)) console.log("  ·", g);
+
+/*
+  Kode keluar harus mencerminkan hasilnya.
+
+  Tanpa baris ini, rangkaian yang gagal tetap keluar dengan kode 0, dan
+  `jalankan.mjs` — yang menilai dari kode keluar — melaporkannya sebagai lolos.
+  Tanda ✗ tetap tercetak di layar, tapi ringkasan di bawahnya mengatakan
+  sebaliknya, dan yang dibaca orang adalah ringkasannya.
+
+  Tiga rangkaian sempat begini sekaligus. Setiap laporan "semua rangkaian lolos"
+  selama itu bernilai lebih kecil daripada bunyinya.
+*/
+process.exit(gagal.length ? 1 : 0);

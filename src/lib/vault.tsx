@@ -19,7 +19,6 @@ import {
   type Mode,
   type MotionLevel,
 } from "./types";
-import { buildSample } from "./sample";
 // Penggabungan dan nisan tinggal di modul murni supaya bisa diuji tanpa React.
 import { gabungNisan, merge } from "./gabung";
 import {
@@ -156,6 +155,21 @@ function lupakanLokal() {
   }
 }
 
+/**
+ * Saluran yang memberi tahu tab lain bahwa seseorang sudah keluar.
+ *
+ * Keluar tanpa ini hanya berlaku di tab tempat tombolnya ditekan. Tab lain yang
+ * masih terbuka tetap memegang kunci di memori dan tetap menganggap dirinya
+ * masuk — jadi begitu ada yang dicatat di sana, ia menulis ulang data ke
+ * perangkat yang baru saja dibersihkan. Terukur: keluar di satu tab, mencatat
+ * di tab lain, lalu layar pendaftaran orang berikutnya menawarkan "1 catatan
+ * yang sudah ada di perangkat ini ikut terangkat ke akun barumu".
+ *
+ * Orang yang menutup sesinya di warnet menutup satu tab, bukan semua tab.
+ */
+const SALURAN = "cadensa.keluar";
+
+
 function writeLocal(v: VaultData) {
   try {
     localStorage.setItem(KEY, JSON.stringify(v));
@@ -178,7 +192,6 @@ type Ctx = {
   update: (id: string, patch: Partial<Entry>) => void;
   remove: (id: string) => void;
   wipe: () => void;
-  seed: () => void;
   setProfile: (p: Partial<Profile>) => void;
   register: (i: {
     username: string;
@@ -420,10 +433,6 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     commit({ ...latest.current, entries: [], dihapus });
   }, [commit]);
 
-  const seed = useCallback(
-    () => commit({ ...latest.current, entries: buildSample(new Date(), latest.current.profile.mode) }),
-    [commit],
-  );
 
   const setProfile = useCallback(
     (p: Partial<Profile>) => {
@@ -546,6 +555,43 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setNeedsUnlock(false);
     setSync({ kind: "lokal" });
+
+    // Tab lain yang masih terbuka harus ikut melupakan; lihat `SALURAN`.
+    try {
+      new BroadcastChannel(SALURAN).postMessage("keluar");
+    } catch {
+      /* peramban tanpa BroadcastChannel — tab lain akan bersih saat dimuat ulang */
+    }
+  }, []);
+
+  /**
+   * Mendengarkan tab lain yang keluar, lalu ikut melupakan segalanya.
+   *
+   * Kuncinya dibuang dari memori juga, bukan hanya dari penyimpanan. Tanpa itu,
+   * tab ini masih bisa mengenkripsi dan mendorong ke server memakai kunci yang
+   * pemiliknya sudah pergi.
+   */
+  useEffect(() => {
+    let saluran: BroadcastChannel;
+    try {
+      saluran = new BroadcastChannel(SALURAN);
+    } catch {
+      return;
+    }
+    saluran.onmessage = () => {
+      if (pushTimer.current) {
+        clearTimeout(pushTimer.current);
+        pushTimer.current = null;
+      }
+      dek.current = null;
+      lupakanLokal();
+      latest.current = EMPTY;
+      setData(EMPTY);
+      setUser(null);
+      setNeedsUnlock(false);
+      setSync({ kind: "lokal" });
+    };
+    return () => saluran.close();
   }, []);
 
   const changePassword = useCallback<Ctx["changePassword"]>(async ({ current, next }) => {
@@ -628,7 +674,6 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       update,
       remove,
       wipe,
-      seed,
       setProfile,
       register,
       login,
@@ -640,7 +685,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       importFile,
       needsUnlock,
     }),
-    [data, ready, user, sync, add, update, remove, wipe, seed, setProfile, register, login, unlockWithRecovery, logout, changePassword, deleteAccount, exportFile, importFile, needsUnlock],
+    [data, ready, user, sync, add, update, remove, wipe, setProfile, register, login, unlockWithRecovery, logout, changePassword, deleteAccount, exportFile, importFile, needsUnlock],
   );
 
   return <VaultCtx.Provider value={value}>{children}</VaultCtx.Provider>;
